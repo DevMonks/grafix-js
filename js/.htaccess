@@ -1,0 +1,5 @@
+Options +FollowSymLinks -Indexes
+
+RewriteEngine On
+
+RewriteRule ^([a-zA-Z\.0-9]+)\.js$ ./js.php?script=$1

@@ -1,0 +1,129 @@
+
+var Rectangle = function( x, y, width, height ) {
+
+	this.size_ = new Size;
+
+    Shape.call( this, x, y );
+	this.set( x, y, width, height );
+};
+
+Rectangle.prototype = Utils.extend( Shape, {
+    get id() {
+        
+        return this.toString( 'Rectangle', 'x y width height color' );
+    },
+    set: function( x, y, width, height ) {
+
+		Shape.prototype.set.call( this, x, y );
+		
+        if( width )
+            this.width = width;
+        if( height )
+            this.height = height;
+        
+        if( Utils.isObject( x ) ) {
+            
+            this.size.set( x );
+        }
+
+		return this;
+	},
+    get width() { return this.size.width; },
+    set width( value ) { this.size.width = value; },
+    get height() { return this.size.height; },
+    set height( value ) { this.size.height = value; },
+    get size() { return this.size_; },
+    set size( value ) { this.size_ = value; this.valid = false; },
+    get rect() { return new Rectangle( this.x, this.y, this.width, this.height ); },
+    get center() {
+
+        return new Point( this.x + this.width / 2, this.y + this.height / 2 );
+    },
+    set center( value ) {
+
+        if( value.x )
+            this.x = value.x - this.width / 2;
+
+        if( value.y )
+            this.y = value.y - this.height / 2;
+
+    },
+    get left() { return this.x; },
+    set left( value ) { this.width -= this.x - value; this.x = value; },
+    get right() { return this.width + this.x; },
+    set right( value ) { this.width = value - this.x; },
+    get top() { return this.y; },
+    set top( value ) { this.height -= this.y - value; this.y = value; },
+    get bottom() { return this.y + this.height; },
+    set bottom( value ) { this.height = value - this.y; },
+    get leftTop() { return new Point( this.left, this.top ); },
+    set leftTop( value ) { this.left = value.x; this.top = value.y; },
+    get rightTop() { return new Point( this.right, this.top ); },
+    set rightTop( value ) { this.right = value.x; this.top = value.y; },
+    get leftBottom() { return new Point( this.left, this.bottom ); },
+    set leftBottom( value ) { this.left = value.x; this.bottom = value.y; },
+    get rightBottom() { return new Point( this.right, this.bottom ); },
+    set rightBottom( value ) { this.right = value.x; this.bottom = value.bottom; },
+    
+    get clone() {
+        
+        return new Rectangle( this );
+    },
+    fill: function( context ) {
+
+		context.fillRect( this.x, this.y, this.width, this.height );
+
+		return this;
+	},
+	stroke: function( context ) {
+
+		context.strokeRect( this.x, this.y, this.width, this.height );
+
+		return this;
+	},
+	clear: function( context ) {
+
+		context.clearRect( this.x, this.y, this.width, this.height );
+
+		return this;
+	},
+    draw: function( context ) {
+        
+        context.save();
+        
+        if( !this.drawStyle )
+            this.drawStyle = 'fill';
+        
+        this.applyStyles( context );
+        this[ this.drawStyle ]( context );
+        
+        if( this.children.length )
+            for( var i in this.children )
+                this.children[ i ].draw( context );
+
+		context.restore();
+        
+        this.valid = true;
+        
+        return this;
+    },
+    collidesWith: function( rect ) {
+        
+        var left = rect.left ? rect.left : rect.x;
+        var right = rect.right ? rect.right : rect.x + ( rect.width ? rect.width : 0 );
+        var top = rect.top ? rect.top : rect.y;
+        var bottom = rect.bottom ? rect.bottom : rect.y + ( rect.height ? rect.height : 0 );
+        
+        return !( left > this.right || right < this.left || top > this.bottom || bottom < this.top );
+    },
+    contains: function( rect ) {
+        
+        var left = rect.left ? rect.left : rect.x;
+        var right = rect.right ? rect.right : rect.x + ( rect.width ? rect.width : 0 );
+        var top = rect.top ? rect.top : rect.y;
+        var bottom = rect.bottom ? rect.bottom : rect.y + ( rect.height ? rect.height : 0 );
+        
+        return ( left > this.left && right < this.right && top > this.top && bottom < this.bottom );
+    }
+} );
+

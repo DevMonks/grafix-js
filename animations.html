@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Grafix.js - Demo</title>
+</head>
+<body>
+
+	<a href="index.html">Index</a>&nbsp;|&nbsp;
+	<a href="grid.html">Grid</a>&nbsp;|&nbsp;
+	<a href="animations.html">Animations</a>&nbsp;|&nbsp;
+	<a href="positioning.html">Positioning</a>&nbsp;|&nbsp;
+	<a href="easings.html">Easings</a>&nbsp;|&nbsp;
+	<a href="ultrapong.html">U-u-ultrapong</a>
+	<br>
+	<div style="width: 100%; padding: 20px; font-family: monospace; border: 1px dashed #fcc" id="frames"></div><br>
+	<br>
+	<canvas id="layer" width="500" height="500"></canvas><br>
+
+	<script src="js/grafix.nocache.js"></script>
+	<script>
+ 
+		Grafix.import();
+
+		var layer = new Layer( { canvas: '#layer', maxFps: 60, clearColor: Color.black } );
+		var rect = new Rectangle( 100, 100, 100, 100 );
+		var rect2 = new Rectangle( 300, 300, 50, 50 );
+		var circle = new Circle( 0, 0, 50, 0, 0 );
+
+		window.setTimeout( function() { 
+
+			rect.parseStyle( 'fill green' ).animate( { 
+				x: 400,
+				width: 200,
+				height: 180
+			}, { 
+				easing: Easing.create( .8,.3,.5, 1.60),
+				duration: 2000,
+				complete: function loop( e ) {
+
+					this.reset().complete( loop );
+				}
+			} ); 
+			rect2.parseStyle( 'stroke yellow' ).animate( {
+				width: 200,
+				height: 200
+			}, {
+				easing: Easing.easeOutElastic,
+				duration: 1000,
+				complete: function loop( e ) {
+
+					this.reset().complete( loop );
+				}
+			} );
+			circle.parseStyle( 'blue fill' ).animate( { 
+				y: 200, 
+				startAngle: 0, 
+				endAngle: 360 ,
+				radius: 100,
+				x: 50
+			}, { 
+				duration: 2000,
+				easing: Easing.easeOutBounce,
+				complete: function loop( e ) {
+
+					this.reset().complete( loop );
+				}
+			} );
+		}, 200 );
+
+		rect.mouseHover( function() {
+			this.style.color = Color.lime;
+		}, function() {
+			this.style.color = Color.green;
+		} );
+
+		rect2.mouseHover( function() {
+			this.style.color = Color.orange;
+		}, function() {
+			this.style.color = Color.yellow;
+		} );
+
+		circle.mouseHover( function() {
+			this.style.color = Color.navy;
+		}, function() {
+			this.style.color = Color.blue;
+		} );
+
+		var frameCount = 0;
+		layer.update( function( e ) {
+
+
+			this.draw( rect ).draw( rect2 ).draw( circle );
+			document.getElementById( 'frames' ).innerHTML = 'Frame Count: ' + ( ++frameCount ) + '<br>' + 
+															'Mouse: (X: ' + layer.mouse().position.x + ') (Y: ' + layer.mouse().position.y + ')';
+		} );
+
+	</script>
+
+</body>
+<html>

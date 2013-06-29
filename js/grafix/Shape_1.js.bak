@@ -1,0 +1,579 @@
+var Shape = function( x, y ) {
+    
+    this.children_ = [];
+    this.parent_ = null;
+    this.valid_ = false;
+    this.draggable_ = false;
+    this.mouse_ = false;
+    this.mouseButtonStates_ = [];
+    this.mouseIn_ = false;
+    this.collides_ = false;
+    
+    /* Events */
+    /* Mouse events will be bound on this.mouse = true */
+    this.clickEvent = new Event( 'shape-click', this );
+    this.mouseOnEvent = new Event( 'shape-mouse-on', this );
+    this.mouseOutEvent = new Event( 'shape-mouse-out', this );
+    this.mouseMoveEvent = new Event( 'shape-mouse-move', this );
+
+    this.dragStartEvent = new Event( 'shape-drag-start', this );
+    this.dragMoveEvent = new Event( 'shape-drag-move', this );
+    this.dragDropEvent = new Event( 'shape-drag-drop', this );
+    
+    this.collideEvent = new Event( 'shape-collide', this );
+
+    /* Style Properties */
+    this.offset_ = null;
+	this.scale_ = null;
+	this.angle_ = null;
+	this.skew_ = null;
+	this.color_ = null;
+	this.drawStyle_ = null;  //stroke, fill...
+	this.lineWidth_ = null;
+	this.lineCap_ = null; //bull, round, square...
+	this.miterLimit_ = null;
+	this.lineJoin_ = null; //miter, bevel, round...
+	this.closePath_ = false;
+    this.alignContext_ = null; //parent, root, [object Shape]
+    this.align_ = null;
+    this.alignSource_ = null;
+    
+    Point.call( this, x, y );
+    this.set( x, y );
+};
+
+Shape.prototype = Utils.extend( Point, {
+    set: function( x, y ) {
+      
+        Point.prototype.set.call( this, x, y );
+        if( Utils.isObject( x ) ) {
+            
+            if( x.mouse ) this.mouse = x.mouse;
+            if( x.draggable ) this.draggable = x.draggable;
+            if( x.collides ) this.collides = x.collides;
+            if( x.parent ) this.parent = x.parent;
+            if( x.offset ) this.offset = x.offset;
+            if( x.scale ) this.scale = x.scale;
+            if( x.angle ) this.angle = x.angle;
+            if( x.skew ) this.skew = x.skew;
+            if( x.color ) this.color = x.color;
+            if( x.drawStyle ) this.drawStyle = x.drawStyle;
+            if( x.lineWidth ) this.lineWidth = x.lineWidth;
+            if( x.lineCap ) this.lineCap = x.lineCap;
+            if( x.miterLimit ) this.miterLimit = x.miterLimit;
+            if( x.lineJoin ) this.lineJoin = x.lineJoin;
+            if( x.closePath ) this.closePath = x.closePath;
+            if( x.align ) this.align = x.align;
+            if( x.alignContext ) this.alignContext = x.alignContext;
+        }
+        
+        return this;
+    },
+    get parent() { return this.parent_; },
+    set parent( value ) {
+        
+        if( this.parent_ && !this.parent_ === value )
+            this.parent_.removeChild( this );
+        
+        this.parent_ = value;
+        var isChild = false;
+        for( var i in value.children )
+            if( value.children[ i ] === this )
+                isChild = true;
+        
+        if( !isChild )
+            value.children_.push( this );
+        
+        if( this.mouse_ === true )
+            this.mouse = true;
+        
+        this.valid = false;
+    },
+    get root() {
+        
+        var current = this;
+        while( current.parent ) {
+            
+            current = current.parent;
+        }
+        
+        return current;
+    },
+    get children() { return this.children_; },
+    set children( value ) {
+        
+        for( var i in value )
+            if( value[ i ].parent_ !== this )
+                value[ i ].parent_ = this;
+        
+        this.children_ = value;
+        this.valid = false;
+    },
+    addChild: function( child ) {
+        
+        if( Utils.isArray( child ) ) {
+            
+            for( var i in child )
+                this.addChild( child[ i ] );
+            return this;
+        }
+
+        child.parent = this;
+
+        return this;
+    },
+    removeChild: function( child ) {
+        
+        for( var i in this.children )
+            if( this.children[ i ] === child ) {
+                this.children.splice( i, 1 );
+                break;
+            }
+        
+        return this;
+    },
+    get valid() { return this.valid_; },
+    set valid( value ) {
+        
+        if( this.parent && !value )
+            this.parent.valid = false;
+        
+        this.valid_ = value;
+    },
+    get offset() { return this.offset_; },
+    set offset( value ) { this.offset_ = value; this.valid = false; },
+    get scale() { return this.scale_; },
+    set scale( value ) { this.scale_ = value; this.valid = false; },
+    get angle() { return this.angle_; },
+    set angle( value ) { this.angle_ = value; this.valid = false; },
+    get skew() { return this.skew_; },
+    set skew( value ) { this.skew_ = value; this.valid = false; },
+    get color() { return this.color_; },
+    set color( value ) { this.color_ = value; this.valid = false; },
+    get drawStyle() { return this.drawStyle_; },
+    set drawStyle( value ) { this.drawStyle_ = value; this.valid = false; },
+    get lineWidth() { return this.lineWidth_; },
+    set lineWidth( value ) { this.lineWidth_ = value; this.valid = false; },
+    get lineCap() { return this.lineCap_; },
+    set lineCap( value ) { this.lineCap_ = value; this.valid = false; },
+    get miterLimit() { return this.miterLimit_; },
+    set miterLimit( value ) { this.miterLimit_ = value; this.valid = false; },
+    get lineJoin() { return this.lineJoin_; },
+    set lineJoin( value ) { this.lineJoin_ = value; this.valid = false; },
+    get closePath() { return this.closePath_; },
+    set closePath( value ) { this.closePath_ = value; this.valid = false; },
+    get align() { return this.align_; },
+    set align( value ) { this.align_ = value; this.valid = false; },
+    get alignContext() { return this.alignContext_; },
+    set alignContext( value ) { this.alignContext_ = value; this.valid = false; },
+    get mouse() { return this.mouse_; },
+    set mouse( value ) {
+        
+        if( ( value === true && Utils.isObject( this.mouse_ ) ) || ( !value && !this.mouse_ ) )
+            return;
+        
+        var shape = this;
+        function moveCallback( e ) {
+
+            e.relativePosition = e.position.point.sub( shape );
+            e.context = shape;
+            if( shape.contains( e.position ) ) {
+                
+                if( !shape.mouseIn_ ) {
+                    
+                    shape.mouseIn_ = true;
+                    shape.mouseOnEvent.trigger( e );
+                }
+                
+                
+                shape.mouseMoveEvent.trigger( e );
+            
+            } else if( shape.mouseIn_ ) {
+                
+                shape.mouseIn_ = false;
+                shape.mouseOutEvent.trigger( e );
+            }
+        }
+        
+        if( !value ) {
+            console.log( 'Unbinding mouse from', this.id );
+            this.mouse_.moveEvent.unbind( moveCallback );
+            
+            this.mouse_ = false;
+        } else {
+            console.log( 'Setting mouse on', this.id, 'to', value );
+            if( Utils.isObject( value ) ) {
+                
+                console.log( 'Mouse is object' );
+                this.mouse_ = value;
+            } else {
+                
+                //search for the mouse in ancestors
+                var mouse = this.mouse_;
+                var current = this;
+                while( current.parent && !this.mouse_ ) {
+                    
+                    if( current.parent.mouse ) {
+                        
+                        mouse = current.parent.mouse;
+                        break;
+                    }
+                    current = current.parent;
+                }
+                
+                this.mouse_ = mouse;
+            }
+            
+            if( !Utils.isObject( this.mouse_ ) ) {
+                this.mouse_ = true;
+                return; //No mouse instance found
+            }
+
+            this.mouse_.move( moveCallback );
+        }
+    },
+    
+    get clone() {
+        
+        return new Shape( this );
+    },
+    toString: function( name, printedProps ) {
+        
+        name = name || 'Shape';
+        printedProps = ( printedProps || 'x y' ).split( ' ' );
+        
+        var c = '';
+        if( this.color ) {
+            
+            for( var i in Color )
+                if( Color[ i ].toUpperCase() === this.color.toUpperCase() ) {
+                    c = i;
+                    c[ 0 ].toUpperCase();
+                    c = c + ' ';
+                }
+            
+            if( c === '' )
+                c = this.color + ' ';
+        }
+        
+        var props = [];
+        for( var i in printedProps )
+            props.push( printedProps[ i ] + ': ' + this[ printedProps[ i ] ] );
+        
+        return c + name + ' (' + props.join( ', ' ) + ')';
+    },
+    get id() {
+
+        return this.toString();
+    },
+    applyStyles: function( context ) {
+
+		//Apply styles if needed (If no style selected, properties won't change for performance reasons)
+		if( this.offset && !this.offset.isZero() ) 
+			context.translate( this.offset.x, this.offset.y );
+
+		if( this.scale && ( this.scale.x !== 1 || this.scale.y !== 1 ) ) 
+			context.scale( this.scale.x, this.scale.y );
+
+		if( this.angle !== null && this.angle )
+			context.rotate( this.angle );
+
+		if( this.lineWidth !== null && context.lineWidth !== this.lineWidth )
+			context.lineWidth = this.lineWidth;
+
+		if( this.lineCap !== null && context.lineCap !== this.lineCap )
+			context.lineCap = this.lineCap;
+
+		if( this.miterLimit !== null && context.miterLimit !== this.miterLimit )
+			context.miterLimit = this.miterLimit;
+
+		if( this.lineJoin !== null && context.lineJoin !== this.lineJoin )
+			context.lineJoin = this.lineJoin;
+
+		if( this.skew && !this.skew.isZero() )
+			context.transform( 1, this.skew.x, this.skew.y, 1, 0, 0 );
+        
+        //re-align the whole thing
+        if( this.align !== null ) {
+            
+            var alignContext = null;
+            switch( ( this.alignContext || 'parent' ) ) {
+                case 'parent':
+                    
+                    alignContext = this.parent;
+                    break;
+                case 'root':
+                    
+                    alignContext = this.root;
+                    break;
+                default:
+                    
+                    alignContext = this.alignContext;
+            }
+            var align = Utils.isString( this.align ) ? this.align : 'center center center';
+            
+            this.alignBy( alignContext, align );
+        }
+        
+        if( this.drawStyle ) {
+            
+            var colorProp = this.drawStyle + 'Style';
+            // the color will only be re-set, if it changes
+            if( this.color !== null && this.color !== context[ colorProp ] )
+                context[ colorProp ] = this.color;
+        }
+
+    },
+    draw: function( context ) {
+        
+        context.save();
+        this.applyStyles( context );
+        
+        if( this.children.length )
+            for( var i in this.children )
+                this.children[ i ].draw( context );
+
+		context.restore();
+        
+        this.valid = true;
+        
+        return this;
+    },
+    style: function( properties ) {
+        
+        if( Utils.isString( properties ) ) {
+            
+            var parts = properties.split( ' ' );
+            for( var i in parts ) {
+
+                var token = parts[ i ];
+
+                switch( token ) {
+                    case 'stroke':
+                        this.drawStyle = 'stroke';
+                        break;
+                    case 'fill':
+                        this.drawStyle = 'fill';
+                        break;
+                    default:
+
+                        if( token in Color )
+                            this.color = Color[ token ];
+                        else if( token.charAt( 0 ) === '#' || token.substr( 0, 3 ) === 'rgb' || token.substr( 0, 3 ) === 'hsl' )
+                            this.color = token;
+                }
+            }
+        } else if( Utils.isObject( properties ) ) {
+            
+            for( var i in properties )
+                this[ i ] = properties[ i ];
+        }
+        
+        return this;
+    },
+    alignBy: function( context, position ) {
+        
+        position = ( position || '' ).split( ' ' );
+        var type = 'center';
+        var xType = null;
+        var yType = null;
+
+        var thisWidth = this.width || ( this.radius ? this.radius * 2 : 0 );
+        var thatWidth = context.width || ( context.radius ? context.radius * 2 : 0 );
+        var thisHeight = this.height || ( this.radius ? this.radius * 2 : 0 );
+        var thatHeight = context.height || ( context.radius ? context.radius * 2 : 0 );
+        
+        for( var i in position ) {
+            switch( position[ i ] ) {
+                case 'center':
+                    
+                    if( xType !== null && yType !== null ) {
+                        
+                        type = 'center';
+                    } else if( xType !== null ) {
+                        
+                        yType = 'center';
+                    } else {
+                        
+                        xType = 'center';
+                    }
+                    
+                    break;
+                case 'left':
+                case 'right':
+                    
+                    xType = position[ i ];
+                    break;
+                case 'top':
+                case 'bottom':
+                    
+                    yType = position[ i ];
+                    break;
+                case 'inner':
+                case 'outer':
+
+                    type = position[ i ];
+            }
+        }
+        
+        if( !xType ) xType = 'center';
+        if( !yType ) yType = 'center';
+        
+        //position
+        switch( xType ) {
+            case 'left':
+                
+                //position inner first
+                this.x = context.x;
+                
+                switch( type ) {
+                    case 'center':
+                        
+                        this.x -= thisWidth / 2;
+                        break;
+                    case 'outer':
+                        
+                        this.x -= thisWidth;
+                }
+                break;
+            case 'right':
+                
+                //position outer first
+                this.x = context.x + thatWidth;
+                
+                switch( type ) {
+                    case 'center':
+                        
+                        this.x -= thisWidth / 2;
+                        break;
+                    case 'inner':
+                        
+                        this.x -= thisWidth;
+                }
+                break;
+           case 'center':
+               
+               //position center first
+               this.x = context.x + ( thatWidth / 2 ) - thisWidth / 2;
+               break;
+        }
+        
+        switch( yType ) {
+            case 'top':
+                
+                //position inner first
+                this.y = context.y;
+                
+                switch( type ) {
+                    case 'center':
+                        
+                        this.y -= thisHeight/ 2;
+                        break;
+                    case 'outer':
+                        
+                        this.y -= thisHeight;
+                }
+                break;
+            case 'bottom':
+                
+                //position outer first
+                this.y = context.y + thatHeight;
+                
+                switch( type ) {
+                    case 'center':
+                        
+                        this.y -= thisHeight / 2;
+                        break;
+                    case 'inner':
+                        
+                        this.y -= thisHeight;
+                }
+                break;
+           case 'center':
+               
+               //position center first
+               this.y = context.y + ( thatHeight / 2 ) - thisHeight / 2;
+               break;
+        }
+        
+        return this;
+    },
+            
+    /* Collision stuff */
+    collidesWith: function( shape ) {
+        
+        return this.equals( shape );
+    },
+    contains: function( shape ) {
+        
+        return this.equals( shape );
+    },
+    
+    /* Mouse stuff */
+    click: function( callback ) {
+        
+        if( Utils.isFunction( callback ) ) {
+            
+            this.mouse = true;
+            this.clickEvent.bind( callback );
+        } else {
+            
+            this.clickEvent.trigger( callback );
+        }
+        
+        return this;
+    },
+            
+    mouseOn: function( callback ) {
+        
+        if( Utils.isFunction( callback ) ) {
+            
+            this.mouse = true;
+            this.mouseOnEvent.bind( callback );
+        } else {
+            
+            this.mouseOnEvent.trigger( callback );
+        }
+        
+        return this;
+    },
+            
+    mouseOut: function( callback ) {
+        
+        if( Utils.isFunction( callback ) ) {
+            
+            this.mouse = true;
+            this.mouseOutEvent.bind( callback );
+        } else {
+            
+            this.mouseOutEvent.trigger( callback );
+        }
+        
+        return this;
+    },
+            
+    hover: function( onCallback, outCallback ) {
+        
+       this.mouseOn( onCallback );
+       this.mouseOut( outCallback );
+       
+       return this;
+    },
+            
+    hoverStyle: function( style ) {
+        
+        var oldProps = {};
+        for( var i in style )
+            oldProps[ i ] = this[ i ];
+        
+        this.hover( function( e ) {
+            
+            this.style( style );
+        }, function( e ) {
+            
+            this.style( oldProps );
+        } );
+        
+        return this;
+    }
+} );

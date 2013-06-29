@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Grafix.js - Demo</title>
+</head>
+<body>
+
+	<a href="index.html">Index</a>&nbsp;|&nbsp;
+	<a href="grid.html">Grid</a>&nbsp;|&nbsp;
+	<a href="animations.html">Animations</a>&nbsp;|&nbsp;
+	<a href="positioning.html">Positioning</a>&nbsp;|&nbsp;
+	<a href="easings.html">Easings</a>&nbsp;|&nbsp;
+	<a href="ultrapong.html">U-u-ultrapong</a>
+	<br>
+	<div style="width: 100%; padding: 20px; font-family: monospace; border: 1px dashed #fcc" id="frames"></div><br>
+	<br>
+	<canvas id="layer" width="500" height="500"></canvas><br>
+
+	<script src="js/grafix.nocache.js"></script>
+	<script>
+
+		Grafix.import();
+
+		var layer = new Layer( { canvas: '#layer', maxFps: 1, clearColor: Color.black } );
+		var frameCount = 0;
+		layer.update( function( e ) {
+
+
+
+			document.getElementById( 'frames' ).innerHTML = 'Frame Count: ' + ( ++frameCount ) + '<br>' + 
+															'Mouse: (X: ' + layer.mouse().position.x + ') (Y: ' + layer.mouse().position.y + ')';
+		} );
+
+	</script>
+
+</body>
+<html>

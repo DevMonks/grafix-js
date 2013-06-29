@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Grafix.js - Demo</title>
+</head>
+<body>
+
+	<a href="index.html">Index</a>&nbsp;|&nbsp;
+	<a href="grid.html">Grid</a>&nbsp;|&nbsp;
+	<a href="animations.html">Animations</a>&nbsp;|&nbsp;
+	<a href="positioning.html">Positioning</a>&nbsp;|&nbsp;
+	<a href="easings.html">Easings</a>&nbsp;|&nbsp;
+	<a href="ultrapong.html">U-u-ultrapong</a>
+	<br>
+	<div style="width: 100%; padding: 20px; font-family: monospace; border: 1px dashed #fcc" id="frames"></div><br>
+	<br>
+	<canvas id="layer" width="500" height="500"></canvas><br>
+
+	<script src="js/grafix.nocache.js"></script>
+	<script>
+
+		Grafix.import();
+
+		var layer = new Layer( { canvas: '#layer', clearColor: Color.black } );
+
+		var GameState = {
+			menu: 0,
+			singlePlayer: 1,
+			multiPlayer: 2
+		}
+
+		var state = GameState.menu;
+
+		var menu = {
+			title: Text.create( "U-u-u-ultrapong", '40 fill white helvetica' ),
+			grid: new Grid( layer.rect() ),
+			singlePlayerButton: new Rectangle,
+			multiPlayerButton: new Rectangle,
+			singlePlayerButtonText: Text.create( "Play Singleplayer", '20 fill white helvetica' ),
+			multiPlayerButtonText: Text.create( "Play Multiplayer", '20 fill white helvetica' )
+		};
+
+		menu.grid.columns = 7;
+		menu.grid.rows = 7;
+		menu.title.position( menu.grid.rectAt( 3, 1 ) );
+		menu.singlePlayerButton.set( menu.grid.rectAt( 1, 3 ) ).width = menu.grid.rectSize().width * 5;
+		menu.singlePlayerButton.parseStyle( 'fill navy' );
+		menu.multiPlayerButton.set( menu.grid.rectAt( 1, 5 ) ).width = menu.grid.rectSize().width * 5;
+		menu.multiPlayerButton.parseStyle( 'fill navy' );
+		menu.singlePlayerButtonText.position( menu.singlePlayerButton );
+		menu.multiPlayerButtonText.position( menu.multiPlayerButton );
+
+		menu.singlePlayerButton.mouseClick( function( e ) {
+
+			console.log( 'clickidlick' );
+			state = GameState.singlePlayer;
+		} ).mouseHover( function( e ) {
+
+			this.style.color = 'blue';
+			this.hoverAnim = this.animate( {
+				y: this.y - 10,
+				x: this.x - 10,
+				width: this.width + 20,
+				height: this.height + 20
+			}, 200, Easing.easeOutElastic );
+		}, function( e ) {
+
+			this.style.color = 'navy';
+			this.hoverAnim.stop().reset();
+		} );
+
+		menu.multiPlayerButton.mouseClick( function( e ) {
+
+			state = GameState.multiPlayer;
+		} ).mouseHover( function( e ) {
+
+			this.style.color = 'blue';
+			this.hoverAnim = this.animate( {
+				y: this.y - 10,
+				x: this.x - 10,
+				width: this.width + 20,
+				height: this.height + 20
+			}, 200, Easing.easeOutElastic );
+		}, function( e ) {
+
+			this.style.color = 'navy';
+			this.hoverAnim.stop().reset();
+		} );
+
+
+		var hud = {
+			menuButton: new Rectangle( { width: 100, height: 30 } ),
+			menuButtonText: Text.create( "To Menu", '13 white fill helvetica' ),
+			leftField: layer.rect().rect().div( { width: 3 } )
+							.parseStyle( 'red stroke' ),
+			rightField: layer.rect().rect().div( { width: 3 } )
+							.parseStyle( 'blue stroke' )
+							.position( layer.rect(), 'right inner' )
+		};
+
+		hud.rightField.position( layer.rect(), 'right inner' );
+
+		hud.menuButton.parseStyle( 'green fill' );
+		hud.menuButtonText.position( hud.menuButton );
+
+		hud.menuButton.mouseClick( function( e ) {
+
+			state = GameState.menu;
+		} ).mouseHover( function(){ this.style.color = 'lime'; }, function() { this.style.color = 'green'; } );
+
+
+		var leftPlayer = {
+			bar: new Rectangle( { width: 10, height: 100 } )
+					.parseStyle( 'gray fill' )
+					.position( layer.rect(), 'left center' )
+		}
+
+		leftPlayer.bar.isFollowing = false;
+		leftPlayer.bar.x = 20;
+		layer.mouse().move( function( e ) {
+
+
+		} );
+
+		layer.mouse().move( function( e ) {
+
+			leftPlayer.bar.y = e.position.y - leftPlayer.bar.height / 2;
+
+			if( leftPlayer.bar.top() < 0 )
+				leftPlayer.bar.y = 0;
+
+			if( leftPlayer.bar.bottom() > layer.size().height )
+				leftPlayer.bar.y = layer.size().height - leftPlayer.bar.height;
+		} ).buttonDown( function( e ) {
+
+			if( !leftPlayer.bar.anim ) {
+
+				leftPlayer.bar.origX = leftPlayer.bar.x;
+				leftPlayer.bar.anim = leftPlayer.bar.animate( {
+					x: leftPlayer.bar.x + 40
+				}, {
+					duration: 200, 
+					easing: Easing.easeOutElastic,
+					complete: function() {
+
+						anim = leftPlayer.bar.animate( {
+							x: leftPlayer.bar.origX
+						}, { 
+							complete: function() {
+								leftPlayer.bar.anim = false;
+							},
+							duration: 200, 
+							easing: Easing.easeOutElastic
+						} );
+					}
+				} );
+			}
+		} ).buttonUp( function( e ) {
+
+			
+		} );
+
+		var frameCount = 0;
+		layer.update( function( e ) {
+
+			switch( state ) {
+				case GameState.menu:
+
+					this.draw( menu );
+					break;
+				case GameState.singlePlayer:
+
+					this.draw( hud );
+					this.draw( leftPlayer );
+					break;
+				case GameState.multiPlayer:
+
+					this.draw( hud );
+			}
+
+			document.getElementById( 'frames' )
+					.innerHTML = 'Frame Count: ' + ( ++frameCount ) + ', FPS: ' + this.fps() + '/' + this.maxFps + '<br>' + 
+								 'Mouse: (X: ' + this.mouse().position.x + ') (Y: ' + this.mouse().position.y + ')<br>' +
+								 'MB0: ' + this.mouse().buttonStates[ 0 ] + ', MB1: ' + this.mouse().buttonStates[ 1 ] + ', MB2: ' + this.mouse().buttonStates[ 2 ] + '<br>' +
+								 'GameState: ' + state;
+		} );
+
+	</script>
+
+</body>
+<html>
