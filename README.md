@@ -20,7 +20,7 @@ Some parts could already be used for serious programming, but honestly, don't us
 It's online here to be able to contribute to it, get some feedback and input from you and also just to show you, what we've been working on lately.
 
 
-WHat can it do?
+What can it do?
 ===============
 
 Many things, really. Let's list a few:
