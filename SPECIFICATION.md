@@ -1,10 +1,9 @@
 General
 =======
 
+## Coding Guideline
 
-# Coding Guideline
-
-## Variable, Namespace and Function Naming
+### Variable, Namespace and Function Naming
 
 Inner Caps.
 
@@ -15,7 +14,7 @@ Inner Caps.
     vendor.myNs.MyStaticClass.myConst = 'value';
 
 
-## Class Naming
+### Class Naming
 
 First character uppercase.
 
@@ -23,7 +22,7 @@ First character uppercase.
 
     }
 
-## Variable Declaration
+### Variable Declaration
 
     var varName = 'value';
     var myArray = [ 1, 2, 3, 4, 5 ]
@@ -32,7 +31,7 @@ First character uppercase.
         return anything;
     };
 
-## Class Declaration
+### Class Declaration
 
 Define as variable, set basic properties in constructor and
 append prototype
@@ -56,7 +55,7 @@ append prototype
         }
     };
 
-## Initialization
+### Initialization
 
     ( function( $, g, _, ns, undefined ) {
 
@@ -65,15 +64,16 @@ append prototype
     } )( jQuery, Grafix, underscore, someOtherDependency );
 
 
+
 Grafix.js
 =========
 
 
-Product Name: Grafix.js
-Project Name: grafix-js
+## Product Name: Grafix.js
+## Project Name: grafix-js
 
 
-Expected Class Structure
+### Expected Class Structure
 
 
 - **EventObject** _Provides event methods_
@@ -103,3 +103,101 @@ Expected Class Structure
 - **Color** _A collection of colors and allows manipulation of colors_
 - **Random** _A random number generator_
 - **Utils** _Some basic utilities (Class extending, merging etc.)_
+
+
+### Object initialization
+
+Most objects should utilize a `set( args )` method, that accepts an object to set
+specific properties of the class
+
+e.g.
+
+    var Point = function( x, y ) {
+        
+        this.set( x, y );
+    }
+    
+    Point.prototype = {
+        set: function( x, y ) {
+            
+            if( typeof x === 'object' ) {
+                if( x.x ) this.x = x.x;
+                if( x.y ) this.y = x.y;
+            } else if( x ) {
+                
+                this.x = x;
+                if( y )
+                    this.y = y;
+            }
+        }
+    }
+
+As you can see, you can either pass an object `{ x: x, y: y}` or just `x, y`
+
+Probably all classes that derive from `Point` and `Size` or any of their
+descendants should include a `set( args )` method and use it in their constructor as well
+
+
+### Cloning
+
+Often you have the need to get a completely new, untouchable instance of your object.
+The `set( args )` method of these objects should accept all properties, that are clonable.
+
+Cloning should work via a getter in order to keep it simple.
+
+Copying a Rectangle should work like this:
+    
+    var rect = new Rectangle( 0, 0, 3, 4 );
+    
+    layer.addChild( rect.style( 'red' ) )
+         .addChild( rect.clone.style( 'blue' ).add( { x: 3 } ) );
+    
+This should draw two rectangles, a blue and a red one, with a width of 3 and a height of 4 pixels right next to each other at the top left corner of the layer
+
+Cloning then should be handled like this:
+
+    var Point = function( args ) {
+        
+        this.set( args );
+    }
+
+    Point.prototype = {
+        set: function( args ) { /*....*/ },
+        get clone() {
+            
+            return new Point( this );
+        }
+    }
+
+This will in essence call .set( this ) on the newly created object and `set( obj )` should
+be able to copy all essential properties.
+
+For a reference visit the `Shape` class and take a look at the `set` and `clone` properties.
+
+
+
+## Roadmap
+
+These things are yet to be implemented
+
+- Group-Shape with a dynamic x/y/width/height based on its children.
+  If you move a group shape, all children will be moved as well (relative positioning)
+  
+  
+- Several default shapes (Polygon, Line/Path, Circle, etc.)
+  Some of them can be taken from the old version residing inside the `js/` directory
+  
+- Color handling. Darken, Lighten colors, parse colors, set specific r/g/b/a/h/s/l/c/m/y/k values     manually
+
+- Touch input handling. Nuff' said.
+
+- Keyboard input handling.
+
+- Grid systems for easy positioning based on manually defined grids
+
+- Animation classes that iterate changes in Shape properties and animates them based on
+  an easing in the `Easing` class or an easing created via `Easing.create()` or `KeySpline()`
+  
+- Several layer types, including `ImageLayer` and `TileLayer`
+
+- Image handling and manipulation
