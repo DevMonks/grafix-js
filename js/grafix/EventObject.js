@@ -29,9 +29,10 @@ EventObject.prototype = {
             this.eventCallbacks_.slice( event, 1 );
 
 		var k;
-		for( var i in this.eventCallbacks_[ event ] )
+		for( var i = 0; i < this.eventCallbacks_[ event ].length; i++ ) {
 			if( this.eventCallbacks_[ event ][ i ] === callback )
 				k = i;
+		}
 
 		if( k )
 			this.eventCallbacks_[ event ].splice( k, 1 );
@@ -48,10 +49,11 @@ EventObject.prototype = {
 			context: this.context,
 			event: event
 		}, args || {} );
-        
-		for( var i in this.eventCallbacks_[ event ] )
+
+		for( var i = 0; i < this.eventCallbacks_[ event ].length; i++ ) {
             this.eventCallbacks_[ event ][ i ].call( args.context, args );
-        
+		}
+
         return this;
 	},
             
@@ -60,10 +62,17 @@ EventObject.prototype = {
         
         console.log( this );
         
-        if( Utils.isFunction( callback ) )
+        if( Utils.isFunction( callback ) ) {
             this.bind( 'changed', callback );
-        else 
-            this.trigger( 'changed', callback );
+	        return this;
+        }
+
+	    if (!('context' in callback)) {
+		    // @FIXME: Causes an endless loop 'cause of Shape changed() registration
+		    return this;
+	    }
+
+	    this.trigger( 'changed', callback );
         
         return this;
     }

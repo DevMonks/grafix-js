@@ -26,7 +26,7 @@ var Scene = function( canvas, clearStyle, maxFps ) {
     this.size.set( this.attributeSize );
     
 	//high pixel-density display optimization (e.g. Retina)
-	if( window.devicePixelRatio && window.devicePixelRatio !== 1 ) {
+	if( ('devicePixelRatio' in window) && window.devicePixelRatio !== 1 ) {
 		this.attributeSize = this.attributeSize.mul( new Size( window.devicePixelRatio, window.devicePixelRatio ) );
 		this.canvasContext.scale( window.devicePixelRatio, window.devicePixelRatio );
 	}
@@ -65,7 +65,7 @@ Scene.prototype = Utils.extend( Shape, {
 	start: function( force ) {
 
 		if( this.isUpdating && !force )
-			return;
+			return this;
 
 		if( this.isUpdating )
 			this.stop();
@@ -112,7 +112,7 @@ Scene.prototype = Utils.extend( Shape, {
             
             if( !this.valid ) {
                 
-                this.draw();
+                this.draw(this.canvasContext);
             }
 
             this.update();

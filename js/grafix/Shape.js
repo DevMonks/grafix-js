@@ -26,11 +26,13 @@ var Shape = function( x, y ) {
 	this.closePath_ = null;
     this.alignContext_ = 'parent'; //parent, root, [object Shape]
     this.align_ = 'top left'; //inner, outer, left, right, bottom, center, top, or all together...
-    
+
+	// @FIXME: Why is a shape invalid after create?
     this.valid = false;
-    this.changed( function() { this.valid = false; } );
     
     this.set( x, y );
+
+	this.changed( function() { this.valid = false; } );
 };
 
 Shape.prototype = Utils.extend( EventObject, {
