@@ -1,5 +1,4 @@
-var Scene = function (canvas, maxFps)
-{
+var Scene = function ( canvas, maxFps ) {
     this.canvas = canvas;
     this.canvasContext = null;
     this.autoStart = false;
@@ -11,84 +10,78 @@ var Scene = function (canvas, maxFps)
     this.currentFps = 0;
     this.lastSecond = new Date().getSeconds();
 
-    if (Utils.isString(this.canvas)) {
+    if ( Utils.isString( this.canvas ) ) {
         this.canvas = document.querySelector
-            ? document.querySelector(this.canvas)
-            : document.getElementById(this.canvas);
+            ? document.querySelector( this.canvas )
+            : document.getElementById( this.canvas );
     }
 
-    if (!this.canvas.getContext) {
+    if ( !this.canvas.getContext ) {
         throw 'Unsupported browser or specified element was not a canvas';
     }
 
-    this.canvasContext = this.canvas.getContext('2d');
+    this.canvasContext = this.canvas.getContext( '2d' );
 
     // set css size
-    this.size.set(this.attributeSize);
+    this.size.set( this.attributeSize );
 
     // high pixel-density display optimization (e.g. Retina)
-    if (('devicePixelRatio' in window) && window.devicePixelRatio !== 1) {
-        this.attributeSize = this.attributeSize.mul(new Size(window.devicePixelRatio, window.devicePixelRatio));
-        this.canvasContext.scale(window.devicePixelRatio, window.devicePixelRatio);
+    if ( ('devicePixelRatio' in window) && window.devicePixelRatio !== 1 ) {
+        this.attributeSize = this.attributeSize.mul( new Size( window.devicePixelRatio, window.devicePixelRatio ) );
+        this.canvasContext.scale( window.devicePixelRatio, window.devicePixelRatio );
     }
 
-    Shape.call(this);
+    Shape.call( this );
 
     this._isDirty = true;
 
-    this.changed(function(args) {
-        console.log('Scene.changed(', args, ') should be dirty:', this.isDirty, ' scene:', this);
-    });
+    this.changed( function ( args ) {
+        console.log( 'Scene.changed(', args, ') should be dirty:', this.isDirty, ' scene:', this );
+    } );
 
-    if (this.autoStart) {
+    if ( this.autoStart ) {
         this.start();
     }
 };
 
-Scene.prototype = Utils.extend(Shape, {
-    get attributeSize()
-    {
+Scene.prototype = Utils.extend( Shape, {
+    get attributeSize() {
         return new Size(
-            parseInt(this.canvas.getAttribute('width')),
-            parseInt(this.canvas.getAttribute('height'))
+            parseInt( this.canvas.getAttribute( 'width' ) ),
+            parseInt( this.canvas.getAttribute( 'height' ) )
         );
     },
-    set attributeSize(value)
-    {
-        if (value.width) {
-            this.canvas.setAttribute('width', value.width);
+    set attributeSize( value ) {
+        if ( value.width ) {
+            this.canvas.setAttribute( 'width', value.width );
         }
-        if (value.height) {
-            this.canvas.setAttribute('height', value.height);
+        if ( value.height ) {
+            this.canvas.setAttribute( 'height', value.height );
         }
     },
 
-    get size()
-    {
+    get size() {
         return new Size(
-            this.canvas.style.width !== '' ? parseInt(this.canvas.style.width) : this.attributeSize.width,
-            this.canvas.style.height !== '' ? parseInt(this.canvas.style.height) : this.attributeSize.height
+            this.canvas.style.width !== '' ? parseInt( this.canvas.style.width ) : this.attributeSize.width,
+            this.canvas.style.height !== '' ? parseInt( this.canvas.style.height ) : this.attributeSize.height
         );
     },
-    set size(value)
-    {
+    set size( value ) {
 
-       if (value.width) {
-           this.canvas.style.width = value.width + 'px'
-       }
-       if (value.height) {
-           this.canvas.style.height = value.height + 'px'
-       }
+        if ( value.width ) {
+            this.canvas.style.width = value.width + 'px'
+        }
+        if ( value.height ) {
+            this.canvas.style.height = value.height + 'px'
+        }
     },
 
-
-    start:     function (force)
-    {
-        if (this.isUpdating && !force) {
+    start: function ( force ) {
+        if ( this.isUpdating && !force ) {
             return this;
         }
 
-        if (this.isUpdating) {
+        if ( this.isUpdating ) {
             this.stop();
         }
 
@@ -98,10 +91,9 @@ Scene.prototype = Utils.extend(Shape, {
         return this;
     },
 
-    stop:      function ()
-    {
-        if (this.lastFrame) {
-            window.cancelAnimationFrame(this.lastFrame);
+    stop: function () {
+        if ( this.lastFrame ) {
+            window.cancelAnimationFrame( this.lastFrame );
         }
 
         this.lastFrame = 0;
@@ -111,33 +103,30 @@ Scene.prototype = Utils.extend(Shape, {
         return this;
     },
 
-    beforeDraw:    function (callback)
-    {
-        if (callback) {
-            return this.bind('before-draw', callback);
+    beforeDraw: function ( callback ) {
+        if ( callback ) {
+            return this.bind( 'before-draw', callback );
         }
 
-        return this.trigger('before-draw', {
+        return this.trigger( 'before-draw', {
             dirty:         this.isDirty,
             canvas:        this.canvas,
             canvasContext: this.canvasContext
-        });
+        } );
     },
 
-    update:    function (callback)
-    {
-        if (callback) {
-            return this.bind('update', callback);
+    update: function ( callback ) {
+        if ( callback ) {
+            return this.bind( 'update', callback );
         }
 
-        return this.trigger('update', {
+        return this.trigger( 'update', {
             canvas:        this.canvas,
             canvasContext: this.canvasContext
-        });
+        } );
     },
 
-    loopFrame: function (timeElapsed)
-    {
+    loopFrame: function ( timeElapsed ) {
         var that = this;
         timeElapsed = timeElapsed || 0;
 
@@ -145,17 +134,17 @@ Scene.prototype = Utils.extend(Shape, {
         var delta = now - this.lastTime;
         var iv = 1000 / this.maxFps;
 
-        if (this.maxFps >= 60 || delta > iv) {
+        if ( this.maxFps >= 60 || delta > iv ) {
 
             this.beforeDraw();
 
-            this.draw(this.canvasContext);
+            this.draw( this.canvasContext );
 
             this.update();
 
             var s = now.getSeconds(); // we only count FINISHED frames
 
-            if (s !== this.lastSecond) {
+            if ( s !== this.lastSecond ) {
                 this.lastFps = this.currentFps;
                 this.currentFps = 0;
                 this.lastSecond = s;
@@ -167,22 +156,21 @@ Scene.prototype = Utils.extend(Shape, {
         }
 
         // make sure this is STOPPED
-        if (!this.isUpdating) {
+        if ( !this.isUpdating ) {
             return this.stop();
         }
 
-        window.requestAnimationFrame(function (timeElapsed) {
-            that.loopFrame(timeElapsed);
-        });
+        window.requestAnimationFrame( function ( timeElapsed ) {
+            that.loopFrame( timeElapsed );
+        } );
 
         return this;
     },
-    fps:       function (maxFps)
-    {
-        if (maxFps) {
+    fps:       function ( maxFps ) {
+        if ( maxFps ) {
             this.maxFps = maxFps;
         }
 
         return this.lastFps;
     }
-});
+} );

@@ -79,7 +79,7 @@ define(
             QUnit.equal(obj.onChangeTriggerCount, 2, "Changed x and y of child item, obj.onChange() triggered 2 times");
 
             obj.changed(obj.prepareChanged('test', 1, 2));
-            QUnit.equal(obj.onChangeTriggerCount, 3, "obj.changed() direct invokation");
+            QUnit.equal(obj.onChangeTriggerCount, 3, "obj.changed() direct invoc    ation");
         });
 
     });

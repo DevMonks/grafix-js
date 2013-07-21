@@ -1,57 +1,56 @@
 <!doctype html>
 <html lang="en">
-<head>
-	<title>Grafix.js - Demo</title>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css">
-</head>
-<body style="padding: 40px">
+    <head>
+        <title>Grafix.js - Demo</title>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css">
+    </head>
+    <body style="padding: 40px">
 
-    <div>
-        
-        <div class="alert alert-info" style="margin-bottom: 40px">
-            <strong>Debug Output:</strong>
-            <pre id="debug"></pre>
+        <div>
+
+            <div class="alert alert-info" style="margin-bottom: 40px">
+                <strong>Debug Output:</strong>
+                <pre id="debug"></pre>
+            </div>
+
+            <div class="well well-small">
+                <canvas id="layer" width="700px" height="400px"></canvas>
+            </div>
+
         </div>
-        
-        <div class="well well-small">
-            <canvas id="layer" width="700px" height="400px"></canvas>
-        </div>
-        
-    </div>
 
-	<script src="js/grafix.nocache.js"></script>
-	<script>
+        <script src="js/grafix.nocache.js"></script>
+        <script>
 
-		Grafix.import();
+            Grafix.import();
 
-     
-		var scene = new Scene( '#layer');
-        scene.color = Color.grey;
-        
-        var rect = new Rectangle( { width: 100, height: 100, color: Color.yellow } );
-        scene.addChild( rect );
-        
-        var rect2 = new Rectangle( { width: 40, height: 40, color: Color.red } );
-        rect.addChild( rect2 );
-        rect.alignBy( scene );
-        rect2.alignBy( rect );
+            var scene = new Scene( '#layer' );
+            scene.color = Color.grey;
 
-	var frameCount = 0,
-            wasEverDirty = false,
-            $debug = document.getElementById('debug');
-	
-	scene
-            .beforeDraw(function() {
-                if (scene.isDirty) {
-                    wasEverDirty = true;
-                }
-                $debug.innerHTML =
-                    'Scene.isDirty: ' + scene.isDirty + ' (was ever: ' + wasEverDirty + ')<br>' +
-                    'Frame Count: ' + ( ++frameCount ) + '<br>';
-            })
-            .start(true);
+            var rect = new Rectangle( { width: 100, height: 100, color: Color.yellow } );
+            scene.addChild( rect );
 
-	</script>
+            var rect2 = new Rectangle( { width: 40, height: 40, color: Color.red } );
+            rect.addChild( rect2 );
+            rect.alignBy( scene );
+            rect2.alignBy( rect );
 
-</body>
-<html>
+            var frameCount = 0,
+                wasEverDirty = false,
+                $debug = document.getElementById( 'debug' );
+
+            scene
+                .beforeDraw( function () {
+                                 if ( scene.isDirty ) {
+                                     wasEverDirty = true;
+                                 }
+                                 $debug.innerHTML =
+                                     'Scene.isDirty: ' + scene.isDirty + ' (was ever: ' + wasEverDirty + ')<br>' +
+                                         'Frame Count: ' + ( ++frameCount ) + '<br>';
+                             } )
+                .start( true );
+
+        </script>
+
+    </body>
+</html>

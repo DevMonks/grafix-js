@@ -1,5 +1,4 @@
-var EventObject = function ()
-{
+var EventObject = function () {
 
     this._eventCallbacks = [];
 };
@@ -14,19 +13,18 @@ EventObject.prototype = {
      * @param {function} callback
      * @returns {self}
      */
-    bind: function (event, callback)
-    {
+    bind: function ( event, callback ) {
 
-        if (Utils.isFunction(callback) == false) {
+        if ( Utils.isFunction( callback ) == false ) {
             throw 'Provided callback is not a function';
         }
 
         // Create some space
-        if (!(event in this._eventCallbacks)) {
+        if ( !(event in this._eventCallbacks) ) {
             this._eventCallbacks[event] = [];
         }
 
-        this._eventCallbacks[event].push(callback);
+        this._eventCallbacks[event].push( callback );
 
         return this;
     },
@@ -38,31 +36,30 @@ EventObject.prototype = {
      * @param {function} callback
      * @returns {self}
      */
-    unbind: function (event, callback)
-    {
+    unbind: function ( event, callback ) {
 
-        if (!(event in this._eventCallbacks)) {
+        if ( !(event in this._eventCallbacks) ) {
             return this;
         }
 
         // Just remove them all
-        if (!callback) {
+        if ( !callback ) {
             delete this._eventCallbacks[event];
             return this;
         }
 
         // Find the callback
         var k = -1;
-        for (var i = 0; i < this._eventCallbacks[event].length; i++) {
-            if (this._eventCallbacks[event][i] === callback) {
+        for ( var i = 0; i < this._eventCallbacks[event].length; i++ ) {
+            if ( this._eventCallbacks[event][i] === callback ) {
                 k = i;
                 break;
             }
         }
 
         // Remove the callback, if found
-        if (k != -1) {
-            this._eventCallbacks[event].splice(k, 1);
+        if ( k != -1 ) {
+            this._eventCallbacks[event].splice( k, 1 );
         }
 
         return this;
@@ -72,34 +69,33 @@ EventObject.prototype = {
      * Triggers an event callback which was priviously registred.
      *
      * @param {string} event
-     * @param {object|array|EventArgs} args
+     * @param {object|EventArgs} args
      * @returns {self}
      */
-    trigger: function (event, args)
-    {
-        if (!(event in this._eventCallbacks)) {
+    trigger: function ( event, args ) {
+        if ( !(event in this._eventCallbacks) ) {
             return this;
         }
 
         var events = this._eventCallbacks[event],
-            // Create EventArgs
+        // Create EventArgs
             eventArgs = args;
 
-        if (!(eventArgs instanceof EventArgs)) {
+        if ( !(eventArgs instanceof EventArgs) ) {
             eventArgs.eventName = event;
-            eventArgs = new EventArgs(eventArgs);
+            eventArgs = new EventArgs( eventArgs );
         }
 
         // We need a context!
-        if (!eventArgs.context) {
+        if ( !eventArgs.context ) {
             //throw 'Failed to trigger "' + eventArgs.eventName + '" event without a context.';
-            eventArgs.updateContext(this);
+            eventArgs.updateContext( this );
         }
 
-        for (var i = 0; i < events.length; i++) {
+        for ( var i = 0; i < events.length; i++ ) {
             var callback = events[i];
             //console.log('EventObject.trigger(', eventArgs.eventName, ') in context', eventArgs.context);
-            callback.call(eventArgs.context, eventArgs);
+            callback.call( eventArgs.context, eventArgs );
         }
 
         return this;
@@ -114,30 +110,29 @@ EventObject.prototype = {
      * @param {function|object|EventArgs} callback
      * @returns {self}
      */
-    changed: function (callback)
-    {
+    changed: function ( callback ) {
         // Maximum call stack size prevention
-        if (this.changed === callback) {
+        if ( this.changed === callback ) {
             throw "Please dont use this.changed as a callback; define a method as a callback handler";
         }
 
         // Register a new callback function for the "changed" event
-        if (Utils.isFunction(callback)) {
-            this.bind('changed', callback);
+        if ( Utils.isFunction( callback ) ) {
+            this.bind( 'changed', callback );
             return this;
         }
 
         // Ensure a context
         var args = callback || {};
-        if (!args.context) {
-            if (!(args instanceof EventArgs)) {
+        if ( !args.context ) {
+            if ( !(args instanceof EventArgs) ) {
                 args.context = this;
             } else {
-                args.updateContext(this);
+                args.updateContext( this );
             }
         }
         // Trigger "changed" event using the given parameters
-        this.trigger('changed', args);
+        this.trigger( 'changed', args );
 
         return this;
     },
@@ -150,8 +145,7 @@ EventObject.prototype = {
      * @param {*} value_new
      * @returns {EventArgs.ChangedProperty}
      */
-    prepareChanged: function (property, value_old, value_new)
-    {
+    prepareChanged: function ( property, value_old, value_new ) {
         var args = {
             eventName: 'change',
             context:   this,
@@ -159,7 +153,7 @@ EventObject.prototype = {
             oldValue:  value_old,
             value:     value_new
         };
-        return new EventArgs.ChangedProperty(args);
+        return new EventArgs.ChangedProperty( args );
     }
 
 };

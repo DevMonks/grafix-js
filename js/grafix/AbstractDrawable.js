@@ -1,8 +1,7 @@
-var AbstractDrawable = function ()
-{
-    EventObject.call(this);
+var AbstractDrawable = function () {
+    EventObject.call( this );
 };
 
-AbstractDrawable.prototype = Utils.extend(EventObject, {
+AbstractDrawable.prototype = Utils.extend( EventObject, {
 
-});
+} );

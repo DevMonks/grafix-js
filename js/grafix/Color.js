@@ -1,30 +1,26 @@
-var Color = function ()
-{
+var Color = function () {
     // Something WILL be done with this!
 };
 
-Utils.merge(Color, {
-    hexToRgb: function (hex)
-    {
+Utils.merge( Color, {
+    hexToRgb: function ( hex ) {
         // Expand shorthand (#03F) to full (#0033FF)
         var reShorthand = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-        hex = hex.replace(reShorthand, function (m, r, g, b)
-        {
+        hex = hex.replace( reShorthand, function ( m, r, g, b ) {
             return r + r + g + g + b + b;
-        });
+        } );
 
         // Extract single components
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec( hex );
         return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
+            r: parseInt( result[1], 16 ),
+            g: parseInt( result[2], 16 ),
+            b: parseInt( result[3], 16 )
         } : null;
     },
 
-    rgbToHex: function (r, g, b)
-    {
-        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    rgbToHex: function ( r, g, b ) {
+        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString( 16 ).slice( 1 );
     },
 
     aqua:                 '#00ffff',
@@ -173,5 +169,5 @@ Utils.merge(Color, {
     wheat:                '#f5deb3',
     whitesmoke:           '#f5f5f5',
     yellowgreen:          '#9acd32'
-});
+} );
 
