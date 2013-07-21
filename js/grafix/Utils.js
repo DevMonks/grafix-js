@@ -1,79 +1,99 @@
 var Utils = {
-    
-	merge: function( target, source ) {
-        
-		for( var i in source )
-			target[ i ] = source[ i ];
 
-		return target;
-	},
-
-	extend: function( parent, childMethods ) {
-
-        var instance = new parent();
-        for( var i in childMethods ) {
-            
-            var desc = Object.getOwnPropertyDescriptor( childMethods, i );
-            Object.defineProperty( instance, i, desc );
+    merge: function (target, source)
+    {
+        for (var i in source) {
+            target[ i ] = source[ i ];
         }
-        
+
+        return target;
+    },
+
+    extend: function (parent, childMethods)
+    {
+        var instance = new parent();
+        for (var i in childMethods) {
+            var desc = Object.getOwnPropertyDescriptor(childMethods, i);
+            Object.defineProperty(instance, i, desc);
+        }
+
         return instance;
-	},
+    },
 
-	isType: function( val, type ) {
+    isType: function (val, type)
+    {
+        return typeof val === type;
+    },
 
-		return typeof val === type;
-	},
+    isString: function (val)
+    {
+        return Utils.isType(val, 'string');
+    },
 
-	isString: function( val ) {
+    isArray: function (val)
+    {
+        return Array.isArray(val);
+    },
 
-		return this.isType( val, 'string' );
-	},
+    isObject: function (val)
+    {
+        return Utils.isType(val, 'object');
+    },
 
-	isArray: function( val ) {
+    isNumber: function (val)
+    {
+        return Utils.isType(val, 'number');
+    },
 
-		return Array.isArray( val );
-	},
+    isNumeric: function (val)
+    {
+        return !isNaN(parseFloat(val)) && isFinite(val);
+    },
 
-	isObject: function( val ) {
+    isFunction: function (val)
+    {
+        return Utils.isType(val, 'function');
+    },
 
-		return this.isType( val, 'object' );
-	},
-
-	isNumber: function( val ) {
-
-		return this.isType( val, 'number' );
-	},
-
-	isNumeric: function( val ) {
-
-		return !isNaN( parseFloat( val ) ) && isFinite( val );
-	},
-    
-    isFunction: function( val ) {
-        
-        return this.isType( val, 'function' );
+    isDomNode: function(o) {
+        return o && (
+            Utils.isObject(Node) ?
+                (o instanceof Node) :
+                Utils.isObject(o) && Utils.isNumber(o.nodeType) && Utils.isString(o.nodeName)
+            );
     },
     
-	inArray: function( array, value ) {
+    isElement: function (o){
+        return o && (
+            Utils.isObject(HTMLElement) ?
+                (o instanceof HTMLElement) :
+                Utils.isObject(o) && o.nodeType === 1 && Utils.isString(o.nodeName)
+            );
+    },
 
-		if( array.indexOf )
-			return array.indexOf( value ) !== -1;
+    inArray: function (array, value)
+    {
+        if (array.indexOf) {
+            return array.indexOf(value) !== -1;
+        }
 
-		for( var i in array )
-			if( array[ i ] === value )
-				return true;
+        for (var i = 0; i < array.length;) {
+            if (array[i] === value) {
+                return true;
+            }
+        }
 
-		return false;
-	},
+        return false;
+    },
 
-	decToRad: function( dec ) {
+    decToRad: function (dec)
+    {
+        return dec * Math.PI / 180;
+    },
 
-		return dec * Math.PI / 180;
-	},
-            
-	radToDec: function( rad ) {
+    radToDec: function (rad)
+    {
+        return ( rad * 180 ) / Math.PI;
+    }
 
-		return ( rad * 180 ) / Math.PI;
-	}
 };

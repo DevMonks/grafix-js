@@ -4,6 +4,7 @@ Utils
 Color
 KeySpline
 Easing
+EventArgs
 EventObject
 Point
 Size
@@ -25,6 +26,7 @@ Layer
         Color: Color,
         Easing: Easing,
         EventObject: EventObject,
+        EventArgs: EventArgs,
         KeySpline: KeySpline,
         Mouse: Mouse,
         Point: Point,

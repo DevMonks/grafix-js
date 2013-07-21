@@ -26,7 +26,7 @@ var Utils = {
 
 	extend: function( parent, child ) {
 
-		result = this.merge( new parent, child );
+		var result = this.merge( new parent, child );
 
 		return result;
 	},
@@ -36,20 +36,15 @@ var Utils = {
 		return typeof val === type;
 	},
 
-	isString: function( val ) {
-
-		return this.isType( val, 'string' );
-	}
-
 	isArray: function( val ) {
 
 		return this.isType( val, 'array' );
-	}
+	},
 
 	isObject: function( val ) {
 
 		return this.isType( val, 'object' );
-	}
+	},
 
 	isString: function( val ) {
 
@@ -101,7 +96,7 @@ Point.prototype = {
 
 		this.x = 0;
 		this.y = 0;
-	}
+	},
 	point: function() {
 
 		return new Point( this.x, this.y );
@@ -114,9 +109,9 @@ Point.prototype = {
 
 		return Math.sqrt( ( this.x - point.x ) * ( this.x - point.x ) + ( this.y - point.y ) * ( this.y - point.y ) )
 	}
-}var Shape = function( x, y ) {
+};var Shape = function( x, y ) {
 
-}
+};
 
 Shape.prototype = Utils.extend( Point, {
 
