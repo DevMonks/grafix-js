@@ -36,10 +36,11 @@
         rect.alignBy( scene );
         rect2.alignBy( rect );
 
-		var frameCount = 0,
+	var frameCount = 0,
             wasEverDirty = false,
             $debug = document.getElementById('debug');
-		scene
+	
+	scene
             .beforeDraw(function() {
                 if (scene.isDirty) {
                     wasEverDirty = true;
