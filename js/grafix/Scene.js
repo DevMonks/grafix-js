@@ -36,8 +36,9 @@ var Scene = function ( canvas, maxFps ) {
     this._isDirty = true;
 
     this.changed( function ( args ) {
-        console.log( 'Scene.changed(', args, ') should be dirty:', this.isDirty, ' scene:', this );
-    } );
+        this._isDirty = true;
+        //console.log( 'Scene.changed() ', this );
+    }, this );
 
     if ( this.autoStart ) {
         this.start();

@@ -126,5 +126,10 @@ Point.prototype = Utils.extend( EventObject, {
         }
 
         return this;
+    },
+
+
+    toString: function() {
+        return '{x:' + this.x + ',y:' + this.y + '}';
     }
 } );

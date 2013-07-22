@@ -89,7 +89,7 @@ Color.prototype = {
       
       //ALLOWS: array [ r, g, b, a ], object { r:, g:, b:, a: }, string rgb( r, g, b ) or string rgba(c, y, m, k)
       //TODO: set this.r/g/b/a based on args
-  }
+  },
   get hex() {
       
       return Color.rgbToHex( this.r, this.g, this.b );
@@ -204,7 +204,7 @@ Utils.merge( Color, {
         stops = end;
         
       if( typeof start !== 'object' )
-        stops[ 0 ] = start.hex ? start.hex : start;
+        stops[ 0 ] = start.hex ? start.hex : start;
       else
         stops = start;
         

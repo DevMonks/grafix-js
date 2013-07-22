@@ -1,24 +1,17 @@
 var EventArgs = function ( args ) {
     if ( args ) {
-        this._context = args.context;
         this._eventName = args.event || args.eventName;
     }
+
     this._time = new Date().getTime();
 };
 
 EventArgs.prototype = {
-    get context() { return this._context; },
-    set context( value ) { this.updateContext( value ); },
-
     get eventName() { return this._eventName; },
     set eventName( value ) { this.handleNotAllowedPropertyChange(); },
 
     get time() { return this._time; },
     set time( value ) { this.handleNotAllowedPropertyChange(); },
-
-    updateContext: function ( newContext ) {
-        this._context = newContext;
-    },
 
     handleNotAllowedPropertyChange: function () {
         throw "Unable to change properties after initialisation. Please create a new EventArgs object instead.";

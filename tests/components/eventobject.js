@@ -28,13 +28,12 @@ define(
         // More common object to test event delegation by children
         var ChildrenEventedObject = function () {
             Grafix.EventObject.call(this);
-            var that = this;
 
             this._onChangeTriggerCount = 0;
-            this.changed(this.onChange);
+            this.changed(this.onChange, this);
 
             this._child = new Grafix.Point();
-            this._child.changed(function() {that.onChange(); });
+            this._child.changed(this.changed, this);
         };
 
         ChildrenEventedObject.prototype = Grafix.Utils.extend(Grafix.EventObject, {
@@ -54,6 +53,28 @@ define(
 
 
         QUnit.module("EventObject tests");
+
+        QUnit.test("EventObject core tests", function() {
+            var emptyFunc = function() {
+                    QUnit.ok(true, 'Event handler was triggered');
+                },
+                simpleHandler = new Grafix.EventHandler(emptyFunc, null),
+                eventName = 'test-event',
+                obj = new Grafix.EventObject();
+
+            QUnit.equal(obj.eventCallbacks.length, 0, 'No callbacks after initialisation');
+
+            // Bind the event and verify using .has()
+            obj.bind(eventName, simpleHandler);
+            QUnit.equal(obj.has(eventName), true, 'Object has a handler for "' + eventName + '"');
+
+            // Try to trigger
+            obj.trigger(eventName);
+
+            // Unbind the event
+            obj.unbind(eventName, simpleHandler);
+            QUnit.equal(obj.has(eventName), false, 'Object\'s handler has been removed');
+        });
 
         QUnit.test("EventObject trigger affection scopre", function() {
             var obj = new SimpleEventedObject();
@@ -79,7 +100,7 @@ define(
             QUnit.equal(obj.onChangeTriggerCount, 2, "Changed x and y of child item, obj.onChange() triggered 2 times");
 
             obj.changed(obj.prepareChanged('test', 1, 2));
-            QUnit.equal(obj.onChangeTriggerCount, 3, "obj.changed() direct invoc    ation");
+            QUnit.equal(obj.onChangeTriggerCount, 3, "obj.changed() direct invocation");
         });
 
     });

@@ -1,27 +1,22 @@
 var Shape = function ( x, y ) {
     EventObject.call( this );
 
-    var that = this,
-        shapeChangedHandler = function ( args ) {
-            that.onChanged( args );
-        };
-
     this._children = [];
     this._parent = null;
 
     this._position = new Point;
-    this._position.changed( shapeChangedHandler );
+    this._position.changed(this.changed, this);
     this._size = new Size;
-    this._size.changed( shapeChangedHandler );
+    this._size.changed(this.changed, this);
 
     /* Style Properties */
     this._offset = new Point;
-    this._offset.changed( shapeChangedHandler );
+    this._offset.changed(this.changed, this);
     this._scale = new Point( 1, 1 );
-    this._scale.changed( shapeChangedHandler );
+    this._scale.changed(this.changed, this);
     this._angle = 0;
     this._skew = new Point;
-    this._skew.changed( shapeChangedHandler );
+    this._skew.changed(this.changed, this);
     this._color = Color.black;
     this._drawStyle = 'fill';  //stroke, fill...
     this._lineWidth = 1;
@@ -285,6 +280,8 @@ Shape.prototype = Utils.extend( EventObject, {
         }
 
         shape.parent = this;
+        // Delegate children changed() to our changed() handler
+        shape.changed(this.changed, this);
 
         return this;
     },
@@ -313,8 +310,6 @@ Shape.prototype = Utils.extend( EventObject, {
         deep = deep || true;
 
         if ( Utils.isObject( x ) ) {
-            console.log( 'Shape.set() update using:', x );
-
             if ( x.width ) {
                 this.width = x.width;
             }
@@ -515,29 +510,35 @@ Shape.prototype = Utils.extend( EventObject, {
         return this;
     },
 
-    draw: function ( context ) {
+    draw: function ( context, forceDraw ) {
         context.save();
 
         // Draw this shape
-        if ( this.isDirty ) {
+        if ( this.isDirty || forceDraw ) {
+            //console.log('Shape.draw() re-draw dirty shape:', this);
+            // If parent is dirty, childs needs a re-draw too
+            var childForceRedraw = true;
+
             // Apply styles
             this.applyStyles( context );
             // Draw it using the current style (stroke, fill or clear)
             this[this.drawStyle].call( this, context );
-        }
 
-        // Draw dirty children
-        if ( this.children.length ) {
-            for ( var i = 0; i < this.children.length; i++ ) {
-                var child = this.children[i];
-                // Redraw shapes that are directly connected to this parent only
-                // @TODO: This causes an overlay problem..
-                //        We have to check if any child needs a redraw and, if so, we have to redraw everything
-                //        Only redrawing dirty childs will make them overlapping ther other not-yet-dirty childs
-                if ( this.collidesWith( child ) && child.isDirty ) {
-                    child.draw( context );
+            // Draw dirty children
+            if ( this.children.length ) {
+                for ( var i = 0; i < this.children.length; i++ ) {
+                    var child = this.children[i];
+                    // Redraw shapes that are directly connected to this parent only
+                    // @TODO: This causes an overlay problem..
+                    //        We have to check if any child needs a redraw and, if so, we have to redraw everything
+                    //        Only redrawing dirty childs will make them overlapping ther other not-yet-dirty childs
+                    if ( this.collidesWith( child )/* && child.isDirty */) {
+                        //console.log('Shape.draw() poke child for draw (dirty=', child.isDirty, '):', child);
+                        child.draw( context, childForceRedraw );
+                    }
                 }
             }
+
         }
 
         context.restore();
@@ -701,6 +702,12 @@ Shape.prototype = Utils.extend( EventObject, {
         var bottom = rect.bottom ? rect.bottom : rect.y + ( rect.height ? rect.height : 0 );
 
         return ( left > this.left && right < this.right && top > this.top && bottom < this.bottom );
+    },
+
+
+    toString: function() {
+        // @TODO: Output everything, but only if set
+        return '{x:' + this.x + ',y:' + this.y + ',width:' + this.width + ',height:' + this.height + '}';
     }
 
 } );

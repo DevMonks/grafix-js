@@ -37,17 +37,50 @@
 
             var frameCount = 0,
                 wasEverDirty = false,
-                $debug = document.getElementById( 'debug' );
+                $debug = document.getElementById( 'debug' ),
+                moveBack = false,
+                moveDown = false;
 
             scene
                 .beforeDraw( function () {
-                                 if ( scene.isDirty ) {
-                                     wasEverDirty = true;
-                                 }
-                                 $debug.innerHTML =
-                                     'Scene.isDirty: ' + scene.isDirty + ' (was ever: ' + wasEverDirty + ')<br>' +
-                                         'Frame Count: ' + ( ++frameCount ) + '<br>';
-                             } )
+                     if ( scene.isDirty ) {
+                         wasEverDirty = true;
+                     }
+                     $debug.innerHTML =
+                         'Scene.isDirty: ' + scene.isDirty + ' (was ever: ' + wasEverDirty + ')<br>' +
+                         'Frame Count: ' + ( ++frameCount ) + ', last Fps:' + scene.lastFps + '<br>' +
+                         'scene: ' + scene + '<br>' +
+                         'rect: ' + rect + '<br>' +
+                         'rect2: ' + rect2 + '<br>';
+                 } )
+                .update( function() {
+                     // Simple tween to test draw() delegation
+                     // Every change to a shape should delegate up to the parent shape (Scene) and forcing a redraw
+                     // of the most parent
+                     if (!moveBack && (rect.x + 1 + rect.width) < scene.width) {
+                        rect.x++;
+                     } else {
+                         moveBack = true;
+                         if (rect.x > 0) {
+                             rect.x--;
+                         } else {
+                             moveBack = false;
+                         }
+                     }
+
+                     if (!moveDown && (rect.y + 1 + rect.height) < scene.height) {
+                         rect.y++;
+                     } else {
+                         moveDown = true;
+                         if (rect.y > 0) {
+                             rect.y--;
+                         } else {
+                             moveDown = false;
+                         }
+                     }
+
+                     rect2.alignBy(rect);
+                 } )
                 .start( true );
 
         </script>
