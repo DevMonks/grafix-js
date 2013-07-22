@@ -2,7 +2,6 @@
 Polyfill.requestAnimationFrame
 Utils
 Color
-KeySpline
 Easing
 EventArgs
 EventObject
