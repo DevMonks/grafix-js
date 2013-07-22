@@ -1,5 +1,174 @@
-var Color = function () {
+var Color = function ( color ) {
     // Something WILL be done with this!
+    this.r = 0;
+    this.g = 0;
+    this.b = 0;
+    this.a = 0;
+    
+    this.set( color );
+};
+
+Color.prototype = {
+    
+    
+  set: function( color ) {
+    
+    //TODO: Set color dynamically. color can have the following forms
+    //- #rgb
+    //- #rrggbb
+    //- rgb(r,g,b) (White-spaces allowed)
+    //- hsl(h,s,l) (White-spaces allowed)
+    //- cymk(c,y,m,k) (White-spaces allowed)
+    //- colorName in Color
+    //- [r,g,b,a]
+    //- [r,g,b]
+    //- {r:, g:, b:, a:} (all optional)
+    //- {h:, s:, l:} (all optional)
+    
+  },
+  
+  //HSL Getters/Setters
+  get h() {
+      
+      return calculatedH;
+  },
+  set h( h ) {
+      
+      //TODO: calculate this.r/g/b/a based on hue
+  },
+  get s() {
+      
+      return calculatedS;
+  },
+  set s( s ) {
+      
+      //TODO: calculate this.r/g/b/a based on saturation
+  },
+  get l() {
+      
+      return calculatedL;
+  },
+  set l( l ) {
+      
+      //TODO: calculate this.r/g/b/a based on lightness
+  },
+    
+  get hsl() { 
+      //RETURNS: array [ h, s, l ]
+      //TODO: calculate HSL
+      return calculatedHsl; 
+  },
+  set hsl( hsl ) {
+      
+      //ALLOWS: array [ h, s, l ], object { h:, s:, l: } or string hsl(h,s,l)
+      //TODO: set this.r/g/b/a based on hsl
+  },
+  get cymk() { 
+      //RETURNS: array [ c, y, m, k ]
+      //TODO: calculate CYMK
+      return calculatedCymk; 
+  },
+  set cymk( cymk ) {
+      
+      //ALLOWS: array [ c, y, m, k], object { c:, y:, m:, k: } or string cymk(c,y,m,k)
+      //TODO: set this.r/g/b/a based on cymk 
+  },
+  get rgb() {
+      //RETURNS: array [ r, g, b ]
+      return [ this.r, this.g, this.b ];
+  },
+  set rgb( rgb ) {
+      this.rgba = rgb;
+  },
+  get rgba() {
+      
+      //RETURNS: array [ r, g, b, a ]
+      return [ this.r, this.g, this.b, this.a ];
+  },
+  set rgba( rgba ) {
+      
+      //ALLOWS: array [ r, g, b, a ], object { r:, g:, b:, a: }, string rgb( r, g, b ) or string rgba(c, y, m, k)
+      //TODO: set this.r/g/b/a based on args
+  }
+  get hex() {
+      
+      return Color.rgbToHex( this.r, this.g, this.b );
+  },
+  set hex( hex ) {
+      
+      var c = Color.hexToRgb( hex );
+      if( c.r ) this.r = c.r;
+      if( c.g ) this.g = c.g;
+      if( c.b ) this.b = c.b;
+  },
+  
+  //HSL operations
+  darken: function( factor ) {
+      
+      //Darken (L)
+  },
+  lighten: function( factor ) {
+      
+      //Darken (L)
+  },
+  saturate: function( factor ) {
+      
+      //Saturate (S)
+  },
+  desaturate: function( factor ) {
+      
+      //Desaturate (S)
+  },
+  hue: function( deg ) {
+      
+      //Specify hue (H)
+  },
+  
+  
+  inverse: function() {
+      
+      //TODO: inverse the color
+  },
+  
+  complement: function() {
+      
+      //TODO: get the complementary color
+  },
+  
+  grayscale: function() {
+    
+      //TODO: get the gray scale of this color
+  },
+  
+  mix: function( color ) {
+    
+      //TODO: return the mixed color.
+  },
+  
+  gradientTo: function( type, color, stops ) {
+      
+      return Color.gradient( type, this, color, stops );
+  },
+  gradientFrom: function( type, color, stops ) {
+      
+      return Color.gradient( type, color, this, stops );
+  },
+  linearGradientTo: function( color, stops ) {
+      
+      return this.gradientTo( 'linear', color, stops );
+  },
+  radialGradientTo: function( color, stops ) {
+      
+      return this.gradientTo( 'radial', color, stops );
+  },
+  linearGradientFrom: function( color, stops ) {
+      
+      return this.gradientFrom( 'linear', color, stops );
+  },
+  radialGradientFrom: function( color, stops ) {
+      
+      return this.gradientFrom( 'radial', color, stops );
+  }
 };
 
 Utils.merge( Color, {
@@ -22,6 +191,31 @@ Utils.merge( Color, {
     rgbToHex: function ( r, g, b ) {
         return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString( 16 ).slice( 1 );
     },
+    
+    gradient: function( type, start, end, stops ) {
+      
+      //stops are formatted like this: { 0: Color, 0.2: Color, 0.5: Color, 0.8: Color, 1: Color }
+      //Type can be "linear", "radial"
+      stops = stops || {};
+      
+      if( typeof end !== 'object' )
+        stops[ 1 ] = end.hex ? end.hex : hex;
+      else
+        stops = end;
+        
+      if( typeof start !== 'object' )
+        stops[ 0 ] = start.hex ? start.hex : start;
+      else
+        stops = start;
+        
+      
+      //TODO: create a canvas gradient out of this
+      
+      return theGreatGradient;
+    },
+    
+    linearGradient: function( start, end, stops ) { return Color.gradient( 'linear', start, end, stops ); },
+    radialGradient: function( start, end, stops ) { return Color.gradient( 'radial', start, end, stops ); },
 
     aqua:                 '#00ffff',
     black:                '#000000',
