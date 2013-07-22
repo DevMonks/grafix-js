@@ -206,7 +206,7 @@ var Easing = {
     },
     create:           function ( x1, y1, x2, y2, name ) {
 
-        var keySpline = new KeySpline( x1, y1, x2, y2 );
+        var keySpline = Utils.keySpline( x1, y1, x2, y2 );
         if ( name ) {
             this[ name ] = keySpline;
         }
