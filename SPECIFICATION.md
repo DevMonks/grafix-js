@@ -76,7 +76,7 @@ Grafix.js
 ### Expected Class Structure
 
 
-- **EventObject** _Provides event methods_
+- **EventBase** _Provides event methods_
     - **Size** _Provides with, height and calculation methods_
     - **Point** _Provides 2D position and calculation methods_
         - **Shape** _Provides basic drawing capabilities of simple shapes and calculation stuff_
@@ -94,10 +94,13 @@ Grafix.js
             - **Circle** _It's a circle!_
             - **Path/Line** _Simple path/line based on 2 or more points_
             - **Polygon** _A shape based on 3 or more points_
-    - **Mouse** _Handles mouse input and delegates to shapes_
-    - **Keyboard** _Handles keyboard input and delegates to shapes_
-    - **Touchscreen** _Handles touch input and delegates to shapes_
-- **KeySpline/BezierCurve** _Calculates easings based on 2 points_
+    - **InputBase** _Provides combined events and manages input events_
+        - **Mouse** _Handles mouse input and delegates to shapes_
+        - **Keyboard** _Handles keyboard input and delegates to shapes_
+        - **Touchpad** _Handles touch input and delegates to shapes_
+        - **Gamepad** _Handles gamepad input and delegates to shapes_
+- **EventArgs**
+- **EventHandler**
 - **Easing** _A collection of animation easings_
 - **Animation** _Handles the animation of shapes based on their style properties_
 - **Color** _A collection of colors and allows manipulation of colors_
@@ -182,7 +185,6 @@ These things are yet to be implemented
 
 - Group-Shape with a dynamic x/y/width/height based on its children.
   If you move a group shape, all children will be moved as well (relative positioning)
-  
   
 - Several default shapes (Polygon, Line/Path, Circle, etc.)
   Some of them can be taken from the old version residing inside the `js/` directory
