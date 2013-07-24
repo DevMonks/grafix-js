@@ -1,7 +1,7 @@
-grafix-js
+Grafix.js
 =========
 
-A canvas based graphics engine in JavaScript. Mostly for HTML games and animations. Replaces flash.
+Probably a HTML5 Canvas Manipulation Toolkit...or something in that direction.
 
 
 So what about it?
@@ -9,6 +9,8 @@ So what about it?
 
 Grafix is an abstraction of/for the HTML5 canvas element with the goal to bring it to life in a most simple and easy way.
 This library doesn't nessecarily aim for being a game engine, but rather wants to provide a solid way for animating, enhancing and positioning shapes and images inside canvas, which can be used for anything _and_ games.
+
+The syntax and library features are designed to be used as easy as possible to get your application up as fast as possible, without sacrificing performance, useful features and tools.
 
 
 How far is it?
@@ -39,16 +41,16 @@ Many things, really. Let's list a few:
   Grafix is based on strict, valid ECMAScript and doesn't use hacky stuff to achieve its goals. This will make Grafix work easily across all browsers and hardware.
 - Mobility/Portability. Since HTML5, CSS and JavaScript work on all possible kind of devices, Grafix works on all possible kind of devices.
   
-  A game or application written once can be used anywhere, your desktop-PC, your phone, your tablet, it doesn't matter.
+  A game or application written once can be used anywhere, your desktop-PC, your phone, your tablet, your fridge, your toaster, it doesn't matter.
 - Texts! Canvas has bad support for simple Texts, it can't even break them when you have line breaks in it.
   
   With Grafix it's as easy as saying `Text.create( 'My text\nwith breaks', '15 blue helvetica' )` and you can use the resulting shape like all other shapes (aligning, positioning etc. possible)
-- Tilesets. Provide canvas with a tileset and it can easily transform and align them accordingly.
+- Tilesets. Feed grafix with a tileset and it can easily transform and align the single tiles accordingly.
 
   Tilesets can also be used for creating animations based on images. Grafix also does that automatically on demand.
-- Color and pixel manipulation. Hands down, it's not in yet. But we're working on it and it soon will be.
+- Color and pixel manipulation.
  
-  This will include defining filters for images and tilesets that get applied before they're drawn to the stage
+  This will include defining filters for images, shapes and tilesets that get applied before they're drawn to the stage
 - Memory saving. Grafix really only draws, what needs to be drawn.
 
   This is achieved through simple features of JavaScript that track the state of our shapes. Collision detection is sometimes less costy than re-drawing.
