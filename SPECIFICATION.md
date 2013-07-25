@@ -176,30 +176,3 @@ This will in essence call .set( this ) on the newly created object and `set( obj
 be able to copy all essential properties.
 
 For a reference visit the `Shape` class and take a look at the `set` and `clone` properties.
-
-
-
-## Roadmap
-
-These things are yet to be implemented
-
-- Group-Shape with a dynamic x/y/width/height based on its children.
-  If you move a group shape, all children will be moved as well (relative positioning)
-  
-- Several default shapes (Polygon, Line/Path, Circle, etc.)
-  Some of them can be taken from the old version residing inside the `js/` directory
-  
-- Color handling. Darken, Lighten colors, parse colors, set specific r/g/b/a/h/s/l/c/m/y/k values     manually
-
-- Touch input handling. Nuff' said.
-
-- Keyboard input handling.
-
-- Grid systems for easy positioning based on manually defined grids
-
-- Animation classes that iterate changes in Shape properties and animates them based on
-  an easing in the `Easing` class or an easing created via `Easing.create()` or `KeySpline()`
-  
-- Several layer types, including `ImageLayer` and `TileLayer`
-
-- Image handling and manipulation
