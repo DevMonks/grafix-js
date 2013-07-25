@@ -2,8 +2,14 @@ var Utils = {
     
     merge: function( target, source ) {
         
-        for( var i in source )
+        for( var i in source ) {
+            // @FIXME: Dirty fix - dont copy 'clone' getter because this will trigger a new clone .. and so on
+            if (i === 'clone') {
+                continue;
+            }
+
             target[ i ] = source[ i ];
+        }
 
         return target;
     },
@@ -66,6 +72,31 @@ var Utils = {
 
         return false;
     },
+
+    isDomNode: function ( o ) {
+        return o && (
+            Utils.isObject( Node ) ?
+                (o instanceof Node) :
+                Utils.isObject( o ) && Utils.isNumber( o.nodeType ) && Utils.isString( o.nodeName )
+            );
+    },
+
+    isDomElement: function ( o ) {
+        return o && (
+            Utils.isObject( HTMLElement ) ?
+                (o instanceof HTMLElement) :
+                Utils.isObject( o ) && o.nodeType === 1 && Utils.isString( o.nodeName )
+            );
+    },
+
+    isBindable: function( o ) {
+        return ( (o instanceof EventHandler) || Utils.isFunction( o ) || Utils.isType( o, 'EventHandler') );
+    },
+
+    isTriggerable: function ( o ) {
+        return ( (o instanceof EventArgs) || Utils.isType( o, 'EventArgs') || Utils.isObject(o) );
+    },
+
 
     decToRad: function( dec ) {
 

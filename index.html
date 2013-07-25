@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <title>Grafix.js - Demo</title>
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="bootstrap.min.css">
     </head>
     <body style="padding: 40px">
 
@@ -36,24 +36,23 @@
             rect2.alignBy( rect );
 
             var frameCount = 0,
-                wasEverDirty = false,
+                wasEverInvalid = false,
                 $debug = document.getElementById( 'debug' ),
                 moveBack = false,
                 moveDown = false;
 
             scene
-                .beforeDraw( function () {
-                     if ( scene.isDirty ) {
-                         wasEverDirty = true;
+                .update( function() {
+                     if ( scene.invalid ) {
+                         wasEverInvalid = true;
                      }
                      $debug.innerHTML =
-                         'Scene.isDirty: ' + scene.isDirty + ' (was ever: ' + wasEverDirty + ')<br>' +
-                         'Frame Count: ' + ( ++frameCount ) + ', last Fps:' + scene.lastFps + '<br>' +
-                         'scene: ' + scene + '<br>' +
-                         'rect: ' + rect + '<br>' +
-                         'rect2: ' + rect2 + '<br>';
-                 } )
-                .update( function() {
+                         'Scene.invalid: ' + scene.invalid + ' (was ever: ' + wasEverInvalid + ')<br>' +
+                             'Frame Count: ' + ( ++frameCount ) + ', last Fps:' + scene._lastFps + '<br>' +
+                             'scene: ' + scene + '<br>' +
+                             'rect: ' + rect + '<br>' +
+                             'rect2: ' + rect2 + '<br>';
+
                      // Simple tween to test draw() delegation
                      // Every change to a shape should delegate up to the parent shape (Scene) and forcing a redraw
                      // of the most parent

@@ -31,7 +31,7 @@
 
 		Grafix.import();
 
-		var layer = new Layer( { canvas: '#layer', maxFps: 60, clearColor: false } );
+		var layer = new Layer( { _canvas: '#layer', maxFps: 60, clearColor: false } );
 
 		var system = new Grid( layer.rect().div( { width: 2, height: 2 } ) );
 		console.log( layer.rect(), layer.rect().div( { width: 2 } ) );

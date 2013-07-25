@@ -32,7 +32,7 @@ define(
             this._onChangeTriggerCount = 0;
             this.changed(this.onChange, this);
 
-            this._child = new Grafix.Point();
+            this._child = new Grafix.Point({delegateChanged: true});
             this._child.changed(this.changed, this);
         };
 

@@ -1,10 +1,37 @@
 var EventObject = function () {
 
+    // Support a parent and invalidate flag
+    this._parent = null;
+    this._invalid = true;
+
     this._eventCallbacks = [];
 };
 
 EventObject.prototype = {
     get eventCallbacks() { return this._eventCallbacks; },
+
+    get parent() { return this._parent; },
+    set parent(value) {
+        if (!(value instanceof EventObject)) {
+            throw 'Only and instance of EventObject are allowed to be set as a parent';
+        }
+
+        this._parent = value;
+    },
+
+    get invalid() { return this._invalid; },
+    set invalid(value) {
+        if (this._invalid === value) {
+            return;
+        }
+
+        this._invalid = value;
+        // Inform parent
+        if (this._parent) {
+            this._parent.invalid = value;
+        }
+    },
+
 
     /**
      *
@@ -109,6 +136,23 @@ EventObject.prototype = {
     },
 
     /**
+     *
+     * @param {string} event
+     * @param {EventHandler|EventArgs|object} args
+     *
+     * @returns {self}
+     */
+    on: function ( event, args ) {
+        // Register a new callback function for the event
+        if ( Utils.isBindable( args ) ) {
+            return this.bind( event, args );
+        }
+
+        // Trigger event using the given parameters, if any
+        return this.trigger( event, args );
+    },
+
+    /**
      *  Some short-hands for default/most-used events
      */
 
@@ -148,7 +192,7 @@ EventObject.prototype = {
      * @param {string} property
      * @param {*} value_old
      * @param {*} value_new
-     * @returns {EventArgs.ChangedProperty}
+     * @returns {EventArgs}
      */
     prepareChanged: function ( property, value_old, value_new ) {
         var args = {
@@ -157,7 +201,7 @@ EventObject.prototype = {
             oldValue:  value_old,
             value:     value_new
         };
-        return new EventArgs.ChangedProperty( args );
+        return new EventArgs( args );
     }
 
 };

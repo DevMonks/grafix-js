@@ -7,14 +7,13 @@ EventArgs
 EventHandler
 EventObject
 Point
+Point3D
 Size
-Style
 Shape
 Rectangle
 Circle
 Grid
 Scene
-Layer
 @@
 @@before
 	var Grafix = (function( undefined ) {
@@ -24,12 +23,14 @@ Layer
 @@after
 	var Export = {
         Color: Color,
+        Circle: Circle,
         Easing: Easing,
         EventObject: EventObject,
         EventArgs: EventArgs,
         EventHandler: EventHandler,
         Mouse: Mouse,
         Point: Point,
+        Point3D: Point3D,
         Random: Random,
         Rectangle: Rectangle,
         Scene: Scene,

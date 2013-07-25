@@ -1,46 +1,41 @@
 var Scene = function ( canvas, maxFps ) {
-    this.canvas = canvas;
-    this.canvasContext = null;
-    this.autoStart = false;
-    this.isUpdating = false;
-    this.lastFrame = null;
-    this.lastTime = new Date;
-    this.maxFps = maxFps || 60;
-    this.lastFps = 0;
-    this.currentFps = 0;
-    this.lastSecond = new Date().getSeconds();
-
-    if ( Utils.isString( this.canvas ) ) {
-        this.canvas = document.querySelector
-            ? document.querySelector( this.canvas )
-            : document.getElementById( this.canvas );
-    }
-
-    if ( !this.canvas.getContext ) {
-        throw 'Unsupported browser or specified element was not a canvas';
-    }
-
-    this.canvasContext = this.canvas.getContext( '2d' );
-
-    // set css size
-    this.size.set( this.attributeSize );
-
-    // high pixel-density display optimization (e.g. Retina)
-    if ( ('devicePixelRatio' in window) && window.devicePixelRatio !== 1 ) {
-        this.attributeSize = this.attributeSize.mul( new Size( window.devicePixelRatio, window.devicePixelRatio ) );
-        this.canvasContext.scale( window.devicePixelRatio, window.devicePixelRatio );
-    }
 
     Shape.call( this );
 
-    this._isDirty = true;
+    this._canvas = canvas;
+    this._canvasContext = null;
+    this._autoStart = false;
+    this._isUpdating = false;
+    this._lastFrame = null;
+    this._lastTime = new Date;
+    this._maxFps = maxFps || 60;
+    this._lastFps = 0;
+    this._currentFps = 0;
+    this._lastSecond = new Date().getSeconds();
 
-    this.changed( function ( args ) {
-        this._isDirty = true;
-        //console.log( 'Scene.changed() ', this );
-    }, this );
+    if ( Utils.isString( this._canvas ) ) {
+        this._canvas = document.querySelector ? document.querySelector( this._canvas ) : document.getElementById( this._canvas );
+    }
 
-    if ( this.autoStart ) {
+    if ( !this._canvas.getContext ) {
+        throw 'Unsupported browser or specified element was not a canvas';
+    }
+
+    this._canvasContext = this._canvas.getContext( '2d' );
+
+    // Create a input handler
+    this._input = new Input( this._canvas );
+
+    // Set css size
+    this.size.set( this.attributeSize );
+
+    // High pixel-density display optimization (e.g. Retina)
+    if ( ('devicePixelRatio' in window) && window.devicePixelRatio !== 1 ) {
+        this.attributeSize = this.attributeSize.mul( new Size( window.devicePixelRatio, window.devicePixelRatio ) );
+        this._canvasContext.scale( window.devicePixelRatio, window.devicePixelRatio );
+    }
+
+    if ( this._autoStart ) {
         this.start();
     }
 };
@@ -59,6 +54,8 @@ Scene.prototype = Utils.extend( Shape, {
         if ( value.height ) {
             this.canvas.setAttribute( 'height', value.height );
         }
+        // Informs also parent
+        this.invalid = true;
     },
 
     get size() {
@@ -75,89 +72,71 @@ Scene.prototype = Utils.extend( Shape, {
         if ( value.height ) {
             this.canvas.style.height = value.height + 'px'
         }
+        // Informs also parent
+        this.invalid = true;
     },
 
+
     start: function ( force ) {
-        if ( this.isUpdating && !force ) {
+        if ( this._isUpdating && !force ) {
             return this;
         }
 
-        if ( this.isUpdating ) {
+        if ( this._isUpdating ) {
             this.stop();
         }
 
-        this.isUpdating = true;
+        this._isUpdating = true;
         this.loopFrame();
 
         return this;
     },
 
     stop: function () {
-        if ( this.lastFrame ) {
-            window.cancelAnimationFrame( this.lastFrame );
+        if ( this._lastFrame ) {
+            window.cancelAnimationFrame( this._lastFrame );
         }
 
-        this.lastFrame = 0;
-        this.lastTime = 0;
-        this.isUpdating = false;
+        this._lastFrame = 0;
+        this._lastTime = 0;
+        this._isUpdating = false;
 
         return this;
     },
 
-    beforeDraw: function ( callback ) {
-        if ( callback ) {
-            return this.bind( 'before-draw', callback );
-        }
-
-        return this.trigger( 'before-draw', {
-            dirty:         this.isDirty,
-            canvas:        this.canvas,
-            canvasContext: this.canvasContext
-        } );
-    },
-
-    update: function ( callback ) {
-        if ( callback ) {
-            return this.bind( 'update', callback );
-        }
-
-        return this.trigger( 'update', {
-            canvas:        this.canvas,
-            canvasContext: this.canvasContext
-        } );
-    },
 
     loopFrame: function ( timeElapsed ) {
         var that = this;
         timeElapsed = timeElapsed || 0;
 
         var now = new Date;
-        var delta = now - this.lastTime;
-        var iv = 1000 / this.maxFps;
+        var delta = now - this._lastTime;
+        var iv = 1000 / this._maxFps;
 
-        if ( this.maxFps >= 60 || delta > iv ) {
+        if ( this._maxFps >= 60 || delta > iv ) {
 
-            this.beforeDraw();
+            this.draw();
 
-            this.draw( this.canvasContext );
-
-            this.update();
+            // Free informations
+            if ( this.input ) {
+                this.input.clear();
+            }
 
             var s = now.getSeconds(); // we only count FINISHED frames
 
-            if ( s !== this.lastSecond ) {
-                this.lastFps = this.currentFps;
-                this.currentFps = 0;
-                this.lastSecond = s;
+            if ( s !== this._lastSecond ) {
+                this._lastFps = this._currentFps;
+                this._currentFps = 0;
+                this._lastSecond = s;
             }
 
-            this.currentFps++;
+            this._currentFps++;
 
-            this.lastTime = now - ( delta % iv );
+            this._lastTime = now - ( delta % iv );
         }
 
         // make sure this is STOPPED
-        if ( !this.isUpdating ) {
+        if ( !this._isUpdating ) {
             return this.stop();
         }
 
@@ -167,11 +146,13 @@ Scene.prototype = Utils.extend( Shape, {
 
         return this;
     },
+
     fps:       function ( maxFps ) {
         if ( maxFps ) {
-            this.maxFps = maxFps;
+            this._maxFps = maxFps;
         }
 
-        return this.lastFps;
+        return this._lastFps;
     }
+
 } );

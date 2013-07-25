@@ -1,6 +1,9 @@
 var Point = function ( x, y ) {
     EventObject.call( this );
 
+    // Will changes to own properties delegated to the changed() event?
+    this._delegateChanged = (Utils.isObject(x) && x.delegateChanged ? true : false);
+
     this._x = 0;
     this._y = 0;
 
@@ -10,22 +13,30 @@ var Point = function ( x, y ) {
 Point.prototype = Utils.extend( EventObject, {
     get x() { return this._x; },
     set x( value ) {
-        if ( Utils.isNumeric( value ) == false ) {
+        if ( Utils.isNumeric( value ) == false || this._x === value ) {
             return;
         }
 
-        this.changed( this.prepareChanged( 'x', this._x, value ) );
+        if (this._delegateChanged && this.has('changed')) {
+            this.changed( this.prepareChanged( 'x', this._x, value ) );
+        }
         this._x = value;
+        // Informs also parent
+        this.invalid = true;
     },
 
     get y() { return this._y; },
     set y( value ) {
-        if ( Utils.isNumeric( value ) == false ) {
+        if ( Utils.isNumeric( value ) == false || this._y === value ) {
             return;
         }
 
-        this.changed( this.prepareChanged( 'y', this._y, value ) );
+        if (this._delegateChanged && this.has('changed')) {
+            this.changed( this.prepareChanged( 'y', this._y, value ) );
+        }
         this._y = value;
+        // Informs also parent
+        this.invalid = true;
     },
 
     get clone() {
@@ -41,6 +52,9 @@ Point.prototype = Utils.extend( EventObject, {
             }
             if ( x.y ) {
                 this.y = x.y;
+            }
+            if ( x.parent ) {
+                this.parent = x.parent;
             }
         } else if ( Utils.isNumeric( x ) ) {
             this.x = parseInt( x );
