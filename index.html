@@ -24,7 +24,7 @@
 
             Grafix.import();
 
-            var scene = new Scene( '#layer' );
+            var scene = new Stage( '#layer' );
             scene.color = Color.grey;
 
             var rect = new Rectangle( { width: 100, height: 100, color: Color.yellow } );
@@ -47,14 +47,14 @@
                          wasEverInvalid = true;
                      }
                      $debug.innerHTML =
-                         'Scene.invalid: ' + scene.invalid + ' (was ever: ' + wasEverInvalid + ')<br>' +
+                         'Stage.invalid: ' + scene.invalid + ' (was ever: ' + wasEverInvalid + ')<br>' +
                              'Frame Count: ' + ( ++frameCount ) + ', last Fps:' + scene._lastFps + '<br>' +
                              'scene: ' + scene + '<br>' +
                              'rect: ' + rect + '<br>' +
                              'rect2: ' + rect2 + '<br>';
 
                      // Simple tween to test draw() delegation
-                     // Every change to a shape should delegate up to the parent shape (Scene) and forcing a redraw
+                     // Every change to a shape should delegate up to the parent shape (Stage) and forcing a redraw
                      // of the most parent
                      if (!moveBack && (rect.x + 1 + rect.width) < scene.width) {
                         rect.x++;

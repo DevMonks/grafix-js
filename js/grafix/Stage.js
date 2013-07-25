@@ -1,4 +1,4 @@
-var Scene = function ( canvas, maxFps ) {
+var Stage = function ( canvas, maxFps ) {
 
     Shape.call( this );
 
@@ -40,7 +40,7 @@ var Scene = function ( canvas, maxFps ) {
     }
 };
 
-Scene.prototype = Utils.extend( Shape, {
+Stage.prototype = Utils.extend( Shape, {
     get attributeSize() {
         return new Size(
             parseInt( this.canvas.getAttribute( 'width' ) ),

@@ -13,7 +13,7 @@ Shape
 Rectangle
 Circle
 Grid
-Scene
+Stage
 @@
 @@before
 	var Grafix = (function( undefined ) {
@@ -33,7 +33,7 @@ Scene
         Point3D: Point3D,
         Random: Random,
         Rectangle: Rectangle,
-        Scene: Scene,
+        Stage: Stage,
         Shape: Shape,
         Size: Size,
         Utils: Utils,
