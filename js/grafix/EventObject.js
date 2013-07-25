@@ -21,11 +21,10 @@ EventObject.prototype = {
 
     get invalid() { return this._invalid; },
     set invalid(value) {
-        if (this._invalid === value) {
-            return;
+        if (this._invalid !== value) {
+            this._invalid = value;
         }
 
-        this._invalid = value;
         // Inform parent
         if (this._parent) {
             this._parent.invalid = value;
