@@ -10,7 +10,7 @@ var Grid = function ( x, y, width, height, columns, rows ) {
 };
 Grid.defaults.columns = 12;
 Grid.defaults.rows = 12;
-Grid.defaults.virtual = false;
+Grid.defaults.virtual = true;
 
 Grid.prototype = Utils.extend( Rectangle, {
 

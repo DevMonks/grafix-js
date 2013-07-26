@@ -16,11 +16,14 @@ Grid
 Stage
 @@
 @@before
-	var Grafix = (function( undefined ) {
+
+var Grafix = (function( undefined ) {
 
 	"use strict";
+    
 @@
 @@after
+
 	var Export = {
         Color: Color,
         Circle: Circle,
@@ -29,6 +32,7 @@ Stage
         EventArgs: EventArgs,
         EventHandler: EventHandler,
         Mouse: Mouse,
+        Grid: Grid,
         Point: Point,
         Point3D: Point3D,
         Random: Random,
@@ -49,7 +53,10 @@ Stage
 			you're perfectly fine with importing everything into the global namespace
 		*/
 		import: function( namespace ) {
-
+            
+            if( namespace === false )
+                return Export;
+            
 			namespace = namespace || window;
 
 			Utils.merge( namespace, Export );
@@ -59,4 +66,7 @@ Stage
 	/* Export classes to namespace via mapping */
 	return Export;
 } )();
+
+if( exports ) exports = Grafix.import( true );
+
 @@
