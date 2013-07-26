@@ -618,39 +618,6 @@ Shape.prototype = Utils.extend( EventObject, {
         context.clearRect( this.x, this.y, this.width, this.height );
     },
 
-    style: function ( properties ) {
-        if ( Utils.isString( properties ) ) {
-
-            var parts = properties.split( ' ' );
-            for ( var i = 0; i < parts.length; i++ ) {
-
-                var token = parts[i];
-
-                switch ( token ) {
-                    case 'stroke':
-                        this.drawStyle = 'stroke';
-                        break;
-                    case 'fill':
-                        this.drawStyle = 'fill';
-                        break;
-                    default:
-                        if ( token in Color ) {
-                            this.color = Color[token];
-                        }
-                        else if ( token.charAt( 0 ) === '#' || token.substr( 0, 3 ) === 'rgb' || token.substr( 0, 3 ) === 'hsl' ) {
-                            this.color = token;
-                        }
-                        break;
-                }
-            }
-        } else if ( Utils.isObject( properties ) ) {
-            this.set( properties );
-        }
-
-        return this;
-    },
-
-
     /**
      * Executed before a draw() happens, should update inner properties and handle input states
      *

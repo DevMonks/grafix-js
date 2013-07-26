@@ -67,6 +67,7 @@ var Grafix = (function( undefined ) {
 	return Export;
 } )();
 
-if( exports ) exports = Grafix.import( true );
+if( typeof exports === 'object' && exports ) 
+    exports = Grafix.import( true );
 
 @@

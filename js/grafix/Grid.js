@@ -8,9 +8,11 @@ var Grid = function ( x, y, width, height, columns, rows ) {
     
     this.set( x, y, width, height, columns, rows );
 };
-Grid.defaults.columns = 12;
-Grid.defaults.rows = 12;
-Grid.defaults.virtual = true;
+Grid.defaults = {
+    columns: 12,
+    rows: 12,
+    virtual: true
+};
 
 Grid.prototype = Utils.extend( Rectangle, {
 
@@ -141,7 +143,7 @@ Grid.prototype = Utils.extend( Rectangle, {
         var points = [],
             currentPoint = {};
         for( var i in arguments )
-            if( Utils.isObject( arguments[ i ] ) )
+            if( Utils.isObject( arguments[ i ] ) )
                 points.push( {
                     x: arguments[ i ].x || 0,
                     y: arguments[ i ].y || 0
