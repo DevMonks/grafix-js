@@ -20,7 +20,7 @@
     stage.color = Color.black;
     
     
-    var rect1 = new Rectangle( { x: 20, y: 20, width: 20, height: 20, color: 'red' } ),
+    var rect1 = new Rectangle( { x: 20, y: 20, width: 20, height: 20, color: 'darkred' } ),
         rect2 = rect1.clone.set( { x: 50, y: 30, width: 20, height: 20, color: 'blue' } ),
         rect3 = rect1.clone.set( { x: 10, y: 60, width: 20, height: 20, color: 'yellow' } ),
         rect4 = rect1.clone.set( { x: 40, y: 90, width: 20, height: 20, color: 'green' } ),
