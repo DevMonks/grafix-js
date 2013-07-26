@@ -27,7 +27,9 @@ var Stage = function ( canvas, maxFps ) {
     this._input = new Input( this._canvas );
 
     // Set css size
-    this.size.set( this.attributeSize );
+    //We can't use the set() method here, since the setter wouldn't be called
+    console.log( this.canvas, this._canvas );
+    this.size = this.attributeSize;
 
     // High pixel-density display optimization (e.g. Retina)
     if ( ('devicePixelRatio' in window) && window.devicePixelRatio !== 1 ) {
@@ -57,7 +59,7 @@ Stage.prototype = Utils.extend( Shape, {
         // Informs also parent
         this.invalid = true;
     },
-
+    
     get size() {
         return new Size(
             this.canvas.style.width !== '' ? parseInt( this.canvas.style.width ) : this.attributeSize.width,
@@ -65,7 +67,7 @@ Stage.prototype = Utils.extend( Shape, {
         );
     },
     set size( value ) {
-
+        
         if ( value.width ) {
             this.canvas.style.width = value.width + 'px'
         }
@@ -75,7 +77,6 @@ Stage.prototype = Utils.extend( Shape, {
         // Informs also parent
         this.invalid = true;
     },
-
 
     start: function ( force ) {
         if ( this._isUpdating && !force ) {
