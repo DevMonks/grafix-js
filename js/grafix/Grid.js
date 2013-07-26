@@ -18,20 +18,35 @@ Grid.prototype = Utils.extend( Rectangle, {
 
     get columns() { return this._columns; },
     set columns( value ) {
-        //TODO: invalidate
+        
+        if( this._delegateChanged && this.has( 'changed' ) ) {
+            this.changed( this.prepareChanged( 'columns', this._columns, value ) );
+        }
         this._columns = value;
+        
+        this.invalid = true;
     },
     
     get rows() { return this._rows; },
     set rows( value ) {
-        //TODO: invalidate
+        
+        if( this._delegateChanged && this.has( 'changed' ) ) {
+            this.changed( this.prepareChanged( 'rows', this._rows, value ) );
+        }
         this._rows = value;
+        
+        this.invalid = true;
     },
     
     get virtual() { return this._virtual; },
     set virtual( value ) {
-        //TODO: invalidate
+        
+        if( this._delegateChanged && this.has( 'changed' ) ) {
+            this.changed( this.prepareChanged( 'virtual', this._virtual, value ) );
+        }
         this._virtual = value;
+        
+        this.invalid = true;
     },
 
     set: function( x, y, width, height, columns, rows ) {
