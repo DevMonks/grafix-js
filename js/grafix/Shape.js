@@ -100,7 +100,7 @@ Shape.prototype = Utils.extend( EventObject, {
 
     get right() { return this.width + this.x; },
     set right( value ) {
-        if ( Utils.isNumeric( value ) == false ) {
+        if ( Utils.isNumeric( value ) === false ) {
             return;
         }
 
@@ -109,7 +109,7 @@ Shape.prototype = Utils.extend( EventObject, {
 
     get top() { return this.y; },
     set top( value ) {
-        if ( Utils.isNumeric( value ) == false ) {
+        if ( Utils.isNumeric( value ) === false ) {
             return;
         }
 
@@ -119,7 +119,7 @@ Shape.prototype = Utils.extend( EventObject, {
 
     get bottom() { return this.y + this.height; },
     set bottom( value ) {
-        if ( Utils.isNumeric( value ) == false ) {
+        if ( Utils.isNumeric( value ) === false ) {
             return;
         }
 
@@ -158,7 +158,7 @@ Shape.prototype = Utils.extend( EventObject, {
 
     get angle() { return this._angle; },
     set angle( value ) {
-        if ( Utils.isNumeric( value ) == false ) {
+        if ( Utils.isNumeric( value ) === false ) {
             return;
         }
 
@@ -185,7 +185,7 @@ Shape.prototype = Utils.extend( EventObject, {
 
     get drawStyle() { return this._drawStyle; },
     set drawStyle( value ) {
-        if ( !Utils.inArray( ['stroke', 'fill', 'clear'] ) ) {
+        if ( !Utils.inArray( ['stroke', 'fill', 'clear'], value ) ) {
             value = 'fill';
         }
 
@@ -1043,6 +1043,104 @@ Shape.prototype = Utils.extend( EventObject, {
     toString: function() {
         // @TODO: Output everything, but only if set
         return '{x:' + this.x + ',y:' + this.y + ',width:' + this.width + ',height:' + this.height + '}';
+    },
+            
+    //style is like set(), but only for style properties
+    style: function( style ) {
+        
+        this._color = Color.black;
+        this._drawStyle = 'fill';  //stroke, fill...
+        this._lineWidth = 1;
+        this._lineCap = 'bull'; //bull, round, square...
+        this._miterLimit = null;
+        this._lineJoin = 'miter'; //miter, bevel, round...
+        this._closePath = null;
+        this._alignContext = 'parent'; //parent, root, [object Shape]
+        this._align = 'top left'; //inner, outer, left, right, bottom, center, top, or all together...
+
+        
+        if( Utils.isString( style ) ) {
+            
+            for( var token in style.split( ' ' ) )
+                switch( token ) {
+                    case 'fill':
+                    case 'clear':
+                    case 'stroke':
+                        
+                        this.drawStyle = token;
+                        break;
+                    case 'bull':
+                    case 'round':
+                    case 'square':
+                        
+                        this.lineCap = token;
+                        break;
+                    case 'miter':
+                    case 'bevel':
+                    case 'round':
+                        
+                        this.miterLimit = token;
+                        break;
+                    case 'parent':
+                    case 'root':
+                        
+                        this.alignContext = token;
+                    case 'inner':
+                    case 'outer':
+                    case 'left':
+                    case 'right':
+                    case 'bottom':
+                        /*TODO: These would need to be collected
+                        * and passed as one string to this.align
+                        **/
+                        break;
+                    default:
+                        
+                        if( Utils.isNumeric( token ) )
+                            //lets take it as the lineWidth
+                            this.lineWidth = parseInt( token );
+                        else
+                            //it's probably the color, heh
+                            this.color = token;
+                }
+        } else if( Utils.isObject( style ) ) {
+            
+            //You can just pass a shape and copy its styles
+            
+            if( x.offset ) this.offset.set( x.offset );
+            if( x.scale ) this.scale.set( x.scale );
+            if( x.angle ) this.angle = x.angle;
+            if( x.skew ) this.skew.set( x.skew );
+            if( x.color ) this.color = x.color;
+            if( x.drawStyle ) this.drawStyle = x.drawStyle;
+            if( x.lineWidth ) this.lineWidth = x.lineWidth;
+            if ( x.lineCap ) this.lineCap = x.lineCap;
+            if ( x.miterLimit ) this.miterLimit = x.miterLimit;
+            if ( x.lineJoin ) this.lineJoin = x.lineJoin;
+            if ( x.closePath ) this.closePath = x.closePath;
+            if ( x.alignContext ) this._alignContext = x.alignContext;
+            if ( x.align ) this.align = x.align;
+        }
+        
+        //make it chainable
+        return this;
+    },
+            
+    expand: function( shape ) {
+        
+        if( this.left > shape.left )
+            this.left( shape.left );
+        
+        if( this.right < shape.right )
+            this.right( shape.right );
+        
+        if( this.top > shape.top )
+            this.top( shape.top );
+        
+        if( this.bottom < shape.bottom )
+            this.bottom( shape.bottom );
+        
+        return this;
     }
 
 } );
