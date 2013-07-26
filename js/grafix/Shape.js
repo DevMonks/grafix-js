@@ -1015,20 +1015,12 @@ Shape.prototype = Utils.extend( EventObject, {
     //style is like set(), but only for style properties
     style: function( style ) {
         
-        this._color = Color.black;
-        this._drawStyle = 'fill';  //stroke, fill...
-        this._lineWidth = 1;
-        this._lineCap = 'bull'; //bull, round, square...
-        this._miterLimit = null;
-        this._lineJoin = 'miter'; //miter, bevel, round...
-        this._closePath = null;
-        this._alignContext = 'parent'; //parent, root, [object Shape]
-        this._align = 'top left'; //inner, outer, left, right, bottom, center, top, or all together...
-
-        
         if( Utils.isString( style ) ) {
             
-            for( var token in style.split( ' ' ) )
+            var tokens = style.split( ' ' );
+            for( var i in tokens ) {
+                
+                var token = tokens[ i ];
                 switch( token ) {
                     case 'fill':
                     case 'clear':
@@ -1052,6 +1044,7 @@ Shape.prototype = Utils.extend( EventObject, {
                     case 'root':
                         
                         this.alignContext = token;
+                        break;
                     case 'inner':
                     case 'outer':
                     case 'left':
@@ -1070,23 +1063,24 @@ Shape.prototype = Utils.extend( EventObject, {
                             //it's probably the color, heh
                             this.color = token;
                 }
+            }
         } else if( Utils.isObject( style ) ) {
             
             //You can just pass a shape and copy its styles
-            
-            if( x.offset ) this.offset.set( x.offset );
-            if( x.scale ) this.scale.set( x.scale );
-            if( x.angle ) this.angle = x.angle;
-            if( x.skew ) this.skew.set( x.skew );
-            if( x.color ) this.color = x.color;
-            if( x.drawStyle ) this.drawStyle = x.drawStyle;
-            if( x.lineWidth ) this.lineWidth = x.lineWidth;
-            if ( x.lineCap ) this.lineCap = x.lineCap;
-            if ( x.miterLimit ) this.miterLimit = x.miterLimit;
-            if ( x.lineJoin ) this.lineJoin = x.lineJoin;
-            if ( x.closePath ) this.closePath = x.closePath;
-            if ( x.alignContext ) this._alignContext = x.alignContext;
-            if ( x.align ) this.align = x.align;
+            if( style.offset ) this.offset.set( style.offset );
+            if( style.scale ) this.scale.set( style.scale );
+            if( style.angle ) this.angle = style.angle;
+            if( style.skew ) this.skew.set( style.skew );
+            if( style.color ) this.color = style.color;
+            if( style.drawStyle ) this.drawStyle = style.drawStyle;
+            if( style.lineWidth ) this.lineWidth = style.lineWidth;
+            if( style.lineCap ) this.lineCap = style.lineCap;
+            if( style.miterLimit ) this.miterLimit = style.miterLimit;
+            if( style.lineJoin ) this.lineJoin = style.lineJoin;
+            if( style.closePath ) this.closePath = style.closePath;
+            //maybe a bad idea
+            //if( style.alignContext ) this._alignContext = style.alignContext;
+            if( style.align ) this.align = style.align;
         }
         
         //make it chainable
@@ -1096,16 +1090,16 @@ Shape.prototype = Utils.extend( EventObject, {
     expand: function( shape ) {
         
         if( this.left > shape.left )
-            this.left( shape.left );
+            this.left = shape.left;
         
         if( this.right < shape.right )
-            this.right( shape.right );
+            this.right = shape.right;
         
         if( this.top > shape.top )
-            this.top( shape.top );
+            this.top = shape.top;
         
         if( this.bottom < shape.bottom )
-            this.bottom( shape.bottom );
+            this.bottom = shape.bottom;
         
         return this;
     }

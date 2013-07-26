@@ -36,28 +36,27 @@ Grid.prototype = Utils.extend( Rectangle, {
 
     set: function( x, y, width, height, columns, rows ) {
         
-    
         if( Utils.isObject( x ) ) {
             
             Shape.prototype.set.call( this, x );
             
-            if( x.y ) this.y = x.y;
-            if( x.width ) this.width = x.width;
-            if( x.height ) this.height = x.height;
-            if( x.columns ) this.columns = x.columns;
-            if( x.rows ) this.rows = x.rows;
-            if( x.virtual ) this.virtual = x.virtual;
+            if( 'y' in x ) this.y = x.y;
+            if( 'width' in x ) this.width = x.width;
+            if( 'height' in x ) this.height = x.height;
+            if( 'columns' in x ) this.columns = x.columns;
+            if( 'rows' in x ) this.rows = x.rows;
+            if( 'virtual' in x ) this.virtual = x.virtual;
             
         } else if( x ) {
             
             this.x = x;
         }
         
-        if( this.y ) this.y = y;
-        if( this.width ) this.width = width;
-        if( this.height ) this.height = height;
-        if( this.columns ) this.columns = columns;
-        if( this.rows ) this.rows = rows;
+        if( y ) this.y = y;
+        if( width ) this.width = width;
+        if( height ) this.height = height;
+        if( columns ) this.columns = columns;
+        if( rows ) this.rows = rows;
         
     },
 
@@ -71,18 +70,22 @@ Grid.prototype = Utils.extend( Rectangle, {
             this._rectangles[ y ] = [];
         
         
+        
         if( !this._rectangles[ y ][ x ] ) {
             
-            var rectWidth = ( this.height / this.rows ),
-                rectHeight = ( this.height / this.rows );
+            var rectWidth = this.width / this.columns,
+                rectHeight = this.height / this.rows;
+            
             this._rectangles[ y ][ x ] = new Rectangle( {
                 x: this.x + x * rectWidth,
                 y: this.y + y * rectHeight,
                 width: rectWidth,
-                hegiht: rectHeight
+                height: rectHeight
             } );
         } else if( this.invalid !== false ) {
             
+            var rectWidth = this.width / this.columns,
+                rectHeight = this.height / this.rows;
             this._rectangles[ y ][ x ].set( {
                 x: this.x + x * rectWidth,
                 y: this.y + y * rectHeight,
@@ -95,7 +98,7 @@ Grid.prototype = Utils.extend( Rectangle, {
     },
     
     rectAt: function( x, y ) {
-      
+
         if( Utils.isObject( x ) ) {
             
             if( x.y ) y = x.y;
@@ -104,7 +107,7 @@ Grid.prototype = Utils.extend( Rectangle, {
             else if( x.x ) x = x.x;
         }
         
-        if( typeof y !== 'undefined' ) {
+        if( typeof y === 'undefined' ) {
             
             y = parseInt( x / this.rows );
             x = x % this.columns;
@@ -115,10 +118,13 @@ Grid.prototype = Utils.extend( Rectangle, {
             
     column: function( col ) {
 
-        var colRect = new Rectangle;
-        this.eachColumnRect( col, function( rect ) {
-            
-            colRect.expand( rect );
+        var colRect = null;
+        this.eachColumnRect( col, function( x, y ) {
+           
+            if( !colRect )
+                colRect = new Rectangle( { size: this.size, position: this.position } );
+            else
+                colRect.expand( this );
         } );
         
         return colRect;
@@ -126,10 +132,13 @@ Grid.prototype = Utils.extend( Rectangle, {
             
     row: function( row ) {
         
-        var rowRect = new Rectangle;
-        this.eachColumnRect( row, function( rect ) {
-            
-            rowRect.expand( rect );
+        var rowRect = null;
+        this.eachRowRect( row, function( x, y ) {
+         
+            if( !rowRect )
+                rowRect =  new Rectangle( { size: this.size, position: this.position } );
+            else
+                rowRect.expand( this );
         } );
         
         return rowRect;
@@ -158,9 +167,15 @@ Grid.prototype = Utils.extend( Rectangle, {
                 currentPoint.x = arguments[ i ];
             }
        
-       var rect = new Rectangle;
-       for( var i in points )
-           rect.expand( this.rectAt( points[ i ] ) );
+       var rect = null;
+       for( var i in points ) {
+           
+           var currentRect = this.rectAt( points[ i ] );
+           if( !rect )
+               rect = new Rectangle( { size: currentRect.size, position: currentRect.position } );
+           else
+            rect.expand( currentRect );
+       }
        
        return rect;
     },
@@ -198,7 +213,7 @@ Grid.prototype = Utils.extend( Rectangle, {
     },
             
     _draw: function( canvasContext, style ) {
-
+        
         if( this.virtual ) //virtual grids dont get drawn
             return;
         
@@ -227,7 +242,7 @@ Grid.prototype = Utils.extend( Rectangle, {
         this._draw( canvasContext, 'clear' );
     },
             
-    draw: function( context, forceDraw) {
+    draw: function( context, forceDraw ) {
         
         //TODO: this is okay, but this will still apply the styles
         //unnessecarily. Maybe need a third "applyStyles" parameter
