@@ -14,6 +14,7 @@ Rectangle
 Circle
 Grid
 Stage
+Group
 @@
 @@before
 
@@ -33,6 +34,7 @@ var Grafix = (function( undefined ) {
         EventHandler: EventHandler,
         Mouse: Mouse,
         Grid: Grid,
+        Group: Group,
         Point: Point,
         Point3D: Point3D,
         Random: Random,

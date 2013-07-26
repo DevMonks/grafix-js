@@ -175,7 +175,7 @@ EventObject.prototype = {
 
         // Support (function, context) for older calls
         if ( context && Utils.isObject(context) ) {
-            if ( Utils.isFunction(callback) == false ) {
+            if ( Utils.isFunction(callback) === false ) {
                 throw 'Provided callback needs to be a callable function';
             }
 

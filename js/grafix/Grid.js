@@ -55,6 +55,7 @@ Grid.prototype = Utils.extend( Rectangle, {
             
             Shape.prototype.set.call( this, x );
             
+            if( 'x' in x ) this.x = x.x;
             if( 'y' in x ) this.y = x.y;
             if( 'width' in x ) this.width = x.width;
             if( 'height' in x ) this.height = x.height;
@@ -67,12 +68,15 @@ Grid.prototype = Utils.extend( Rectangle, {
             this.x = x;
         }
         
+        if( x ) this.x = x;
         if( y ) this.y = y;
         if( width ) this.width = width;
         if( height ) this.height = height;
         if( columns ) this.columns = columns;
         if( rows ) this.rows = rows;
         
+        
+        return this;
     },
 
     get clone() {

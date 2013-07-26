@@ -1,4 +1,4 @@
-var Shape = function ( x, y ) {
+var Shape = function( x, y ) {
     EventObject.call( this );
 
     this._canvas = null;
@@ -484,6 +484,17 @@ Shape.prototype = Utils.extend( EventObject, {
             if ( x.canvas ) {
                 this.canvas = x.canvas;
                 this._canvasContext = this.canvas.getContext( '2d' );
+            }
+            
+            //also clone child shapes!
+            if( 'children' in x && x.children.length > 0 ) {
+                for( var i in x.children ) {
+                    
+                    var child = x.children[ i ];
+                    
+                    if( 'clone' in child )
+                        this.addChild( child.clone );
+                }
             }
 
             if ( deep ) {

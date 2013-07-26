@@ -28,7 +28,6 @@ var Stage = function ( canvas, maxFps ) {
 
     // Set css size
     //We can't use the set() method here, since the setter wouldn't be called
-    console.log( this.canvas, this._canvas );
     this.size = this.attributeSize;
 
     // High pixel-density display optimization (e.g. Retina)
