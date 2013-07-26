@@ -59,9 +59,7 @@ Circle.prototype = Utils.extend( Shape, {
             this.x = x;
         }
 
-        if ( y ) {
-            this.y = y;
-        }
+        if ( y ) this.y = y;
         if ( radius ) { this.radius = radius; }
         if ( startAngle ) { this.startAngle = startAngle; }
         if ( endAngle ) { this.endAngle = endAngle; }
@@ -192,9 +190,9 @@ Circle.prototype = Utils.extend( Shape, {
 
         if( !this._rectInstance ) {
             this._rectInstance = new Rectangle( this.x, this.y, this.radius * 2, this.radius * 2 );
+        } else {
+            this._rectInstance.set( { x: this.x, y: this.y, width: this.radius * 2, height: this.radius * 2 } );
         }
-
-        this._rectInstance.set( { x: this.x, y: this.y, width: this.radius * 2, height: this.radius * 2 } );
 
         return this._rectInstance;
     },

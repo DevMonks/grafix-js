@@ -669,7 +669,7 @@ Shape.prototype = Utils.extend( EventObject, {
 
         if ( input ) {
             // Only trigger new mouseMove() if the user moved
-            if ( this._lastPositions.mouse.equals(input.mouse.position) == false ) {
+            if ( this._lastPositions.mouse.equals(input.mouse.position) === false ) {
                 // Store last used/seen position
                 this._lastPositions.mouse.set(input.mouse.position);
 
@@ -748,7 +748,7 @@ Shape.prototype = Utils.extend( EventObject, {
 
         // Update also children, if this shape is not invalid
         // This is because no draw() of this shape or any children will be called
-        if (this.invalid == false) {
+        if (this.invalid === false) {
             for (var i = 0; i < this._children.length; i++) {
                 var child = this._children[i];
                 child.update();
