@@ -25,7 +25,7 @@
         virtual: false,
         align: 'center center',
         drawStyle: 'stroke',
-        color: 'red'
+        color: 'blue'
     } );
     
     stage.addChild( grid );
