@@ -1,10 +1,13 @@
 
 
-var Group = function() {
+var Group = function( shapes, virtual ) {
     
-    this._virtual = Group.defaults.virtual;
+    this._virtual = typeof virtual !== 'undefined' ? virtual : Group.defaults.virtual;
     
     Shape.call( this );
+    
+    if( shapes )
+        this.addChild( shapes );
 }
 Group.defaults = {
     virtual: true
@@ -62,3 +65,10 @@ Group.prototype = {
         return this;
     }
 };
+
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' )
+    ShortCuts.group = function( shapes, virtual ) {
+        
+        return new Group( shapes, virtual );
+    };

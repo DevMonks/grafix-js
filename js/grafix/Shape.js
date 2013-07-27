@@ -219,7 +219,7 @@ Shape.prototype = Utils.extend( EventObject, {
 
     get miterLimit() { return this._miterLimit; },
     set miterLimit( value ) {
-        if ( Utils.isNumeric( value ) == false ) {
+        if ( Utils.isNumeric( value ) === false ) {
             return;
         }
 
@@ -718,7 +718,7 @@ Shape.prototype = Utils.extend( EventObject, {
         }
 
 
-        // Trigger callbacks for update
+        // Trigger callbacks for update     
         this.on( 'update', {
             canvas:        this.canvas,
             canvasContext: this.canvasContext

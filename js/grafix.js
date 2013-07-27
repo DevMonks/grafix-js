@@ -22,6 +22,8 @@ var Grafix = (function( undefined ) {
 
 	"use strict";
     
+    var ShortCuts = {};
+    
 @@
 @@after
 
@@ -64,6 +66,8 @@ var Grafix = (function( undefined ) {
 			Utils.merge( namespace, Export );
 		}
 	};
+    
+    Utils.merge( Export, ShortCuts );
 
 	/* Export classes to namespace via mapping */
 	return Export;

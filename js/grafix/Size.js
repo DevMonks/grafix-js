@@ -137,3 +137,10 @@ Size.prototype = Utils.extend( EventObject, {
     }
 
 } );
+
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' )
+    ShortCuts.size = function( width, height ) {
+        
+        return new Size( width, height );
+    };

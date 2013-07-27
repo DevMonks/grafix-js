@@ -156,3 +156,11 @@ Stage.prototype = Utils.extend( Shape, {
     }
 
 } );
+
+
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' )
+    ShortCuts.stage = function( canvas, maxFps ) {
+        
+        return new Stage( canvas, maxFps );
+    };

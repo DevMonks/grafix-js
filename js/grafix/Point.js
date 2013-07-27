@@ -147,3 +147,10 @@ Point.prototype = Utils.extend( EventObject, {
         return '{x:' + this.x + ',y:' + this.y + '}';
     }
 } );
+
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' )
+    ShortCuts.point = function( x, y ) {
+        
+        return new Point( x, y );
+    };

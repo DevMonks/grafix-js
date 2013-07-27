@@ -241,3 +241,9 @@ Circle.prototype = Utils.extend( Shape, {
 
 } );
 
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' )
+    ShortCuts.circle = function( x, y, radius, startAngle, endAngle, clockwise ) {
+        
+        return new Circle( x, y, radius, startAngle, endAngle, clockwise );
+    };

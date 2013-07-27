@@ -276,3 +276,9 @@ Grid.prototype = Utils.extend( Rectangle, {
 
 } );
 
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' )
+    ShortCuts.grid = function( x, y, width, height, columns, rows ) {
+        
+        return new Grid( x, y, width, height, columns, rows );
+    };

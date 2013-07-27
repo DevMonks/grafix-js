@@ -28,3 +28,12 @@ Rectangle.prototype = Utils.extend( Shape, {
 
 } );
 
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' ) {
+    ShortCuts.rect = function( x, y, width, height ) {
+        
+        return new Rectangle( x, y, width, height );
+    };
+    //Avoid confusion
+    ShortCuts.rectangle = ShortCuts.rect;
+}
