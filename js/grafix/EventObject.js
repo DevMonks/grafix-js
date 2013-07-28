@@ -25,7 +25,7 @@ EventObject.prototype = {
     bind: function ( event, handler ) {
 
         if ( !(handler instanceof EventHandler) ) {
-            if ( Utils.isFunction( handler ) == false ) {
+            if ( Utils.isFunction( handler ) === false ) {
                 throw 'Provided callback is not a EventHandler';
             }
 
@@ -33,7 +33,7 @@ EventObject.prototype = {
         }
 
         // Create some space
-        if ( this.has(event) == false ) {
+        if ( this.has(event) === false ) {
             this._eventCallbacks[event] = [];
         }
 
@@ -51,7 +51,7 @@ EventObject.prototype = {
      */
     unbind: function ( event, handler ) {
 
-        if ( this.has(event) == false ) {
+        if ( this.has(event) === false ) {
             return this;
         }
 
@@ -91,7 +91,7 @@ EventObject.prototype = {
      * @returns {self}
      */
     trigger: function ( event, args ) {
-        if ( this.has(event) == false ) {
+        if ( this.has(event) === false ) {
             return this;
         }
 
@@ -154,7 +154,7 @@ EventObject.prototype = {
 
         // Support (function, context) for older calls
         if ( context && Utils.isObject(context) ) {
-            if ( Utils.isFunction(callback) == false ) {
+            if ( Utils.isFunction(callback) === false ) {
                 throw 'Provided callback needs to be a callable function';
             }
 
