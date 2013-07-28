@@ -47,3 +47,7 @@ InputBase.prototype = Utils.extend( EventObject, {
     }
 
 } );
+
+Utils.merge( InputBase, {
+    moduleName: '_invalid_'
+} );

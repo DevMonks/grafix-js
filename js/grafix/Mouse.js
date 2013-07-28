@@ -10,18 +10,22 @@ var Mouse = function ( target ) {
     this._lastClickStates = [];
     this._locked = [];
 
-    InputBase.call(this, target );
+    InputBase.call( this, target );
 };
 
-Mouse.KEY = {
-    ANY:         -1,
+Utils.merge( Mouse, {
+    KEY: {
+        ANY:         -1,
 
-    MOUSE1:      -2,
-    MOUSE2:      -3,
-    MOUSE3:      -4,
-    MWHEEL_UP:   -5,
-    MWHEEL_DOWN: -6
-};
+        MOUSE1:      -2,
+        MOUSE2:      -3,
+        MOUSE3:      -4,
+        MWHEEL_UP:   -5,
+        MWHEEL_DOWN: -6
+    },
+
+    moduleName: 'Mouse'
+});
 
 Mouse.prototype = Utils.extend( InputBase, {
 

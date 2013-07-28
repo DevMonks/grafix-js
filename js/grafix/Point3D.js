@@ -16,7 +16,7 @@ Point3D.prototype = Utils.extend( Point, {
     },
 
     get clone() {
-        return new Point( this );
+        return new Point3D( this );
     },
 
     set: function ( x, y, z ) {
@@ -83,3 +83,11 @@ Point3D.prototype = Utils.extend( Point, {
         return '{x:' + this.x + ',y:' + this.y + ',z:' + this.z + '}';
     }
 } );
+
+
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' )
+    ShortCuts.point3D = function( x, y, z ) {
+        
+        return new point3D( x, y, z );
+    };

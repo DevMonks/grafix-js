@@ -1,5 +1,5 @@
 var Point = function ( x, y ) {
-    EventObject.call( this );
+    ShapeBase.call( this );
 
     // Will changes to own properties delegated to the changed() event?
     this._delegateChanged = (Utils.isObject(x) && x.delegateChanged ? true : false);
@@ -10,10 +10,10 @@ var Point = function ( x, y ) {
     this.set( x, y );
 };
 
-Point.prototype = Utils.extend( EventObject, {
+Point.prototype = Utils.extend( ShapeBase, {
     get x() { return this._x; },
     set x( value ) {
-        if ( Utils.isNumeric( value ) == false || this._x === value ) {
+        if ( Utils.isNumeric( value ) === false || this._x === value ) {
             return;
         }
 
@@ -27,7 +27,7 @@ Point.prototype = Utils.extend( EventObject, {
 
     get y() { return this._y; },
     set y( value ) {
-        if ( Utils.isNumeric( value ) == false || this._y === value ) {
+        if ( Utils.isNumeric( value ) === false || this._y === value ) {
             return;
         }
 
@@ -43,24 +43,26 @@ Point.prototype = Utils.extend( EventObject, {
         return new Point( this );
     },
 
-    set: function ( x, y ) {
+    set: function( x, y ) {
 
         if ( Utils.isObject( x ) ) {
 
-            if ( x.x ) {
+            if ( 'x' in x ) {
                 this.x = x.x;
             }
-            if ( x.y ) {
+            if ( 'y' in x ) {
                 this.y = x.y;
             }
-            if ( x.parent ) {
+            if ( 'parent' in x ) {
                 this.parent = x.parent;
             }
-        } else if ( Utils.isNumeric( x ) ) {
+        } else if( typeof x !== 'undefined' ) {
+            
             this.x = parseInt( x );
         }
 
-        if ( Utils.isNumeric( y ) ) {
+        if( typeof y !== 'undefined' ) {
+            
             this.y = parseInt( y );
         }
 
@@ -147,3 +149,10 @@ Point.prototype = Utils.extend( EventObject, {
         return '{x:' + this.x + ',y:' + this.y + '}';
     }
 } );
+
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' )
+    ShortCuts.point = function( x, y ) {
+        
+        return new Point( x, y );
+    };

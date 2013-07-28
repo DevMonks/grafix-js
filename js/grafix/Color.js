@@ -365,3 +365,12 @@ Utils.merge( Color, {
     yellowgreen:          '#9acd32'
 } );
 
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' ) {
+    ShortCuts.color = function( color ) {
+        
+        return new Color( color );
+    };
+    
+    ShortCuts.colors = Color;
+}
