@@ -286,10 +286,10 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     set: function ( x, y, deep ) {
         deep = deep || true;
-        
-        this.position.set( x, y );
 
         ShapeBase.prototype.set.call(this, x, y);
+
+        this.position.set( x, y );
 
         if ( Utils.isObject( x ) ) {
             
@@ -352,7 +352,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 this._canvasContext = this.canvas.getContext( '2d' );
             }
             
-            //also clone child shapes!
+            // Also clone child shapes!
             if( 'children' in x && x.children.length > 0 ) {
                 for( var i in x.children ) {
                     
@@ -370,9 +370,6 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 //They are not needed, because each of those properties
                 //just modify x and y and we already set these in a plain copy
                 //for a copy of an object, use either (new Shape).set( source ) or Shape.clone( source )
-                if ( 'position' in x ) {
-                    this.position.set( x.position );
-                }
                 if ( 'size' in x ) {
                     this.size.set( x.size );
                 }
@@ -409,6 +406,81 @@ Shape.prototype = Utils.extend( ShapeBase, {
             this.x = x;
         }
 
+        return this;
+    },
+
+    // Style is like set(), but only for style properties
+    style: function( style ) {
+
+        if( Utils.isString( style ) ) {
+
+            var tokens = style.split( ' ' );
+            for( var i in tokens ) {
+
+                var token = tokens[ i ];
+                switch( token ) {
+                    case 'fill':
+                    case 'clear':
+                    case 'stroke':
+
+                        this.drawStyle = token;
+                        break;
+                    case 'bull':
+                    case 'round':
+                    case 'square':
+
+                        this.lineCap = token;
+                        break;
+                    case 'miter':
+                    case 'bevel':
+                    case 'round':
+
+                        this.miterLimit = token;
+                        break;
+                    case 'parent':
+                    case 'root':
+
+                        this.alignContext = token;
+                        break;
+                    case 'inner':
+                    case 'outer':
+                    case 'left':
+                    case 'right':
+                    case 'bottom':
+                        /*TODO: These would need to be collected
+                         * and passed as one string to this.align
+                         **/
+                        break;
+                    default:
+
+                        if( Utils.isNumeric( token ) )
+                        //lets take it as the lineWidth
+                            this.lineWidth = parseInt( token );
+                        else
+                        //it's probably the color, heh
+                            this.color = token;
+                }
+            }
+        } else if( Utils.isObject( style ) ) {
+
+            //You can just pass a shape and copy its styles
+            if( style.offset ) this.offset.set( style.offset );
+            if( style.scale ) this.scale.set( style.scale );
+            if( style.angle ) this.angle = style.angle;
+            if( style.skew ) this.skew.set( style.skew );
+            if( style.color ) this.color = style.color;
+            if( style.drawStyle ) this.drawStyle = style.drawStyle;
+            if( style.lineWidth ) this.lineWidth = style.lineWidth;
+            if( style.lineCap ) this.lineCap = style.lineCap;
+            if( style.miterLimit ) this.miterLimit = style.miterLimit;
+            if( style.lineJoin ) this.lineJoin = style.lineJoin;
+            if( style.closePath ) this.closePath = style.closePath;
+            //maybe a bad idea
+            //if( style.alignContext ) this._alignContext = style.alignContext;
+            if( style.align ) this.align = style.align;
+        }
+
+        //make it chainable
         return this;
     },
 
@@ -459,6 +531,24 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
         return this;
     },
+
+    expand: function( shape ) {
+
+        if( this.left > shape.left )
+            this.left = shape.left;
+
+        if( this.right < shape.right )
+            this.right = shape.right;
+
+        if( this.top > shape.top )
+            this.top = shape.top;
+
+        if( this.bottom < shape.bottom )
+            this.bottom = shape.bottom;
+
+        return this;
+    },
+
 
     fill: function ( context ) {
 
@@ -828,98 +918,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
         return this.handleMouseEvent( 'mouseDrop', callback );
     },
-            
-    //style is like set(), but only for style properties
-    style: function( style ) {
-        
-        if( Utils.isString( style ) ) {
-            
-            var tokens = style.split( ' ' );
-            for( var i in tokens ) {
-                
-                var token = tokens[ i ];
-                switch( token ) {
-                    case 'fill':
-                    case 'clear':
-                    case 'stroke':
-                        
-                        this.drawStyle = token;
-                        break;
-                    case 'bull':
-                    case 'round':
-                    case 'square':
-                        
-                        this.lineCap = token;
-                        break;
-                    case 'miter':
-                    case 'bevel':
-                    case 'round':
-                        
-                        this.miterLimit = token;
-                        break;
-                    case 'parent':
-                    case 'root':
-                        
-                        this.alignContext = token;
-                        break;
-                    case 'inner':
-                    case 'outer':
-                    case 'left':
-                    case 'right':
-                    case 'bottom':
-                        /*TODO: These would need to be collected
-                        * and passed as one string to this.align
-                        **/
-                        break;
-                    default:
-                        
-                        if( Utils.isNumeric( token ) )
-                            //lets take it as the lineWidth
-                            this.lineWidth = parseInt( token );
-                        else
-                            //it's probably the color, heh
-                            this.color = token;
-                }
-            }
-        } else if( Utils.isObject( style ) ) {
-            
-            //You can just pass a shape and copy its styles
-            if( style.offset ) this.offset.set( style.offset );
-            if( style.scale ) this.scale.set( style.scale );
-            if( style.angle ) this.angle = style.angle;
-            if( style.skew ) this.skew.set( style.skew );
-            if( style.color ) this.color = style.color;
-            if( style.drawStyle ) this.drawStyle = style.drawStyle;
-            if( style.lineWidth ) this.lineWidth = style.lineWidth;
-            if( style.lineCap ) this.lineCap = style.lineCap;
-            if( style.miterLimit ) this.miterLimit = style.miterLimit;
-            if( style.lineJoin ) this.lineJoin = style.lineJoin;
-            if( style.closePath ) this.closePath = style.closePath;
-            //maybe a bad idea
-            //if( style.alignContext ) this._alignContext = style.alignContext;
-            if( style.align ) this.align = style.align;
-        }
-        
-        //make it chainable
-        return this;
-    },
-            
-    expand: function( shape ) {
-        
-        if( this.left > shape.left )
-            this.left = shape.left;
-        
-        if( this.right < shape.right )
-            this.right = shape.right;
-        
-        if( this.top > shape.top )
-            this.top = shape.top;
-        
-        if( this.bottom < shape.bottom )
-            this.bottom = shape.bottom;
-        
-        return this;
-    },
+
             
     toString: function() {
         

@@ -13,8 +13,6 @@ var ShapeBase = function ( args ) {
 
     /** @var Input */
     this._input = null;
-
-    this.set(args);
 };
 
 ShapeBase.prototype = Utils.extend( EventObject, {
@@ -27,8 +25,9 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         }
 
         // Inform parent
-        if (this._parent) {
-            this._parent.invalid = value;
+        var parent = this.parent;
+        if (parent) {
+            parent.invalid = value;
         }
     },
 
@@ -41,21 +40,25 @@ ShapeBase.prototype = Utils.extend( EventObject, {
             return;
         }
 
-        if ( !(value instanceof Shape) ) {
+        if ( !(value instanceof ShapeBase) ) {
             throw 'Only and instance of Shape are allowed to be set as a parent';
         }
 
+        // Add us as a child to our (new)parent
         if ( !value.hasChild( this ) ) {
             value.children.push( this );
         }
 
+        // If we got a parent already, remove it
         if ( this._parent ) {
             this.parent.removeChild( this );
         }
 
+        // Delegate changed() events from our parent to us
         if (this._delegateChanged && this.has('changed')) {
             this.changed( this.prepareChanged( 'parent', this._parent, value ) );
         }
+        // Store it
         this._parent = value;
     },
 
@@ -234,10 +237,10 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         // Draw this shape
         if ( this.invalid || forceDraw ) {
             //console.log('Shape.draw() re-draw dirty shape:', this);
-            // If parent is dirty, childs needs a re-draw too
-            var childForceRedraw = true;
+            // If parent is dirty, childs will need a re-draw too
+            var forceChildDraw = true;
 
-            this._draw( context, childForceRedraw );
+            this._draw( context, forceChildDraw );
         }
 
         context.restore();
@@ -248,6 +251,8 @@ ShapeBase.prototype = Utils.extend( EventObject, {
     },
 
     _draw: function ( context, forceChildDraw ) {
+
+        // Should draw the shape on the given context
 
     }
 
