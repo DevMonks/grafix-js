@@ -19,6 +19,7 @@ Grid.prototype = Utils.extend( Rectangle, {
 
     get columns() { return this._columns; },
     set columns( value ) {
+        
         if( this._columns === value ) {
             return;
         }
@@ -33,6 +34,7 @@ Grid.prototype = Utils.extend( Rectangle, {
     
     get rows() { return this._rows; },
     set rows( value ) {
+        
         if( this._rows === value ) {
             return;
         }
@@ -47,6 +49,7 @@ Grid.prototype = Utils.extend( Rectangle, {
     
     get virtual() { return this._virtual; },
     set virtual( value ) {
+        
         if( this._virtual === value ) {
             return;
         }
@@ -153,11 +156,15 @@ Grid.prototype = Utils.extend( Rectangle, {
         
         var rowRect = null;
         this.eachRowRect( row, function( x, y ) {
+            
+            console.log( 'creating rect at', this.position.toString() );
          
             if( !rowRect )
                 rowRect =  new Rectangle( { size: this.size, position: this.position } );
             else
                 rowRect.expand( this );
+            
+            console.log( 'created rect at', rowRect.position.toString() );
         } );
         
         return rowRect;
@@ -241,9 +248,10 @@ Grid.prototype = Utils.extend( Rectangle, {
         // it would just overwrite the borders of the side rects
         var grid = this;
         this.eachRect( function( x, y, i ) {
+            
             var drawFn = this.style( grid )[ style ];
             
-            drawFn.call( grid, canvasContext );
+            drawFn.call( this, canvasContext );
         } );
     },
             

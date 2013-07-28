@@ -370,6 +370,9 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 //They are not needed, because each of those properties
                 //just modify x and y and we already set these in a plain copy
                 //for a copy of an object, use either (new Shape).set( source ) or Shape.clone( source )
+                if( 'position' in x )
+                    this.position.set( x.position );
+                
                 if( 'size' in x ) {
                     this.size.set( x.size );
                 }
@@ -902,7 +905,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
     },
             
     expand: function( shape ) {
-        
+
         if( this.left > shape.left )
             this.left = shape.left;
         
