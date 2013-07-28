@@ -115,9 +115,16 @@ Input.prototype = Utils.extend( EventObject, {
         }
 
         // @TODO: I think this uses eval() internally.. maybe fnd a better way
+        // @FIXED: BUT, I don't think think this is nessecary anyways
+        //         This will give problems in Node.js I guess
+        
         var that = this;
         // Create the instance
-        this._inputModules[ moduleName ] = new Function("return new " + moduleName + "(this.target);").call( this );
+        
+        if( !( moduleName in Grafix ) )
+            throw 'Invalid input module ' + moduleName;
+        
+        this._inputModules[ moduleName ] = new Grafix[ moduleName ]( this.target );
 
         // Return the instance
         return this._inputModules[ moduleName ];

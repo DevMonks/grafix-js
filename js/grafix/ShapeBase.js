@@ -202,7 +202,7 @@ ShapeBase.prototype = Utils.extend( EventObject, {
 
         // Update also children, if this shape is not invalid
         // This is because no draw() of this shape or any children will be called
-        if (this.invalid == false) {
+        if (this.invalid === false) {
             for (var i = 0; i < this._children.length; i++) {
                 var child = this._children[i];
                 child.update();

@@ -15,13 +15,13 @@
 
 <script src="js/grafix.nocache.js"></script>
 <script>
-
-    Grafix.import();
-
-    var stage = new Stage( '#stage' );
-    stage.color = Color.black;
     
-    var grid = new Grid( { 
+    var stage = Grafix.stage( '#stage' );
+    stage.color = Grafix.colors.black;
+    
+    console.log( 'Funcs:', Grafix.stage, Grafix.grid, Grafix.colors );
+    
+    var grid = Grafix.grid( { 
         width: 200, 
         height: 200,
         virtual: false,
