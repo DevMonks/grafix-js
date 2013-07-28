@@ -36,25 +36,26 @@ Size.prototype = Utils.extend( EventObject, {
     },
 
 
-    set: function ( width, height ) {
+    set: function( width, height ) {
 
         if ( Utils.isObject( width ) ) {
 
-            if ( width.width ) {
+            if ( 'width' in width ) {
                 this.width = width.width;
             }
-            if ( width.height ) {
+            if ( 'height' in width ) {
                 this.height = width.height;
             }
-            if ( width.parent ) {
+            if ( 'parent' in width ) {
                 this.parent = width.parent;
             }
-        } else if ( Utils.isNumeric( width ) ) {
+        } else if ( typeof width !== 'undefined' ) {
 
             this.width = parseInt( width );
         }
 
-        if ( Utils.isNumeric( height ) ) {
+        if ( typeof height !== 'undefined' ) {
+            
             this.height = parseInt( height );
         }
 

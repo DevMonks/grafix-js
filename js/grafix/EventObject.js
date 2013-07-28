@@ -12,7 +12,8 @@ EventObject.prototype = {
 
     get parent() { return this._parent; },
     set parent(value) {
-        if (!(value instanceof EventObject)) {
+        //TODO: Log here, I see many calls to this point when moving the mouse, is this intended?
+        if (!(value instanceof EventObject) && value !== null ) {
             throw 'Only and instance of EventObject are allowed to be set as a parent';
         }
 
@@ -51,7 +52,7 @@ EventObject.prototype = {
     bind: function ( event, handler ) {
 
         if ( !(handler instanceof EventHandler) ) {
-            if ( Utils.isFunction( handler ) == false ) {
+            if ( Utils.isFunction( handler ) === false ) {
                 throw 'Provided callback is not a EventHandler';
             }
 
@@ -59,7 +60,7 @@ EventObject.prototype = {
         }
 
         // Create some space
-        if ( this.has(event) == false ) {
+        if ( this.has(event) === false ) {
             this._eventCallbacks[event] = [];
         }
 
@@ -77,7 +78,7 @@ EventObject.prototype = {
      */
     unbind: function ( event, handler ) {
 
-        if ( this.has(event) == false ) {
+        if ( this.has(event) === false ) {
             return this;
         }
 
@@ -112,7 +113,7 @@ EventObject.prototype = {
      * @returns {self}
      */
     trigger: function ( event, args ) {
-        if ( this.has(event) == false ) {
+        if ( this.has(event) === false ) {
             return this;
         }
 

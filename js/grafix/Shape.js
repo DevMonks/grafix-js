@@ -423,65 +423,68 @@ Shape.prototype = Utils.extend( EventObject, {
         return this;
     },
 
-    set: function ( x, y, deep ) {
+    set: function( x, y, deep ) {
         deep = deep || true;
+        
+        this.position.set( x, y );
 
         if ( Utils.isObject( x ) ) {
-            if ( x.width ) {
+            
+            if ( 'width' in x ) {
                 this.width = x.width;
             }
-            if ( x.height ) {
+            if ( 'height' in x ) {
                 this.height = x.height;
             }
-            if ( x.parent ) {
+            if ( 'parent' in x ) {
                 this.parent = x.parent;
             }
-            if ( x.offset ) {
+            if ( 'offset' in x ) {
                 this.offset.set( x.offset );
             }
-            if ( x.scale ) {
+            if ( 'scale' in x ) {
                 this.scale.set( x.scale );
             }
-            if ( x.angle ) {
+            if ( 'angle' in x ) {
                 this.angle = x.angle;
             }
-            if ( x.skew ) {
+            if ( 'skew' in x ) {
                 this.skew.set( x.skew );
             }
-            if ( x.color ) {
+            if ( 'color' in x ) {
                 this.color = x.color;
             }
-            if ( x.drawStyle ) {
+            if ( 'drawStyle' in x ) {
                 this.drawStyle = x.drawStyle;
             }
-            if ( x.lineWidth ) {
+            if ( 'lineWidth' in x ) {
                 this.lineWidth = x.lineWidth;
             }
-            if ( x.lineCap ) {
+            if ( 'lineCap' in x ) {
                 this.lineCap = x.lineCap;
             }
-            if ( x.miterLimit ) {
+            if ( 'miterLimit' in x ) {
                 this.miterLimit = x.miterLimit;
             }
-            if ( x.lineJoin ) {
+            if ( 'lineJoin' in x ) {
                 this.lineJoin = x.lineJoin;
             }
-            if ( x.closePath ) {
+            if ( 'closePath' in x ) {
                 this.closePath = x.closePath;
             }
-            if ( x.alignContext ) {
+            if ( 'alignContext' in x ) {
                 this._alignContext = x.alignContext;
             }
-            if ( x.align ) {
+            if ( 'align' in x ) {
                 this.align = x.align;
             }
-            if ( x.x ) {
+            if ( 'x' in x ) {
                 this.x = x.x;
             }
-            if ( x.y ) {
+            if ( 'y' in x ) {
                 this.y = x.y;
             }
-            if ( x.canvas ) {
+            if ( 'canvas' in x ) {
                 this.canvas = x.canvas;
                 this._canvasContext = this.canvas.getContext( '2d' );
             }
@@ -497,54 +500,48 @@ Shape.prototype = Utils.extend( EventObject, {
                 }
             }
 
-            if ( deep ) {
+            if( deep ) {
 
                 //we allow those, too! they just dont make sense in a copy
                 //this extends our possibilities in animating later on
                 //They are not needed, because each of those properties
                 //just modify x and y and we already set these in a plain copy
                 //for a copy of an object, use either (new Shape).set( source ) or Shape.clone( source )
-                if ( x.position ) {
+                if ( 'position' in x ) {
                     this.position.set( x.position );
                 }
-                if ( x.size ) {
+                if ( 'size' in x ) {
                     this.size.set( x.size );
                 }
-                if ( x.center ) {
+                if ( 'center' in x ) {
                     this.center = x.center;
                 }
-                if ( x.left ) {
+                if ( 'left' in x ) {
                     this.left = x.left;
                 }
-                if ( x.right ) {
+                if ( 'right' in x ) {
                     this.right = x.right;
                 }
-                if ( x.top ) {
+                if ( 'top' in x ) {
                     this.top = x.top;
                 }
-                if ( x.bottom ) {
+                if ( 'bottom' in x ) {
                     this.bottom = x.bottom;
                 }
-                if ( x.leftTop ) {
+                if ( 'leftTop' in x ) {
                     this.leftTop = x.leftTop;
                 }
-                if ( x.rightTop ) {
+                if ( 'rightTop' in x ) {
                     this.rightTop = x.rightTop;
                 }
-                if ( x.leftBottom ) {
+                if ( 'leftBottom' in x ) {
                     this.leftBottom = x.leftBottom;
                 }
-                if ( x.rightBottom ) {
+                if ( 'rightBottom' in x ) {
                     this.rightBottom = x.rightBottom;
                 }
             }
 
-        } else {
-            this.x = x;
-        }
-
-        if ( y ) {
-            this.y = y;
         }
 
         return this;
@@ -1016,12 +1013,6 @@ Shape.prototype = Utils.extend( EventObject, {
 
         return this.handleMouseEvent( 'mouseDrop', callback );
     },
-
-
-    toString: function() {
-        // @TODO: Output everything, but only if set
-        return '{x:' + this.x + ',y:' + this.y + ',width:' + this.width + ',height:' + this.height + '}';
-    },
             
     //style is like set(), but only for style properties
     style: function( style ) {
@@ -1113,6 +1104,12 @@ Shape.prototype = Utils.extend( EventObject, {
             this.bottom = shape.bottom;
         
         return this;
+    },
+            
+    toString: function() {
+        
+        // @TODO: Output everything, but only if set
+        return '{color:' + this.color + ', x:' + this.x + ', y:' + this.y + ', width:' + this.width + ', height:' + this.height + '}';
     }
 
 } );

@@ -15,6 +15,7 @@ Circle
 Grid
 Stage
 Group
+Picture
 @@
 @@before
 
@@ -37,6 +38,7 @@ var Grafix = (function( undefined ) {
         Mouse: Mouse,
         Grid: Grid,
         Group: Group,
+        Picture: Picture,
         Point: Point,
         Point3D: Point3D,
         Random: Random,

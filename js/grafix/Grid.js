@@ -51,30 +51,21 @@ Grid.prototype = Utils.extend( Rectangle, {
 
     set: function( x, y, width, height, columns, rows ) {
         
+        
+        Rectangle.prototype.set.call( this, x, y, width, height );
+
         if( Utils.isObject( x ) ) {
             
-            Shape.prototype.set.call( this, x );
-            
-            if( 'x' in x ) this.x = x.x;
-            if( 'y' in x ) this.y = x.y;
-            if( 'width' in x ) this.width = x.width;
-            if( 'height' in x ) this.height = x.height;
             if( 'columns' in x ) this.columns = x.columns;
             if( 'rows' in x ) this.rows = x.rows;
             if( 'virtual' in x ) this.virtual = x.virtual;
-            
-        } else if( x ) {
-            
-            this.x = x;
         }
+
+        if( typeof columns !== 'undefined' ) 
+            this.columns = columns;
         
-        if( x ) this.x = x;
-        if( y ) this.y = y;
-        if( width ) this.width = width;
-        if( height ) this.height = height;
-        if( columns ) this.columns = columns;
-        if( rows ) this.rows = rows;
-        
+        if( typeof rows !== 'undefined' ) 
+            this.rows = rows;
         
         return this;
     },

@@ -1,4 +1,4 @@
-var Stage = function ( canvas, maxFps ) {
+var Stage = function( canvas, maxFps ) {
 
     Shape.call( this );
 
@@ -23,7 +23,7 @@ var Stage = function ( canvas, maxFps ) {
 
     this._canvasContext = this._canvas.getContext( '2d' );
 
-    // Create a input handler
+    // Create an input handler
     this._input = new Input( this._canvas );
 
     // Set css size
@@ -140,7 +140,7 @@ Stage.prototype = Utils.extend( Shape, {
             return this.stop();
         }
 
-        window.requestAnimationFrame( function ( timeElapsed ) {
+        window.requestAnimationFrame( function( timeElapsed ) {
             that.loopFrame( timeElapsed );
         } );
 
