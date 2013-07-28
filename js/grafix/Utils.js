@@ -26,6 +26,21 @@ var Utils = {
         return instance;
     },
 
+    resolveClass: function ( classPath, scope ) {
+        // Default to grafix-js as scope
+        if ( !scope ) {
+            scope = Grafix;
+        }
+
+        var scopes = classPath.split('.');
+        for ( var i = 0; i < scopes.length; i++ ) {
+            scope = scope[scopes[i]];
+        }
+
+        return scope;
+    },
+
+
     isType: function( val, type ) {
 
         return typeof val === type;

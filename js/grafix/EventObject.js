@@ -1,37 +1,10 @@
 var EventObject = function () {
 
-    // Support a parent and invalidate flag
-    this._parent = null;
-    this._invalid = true;
-
     this._eventCallbacks = [];
 };
 
 EventObject.prototype = {
     get eventCallbacks() { return this._eventCallbacks; },
-
-    get parent() { return this._parent; },
-    set parent(value) {
-        //TODO: Log here, I see many calls to this point when moving the mouse, is this intended?
-        if (!(value instanceof EventObject) && value !== null ) {
-            throw 'Only and instance of EventObject are allowed to be set as a parent';
-        }
-
-        this._parent = value;
-    },
-
-    get invalid() { return this._invalid; },
-    set invalid(value) {
-        if (this._invalid !== value) {
-            this._invalid = value;
-        }
-
-        // Inform parent
-        if (this._parent) {
-            this._parent.invalid = value;
-        }
-    },
-
 
     /**
      *
@@ -39,7 +12,7 @@ EventObject.prototype = {
      * @returns {boolean}
      */
     has: function ( event ) {
-        return ( event in this._eventCallbacks) && this._eventCallbacks[ event ].length > 0;
+        return ( event in this._eventCallbacks ) && this._eventCallbacks[ event ].length > 0;
     },
 
     /**
@@ -89,9 +62,14 @@ EventObject.prototype = {
         }
 
         // Find the callback
-        var k = -1;
-        for ( var i = 0; i < this._eventCallbacks[event].length; i++ ) {
-            if ( this._eventCallbacks[event][i] === handler ) {
+        var k = -1,
+            events = this._eventCallbacks[event],
+            callback = handler.callback || handler,
+            context = handler.context || null;
+
+        for ( var i = 0; i < events.length; i++ ) {
+            var evt = events[i];
+            if ( evt.callback === callback && evt.context === context ) {
                 k = i;
                 break;
             }

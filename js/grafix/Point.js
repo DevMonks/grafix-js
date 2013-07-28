@@ -1,5 +1,5 @@
 var Point = function ( x, y ) {
-    EventObject.call( this );
+    ShapeBase.call( this );
 
     // Will changes to own properties delegated to the changed() event?
     this._delegateChanged = (Utils.isObject(x) && x.delegateChanged ? true : false);
@@ -10,7 +10,7 @@ var Point = function ( x, y ) {
     this.set( x, y );
 };
 
-Point.prototype = Utils.extend( EventObject, {
+Point.prototype = Utils.extend( ShapeBase, {
     get x() { return this._x; },
     set x( value ) {
         if ( Utils.isNumeric( value ) === false || this._x === value ) {

@@ -1,5 +1,6 @@
 var Grid = function ( x, y, width, height, columns, rows ) {
-    
+
+    Rectangle.call( this );
     
     this._columns = Grid.defaults.columns;
     this._rows = Grid.defaults.rows;
@@ -18,6 +19,9 @@ Grid.prototype = Utils.extend( Rectangle, {
 
     get columns() { return this._columns; },
     set columns( value ) {
+        if( this._columns === value ) {
+            return;
+        }
         
         if( this._delegateChanged && this.has( 'changed' ) ) {
             this.changed( this.prepareChanged( 'columns', this._columns, value ) );
@@ -29,6 +33,9 @@ Grid.prototype = Utils.extend( Rectangle, {
     
     get rows() { return this._rows; },
     set rows( value ) {
+        if( this._rows === value ) {
+            return;
+        }
         
         if( this._delegateChanged && this.has( 'changed' ) ) {
             this.changed( this.prepareChanged( 'rows', this._rows, value ) );
@@ -40,6 +47,9 @@ Grid.prototype = Utils.extend( Rectangle, {
     
     get virtual() { return this._virtual; },
     set virtual( value ) {
+        if( this._virtual === value ) {
+            return;
+        }
         
         if( this._delegateChanged && this.has( 'changed' ) ) {
             this.changed( this.prepareChanged( 'virtual', this._virtual, value ) );
@@ -50,7 +60,6 @@ Grid.prototype = Utils.extend( Rectangle, {
     },
 
     set: function( x, y, width, height, columns, rows ) {
-        
         
         Rectangle.prototype.set.call( this, x, y, width, height );
 
@@ -222,41 +231,42 @@ Grid.prototype = Utils.extend( Rectangle, {
         return this;
     },
             
-    _draw: function( canvasContext, style ) {
+    _drawGrid: function( canvasContext, style ) {
         
         if( this.virtual ) //virtual grids dont get drawn
             return;
         
-        //We don't need to draw this (The Grid), since
-        //the rectangles at the sides will already define its borders
-        //it would just overwrite the borders of the side rects
+        // We don't need to draw this (The Grid), since
+        // the rectangles at the sides will already define its borders
+        // it would just overwrite the borders of the side rects
         var grid = this;
         this.eachRect( function( x, y, i ) {
+            var drawFn = this.style( grid )[ style ];
             
-            this.style( grid )[ style ]( canvasContext );
+            drawFn.call( grid, canvasContext );
         } );
     },
             
     fill: function( canvasContext ) {
 
-        this._draw( canvasContext, 'fill' );
+        this._drawGrid( canvasContext, 'fill' );
     },
             
     stroke: function( canvasContext ) {
 
-        this._draw( canvasContext, 'stroke' );
+        this._drawGrid( canvasContext, 'stroke' );
     },
     
     clear: function( canvasContext ) {
 
-        this._draw( canvasContext, 'clear' );
+        this._drawGrid( canvasContext, 'clear' );
     },
             
     draw: function( context, forceDraw ) {
         
-        //TODO: this is okay, but this will still apply the styles
-        //unnessecarily. Maybe need a third "applyStyles" parameter
-        //in Shape? This function exists to pass "FALSE" to it then later.
+        // @TODO: This is okay, but this will still apply the styles
+        //        unnessecarily. Maybe need a third "applyStyles" parameter
+        //        in Shape? This function exists to pass "FALSE" to it then later.
         Shape.prototype.draw.call( this, context, forceDraw );
     },
    

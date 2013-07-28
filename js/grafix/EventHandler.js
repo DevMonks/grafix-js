@@ -2,9 +2,6 @@ var EventHandler = function(callback, context) {
     if (Utils.isFunction(callback) == false) {
         throw 'Callback needs to be a callable function';
     }
-    if (Utils.isObject(context) == false) {
-        throw 'Context has be the instance of an object';
-    }
 
     this._callback = callback;
     this._context = context;

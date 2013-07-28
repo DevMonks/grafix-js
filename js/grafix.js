@@ -6,13 +6,18 @@ Easing
 EventArgs
 EventHandler
 EventObject
+ShapeBase
+Shape
 Point
 Point3D
 Size
-Shape
 Rectangle
 Circle
 Grid
+InputBase
+Mouse
+Keyboard
+Input
 Stage
 Group
 Picture
@@ -35,6 +40,9 @@ var Grafix = (function( undefined ) {
         EventObject: EventObject,
         EventArgs: EventArgs,
         EventHandler: EventHandler,
+        Input: Input,
+        InputBase: InputBase,
+        Keyboard: Keyboard,
         Mouse: Mouse,
         Grid: Grid,
         Group: Group,
@@ -44,6 +52,7 @@ var Grafix = (function( undefined ) {
         Random: Random,
         Rectangle: Rectangle,
         Stage: Stage,
+        ShapeBase: ShapeBase,
         Shape: Shape,
         Size: Size,
         Utils: Utils,

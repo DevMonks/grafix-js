@@ -1,5 +1,5 @@
 var Size = function ( width, height ) {
-    EventObject.call( this );
+    ShapeBase.call( this );
 
     // Will changes to own properties delegated to the changed() event?
     this._delegateChanged = (Utils.isObject(width) && width.delegateChanged ? true : false);
@@ -10,7 +10,7 @@ var Size = function ( width, height ) {
     this.set( width, height );
 };
 
-Size.prototype = Utils.extend( EventObject, {
+Size.prototype = Utils.extend( ShapeBase, {
     get width() { return this._width; },
     set width( value ) {
         if (this._delegateChanged && this.has('changed')) {
@@ -37,6 +37,8 @@ Size.prototype = Utils.extend( EventObject, {
 
 
     set: function( width, height ) {
+
+        ShapeBase.prototype.set.call(this, width);
 
         if ( Utils.isObject( width ) ) {
 
