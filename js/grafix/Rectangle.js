@@ -1,6 +1,6 @@
 var Rectangle = function( x, y, width, height ) {
 
-    Shape.call( this );
+    Shape.call( this, x, y );
 
     this.set( x, y, width, height );
 };

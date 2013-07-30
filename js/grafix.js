@@ -1,6 +1,7 @@
 @@prioritize
 Polyfill.requestAnimationFrame
 Utils
+Uid
 Color
 Easing
 EventArgs
@@ -20,7 +21,7 @@ Keyboard
 Input
 Stage
 Group
-Picture
+Bitmap
 @@
 @@before
 
@@ -46,7 +47,7 @@ var Grafix = (function( undefined ) {
         Mouse: Mouse,
         Grid: Grid,
         Group: Group,
-        Picture: Picture,
+        Bitmap: Bitmap,
         Point: Point,
         Point3D: Point3D,
         Random: Random,
@@ -56,6 +57,7 @@ var Grafix = (function( undefined ) {
         Shape: Shape,
         Size: Size,
         Utils: Utils,
+        Uid: Uid,
 		/*
 			You can call "import()" somewhere for a namespace (global namespace is default)
 			in order to export it to that namespace

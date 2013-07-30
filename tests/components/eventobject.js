@@ -1,7 +1,6 @@
 define(
     ['./../../js/grafix.nocache.js'],
     function() {
-        console.log(Grafix);
 
         // Simple test object to test the scopre of events and ensure each instance has his own scopre
         var SimpleEventedObject = function () {

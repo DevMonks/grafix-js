@@ -16,14 +16,14 @@
     var stage = new Stage( '#stage' );
     stage.color = Color.black;
     
-    var muffin = new Picture( 'img/muffin.jpg', { width: 100 } );
+    var muffin = new Bitmap({ path: 'img/muffin.jpg', width: 100 }),
+        muffinCrop = new Bitmap({ path: 'img/muffin.jpg', x: 110, width: 100, height: 100, crop: { x: 130, y: 130, width: 100, height: 100 } }),
+        muffinScaled = new Bitmap({ path: 'img/muffin.jpg', x: 220 }).scaled({ width: 0.2, height: 0.2 });
 
-    
-    stage.addChild( [ muffin ] );
+    stage.addChild( [ muffin, muffinCrop, muffinScaled ] );
 
     var frameCount = 0;
     stage.update( function( e ) {
-
         
         document.getElementById( 'frames' ).innerHTML = ++frameCount;
     } ).start( true );

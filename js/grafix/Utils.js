@@ -41,6 +41,11 @@ var Utils = {
     },
 
 
+    getUid: function() {
+        return Uid.create();
+    },
+
+
     isType: function( val, type ) {
 
         return typeof val === type;
