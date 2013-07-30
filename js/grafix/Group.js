@@ -4,7 +4,7 @@ var Group = function( shapes, virtual ) {
     
     this._virtual = typeof virtual !== 'undefined' ? virtual : Group.defaults.virtual;
     
-    Shape.call( this );
+    ShapeBase.call( this );
     
     if( shapes )
         this.addChild( shapes );
@@ -13,7 +13,7 @@ Group.defaults = {
     virtual: true
 };
 
-Group.prototype = {
+Group.prototype = Utils.extend( Shape, {
     get virtual() { return this._virtual; },
     set virtual( value ) {
         
@@ -26,10 +26,10 @@ Group.prototype = {
     },
             
     set: function( virtual ) {
-        
+
+        Shape.prototype.set.call( this, virtual );
+
         if( Utils.isObject( virtual ) ) {
-            
-            Shape.prototype.set.call( this, virtual );
             
             if( 'virtual' in virtual ) this.virtual = virtual.virtual;
             
@@ -45,7 +45,7 @@ Group.prototype = {
 
         return new Group( this );
     },
-    
+
     addChild: function( shape ) {
         
         if( Utils.isArray( shape ) )
@@ -64,7 +64,7 @@ Group.prototype = {
         
         return this;
     }
-};
+});
 
 /* Add ShortCut */
 if( typeof ShortCuts !== 'undefined' )

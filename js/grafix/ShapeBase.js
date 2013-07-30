@@ -55,7 +55,7 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         }
 
         if( !(value instanceof ShapeBase) ) {
-            throw 'Only and instance of Shape are allowed to be set as a parent';
+            throw 'Only an instance of Shape are allowed to be set as a parent';
         }
 
         // Add us as a child to our (new)parent
@@ -255,8 +255,16 @@ ShapeBase.prototype = Utils.extend( EventObject, {
                 this.addChild( args.children );
             }
             if( 'canvas' in args ) {
-                this.canvas = args.canvas;
-                this._canvasContext = this.canvas.getContext( '2d' );
+                this._canvas = args.canvas;
+                if( Utils.isString( this._canvas ) ) {
+                    this._canvas = Utils.getDomElementById( this._canvas );
+                }
+                if( Utils.isDomNode( this._canvas ) ) {
+                    this._canvasContext = this._canvas.getContext( '2d' );
+                }
+            }
+            if( ('parent' in args) && args.parent !== null ) {
+                this.parent = args.parent;
             }
         }
 
