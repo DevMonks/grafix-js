@@ -8,7 +8,8 @@ var Group = function( shapes, virtual ) {
     
     if( shapes )
         this.addChild( shapes );
-}
+};
+
 Group.defaults = {
     virtual: true
 };

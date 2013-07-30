@@ -8,12 +8,6 @@ var Bitmap = function( path, x, y, width, height ) {
     this._loaded = false;
     this._image = null;
 
-    // Allow to scale every single value - x, y, width, height
-    this._scale = new Rectangle(1., 1., 1., 1.);
-    if( this._delegateChanged ) {
-        this._scale.changed( this.changed, this );
-    }
-
     this._crop = new Rectangle;
     if( this._delegateChanged ) {
         this._crop.changed( this.changed, this );
@@ -95,15 +89,15 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     get originWidth() { return this.image.width; },
     get originHeight() { return this.image.height; },
 
-    get isCroped() { return ( this.crop.x !== 0 || this.crop.y !== 0 || this.crop.width !== 0 || this.crop.height !== 0 ); },
+    get isCropped() { return ( this.crop.x !== 0 || this.crop.y !== 0 || this.crop.width !== 0 || this.crop.height !== 0 ); },
 
     /**
      * Gets the image source bounds (crop'ed or origin)
      * @returns {Rectangle}
      */
-    get rectSource() {
+    get sourceRect() {
         // Return crop'ed area, if needed
-        if( this.isCroped ) {
+        if( this.isCropped ) {
             return this.crop;
         }
 
@@ -118,18 +112,10 @@ Bitmap.prototype = Utils.extend( Rectangle, {
      * Gets the image destination bounds (scaled)
      * @returns {Rectangle}
      */
-    get rectDestination() {
-            return new Rectangle(
-                this.x * this.scale.x,
-                this.y * this.scale.y,
-                this.width * this.scale.width,
-                this.height * this.scale.height
-            );
+    get destinationRect() {
+        return this.bounds;
     },
 
-    get scale() { return this._scale; },
-    set scale(value) { throw 'Cannot redeclare scale, use Bitmap.scale.set( object ) instead'; },
-    
     set: function( path, x, y, width, height ) {
 
         Rectangle.prototype.set.call( this, x, y, width, height );
@@ -138,7 +124,6 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             
             if( 'path' in path ) this.path = path.path;
             if( 'crop' in path ) this.crop.set( path.crop );
-            if( 'scale' in path ) this.scale.set( path.scale );
 
             Rectangle.prototype.set.call( this, path );
         } else if( typeof path !== 'undefined' ) {
@@ -153,27 +138,22 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     // Image manipulation methods
 
     /**
-     * Set the destination scale factor for any of x, y, width or height.
+     * Set the destination scale factor for any of x or y.
      *
-     * @param {int|Rectangle} x
+     * @param {int|Point} x
      * @param {int|undefined} y
-     * @param {int|undefined} width
-     * @param {int|undefined} height
      * @returns {self}
      */
-    scaled: function( x, y, width, height ) {
+    scaled: function( x, y ) {
         // Allow to scale all with 1
-        if( Utils.isNumeric(x) && y === undefined && width === undefined && height === undefined ) {
+        if( Utils.isNumeric(x) && y === undefined ) {
 
-            this.scale.x *= x;
-            this.scale.y *= x;
-            this.scale.width *= x;
-            this.scale.height *= x;
+            this.scale.mul( x );
 
             return this;
         }
 
-        this.scale.set(x, y, width, height);
+        this.scale.set(x, y);
         return this;
     },
 
@@ -184,12 +164,12 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             return this;
 
         // Get source and destination bounds
-        var rectSource = this.rectSource,
-            rectDestination = this.rectDestination,
+        var sourceRect = this.sourceRect,
+            destinationRect = this.destinationRect,
             drawData = this._image;
 
         // Lil debug
-        if( this.isCroped ) {
+        if( this.isCropped ) {
             console.log( 'Drawing cropped', this.crop.toString() );
         } else {
             console.log( 'Drawing uncropped', this.toString() );
@@ -199,15 +179,15 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         canvasContext.drawImage(
             drawData,
             // The source rectangle
-            rectSource.x,
-            rectSource.y,
-            rectSource.width,
-            rectSource.height,
+            sourceRect.x,
+            sourceRect.y,
+            sourceRect.width,
+            sourceRect.height,
             // The destination rectangle
-            rectDestination.x,
-            rectDestination.y,
-            rectDestination.width,
-            rectDestination.height
+            destinationRect.x,
+            destinationRect.y,
+            destinationRect.width,
+            destinationRect.height
         );
 
         return this;
