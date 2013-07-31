@@ -10,34 +10,48 @@ var ShapeBase = function( args ) {
     this._childrenNameCache = {};
 
     // Support for named components
-    this._name = ( args && args.name ? args.name : Utils.getUid());
+    this._name = null;
     // Canvas
     this._canvas = null;
     this._canvasContext = null;
 
     // Will changes to own and children properties delegated to the changed() event?
-    this._delegateChanged = ( args && args.delegateChanged ? true : false );
+    this._delegateChanged = ShapeBase.defaults.delegateChanged;
 
     /** @var Input */
     this._input = null;
+    
+    this.set( args );
+};
+ShapeBase.defaults = {
+    delegateChanged: false
 };
 
 ShapeBase.prototype = Utils.extend( EventObject, {
-    get clone() { throw 'Cannot clone ShapeBase, please use any of the derived classes instead'; },
+    
+    get clone() { 
+        throw 'Cannot clone ShapeBase, please use any of the derived classes instead'; 
+    },
 
-    get name() { return this._name; },
-    set name(value) {
+    get name() { 
+        
+        if( !this._name )
+            this._name = Utils.getUid();
+        
+        return this._name; 
+    },
+    set name( value ) {
 
         this._name = value;
         this.invalid = true;
     },
 
     get invalid() { return this._invalid; },
-    set invalid(value) {
-        if( this._invalid !== value ) {
+    set invalid( value ) {
+        
+        if( this._invalid !== value )
             this._invalid = value;
-        }
-
+        
         // Inform parent
         var parent = this.parent;
         if( parent ) {
@@ -50,26 +64,26 @@ ShapeBase.prototype = Utils.extend( EventObject, {
 
     get parent() { return this._parent; },
     set parent( value ) {
-        if( value === this._parent ) {
+        
+        if( this._parent === value ) {
             return;
         }
 
-        if( !(value instanceof ShapeBase) ) {
+        if( !( value instanceof ShapeBase ) && value !== null ) {
+            
             throw 'Only an instance of Shape are allowed to be set as a parent';
         }
 
         // Add us as a child to our (new)parent
-        if( !value.hasChild( this ) ) {
+        if( value !== null && !value.hasChild( this ) )
             value.addChild( this );
-        }
 
         // If we got a parent already, remove it
-        if( this._parent ) {
+        if( this._parent )
             this.parent.removeChild( this );
-        }
 
         // Delegate changed() events from our parent to us
-        if( this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged && this.has( 'changed' ) ) {
             this.changed( this.prepareChanged( 'parent', this._parent, value ) );
         }
         // Store it
@@ -77,53 +91,57 @@ ShapeBase.prototype = Utils.extend( EventObject, {
     },
 
     get input() {
-        if( this._input ) {
+        
+        if( this._input )
             return this._input;
-        }
 
-        // Lazy getting input handler from parent
-        var shape = this;
-        // @TODO: This will call the getter of a parent shape, which does the same..
-        //        Maybe break until first input handler was found?
-        //        Would be a good idea to use the nearst input handler which could be found
-        while ( shape.parent && shape.parent.input ) {
-            this._input = shape.parent.input;
-            shape = shape.parent;
-        }
+        if( this.parent )
+            this._input = this.parent.input;
 
         // Nothing found in parent tree? Then create our own
-        if( !this._input ) {
+        if( !this._input )
             this._input = new Input( this.canvas );
-        }
 
         return this._input;
     },
-    set input(value) { this._input = value; },
+    set input( value ) { this._input = value; },
 
     get canvas() {
-        if( this._canvas ) {
+        
+        if( this._canvas )
             return this._canvas;
-        }
-
-        // Lazy getting canvas from parent
-        var shape = this;
-        // @TODO: See lazy input getter
-        while ( shape.parent && shape.parent.canvas ) {
-            this._canvas = shape.parent.canvas;
-            shape = shape.parent;
+        
+        if( this.parent )
+            this._canvas = this.parent.canvas;
+        
+        if( !this._canvas ) {
+            
+            this._canvas = document.createElement( 'canvas' );
+            this._canvas.setAttribute( 'width', 'width' in this ? this.width : 0 );
+            this._canvas.setAttribute( 'height', 'height' in this ? this.height : 0 );
         }
 
         return this._canvas;
     },
-    set canvas(value) { this._canvas = value; },
+    set canvas( value ) { 
+        
+        if( Utils.isString( value ) )
+            value = Utils.getDomElementById( value );
+        
+        this._canvasContext = null;
+        this._canvas = value; 
+    },
 
     get canvasContext() {
-        if( !this._canvasContext && this.canvas ) {
-            this._canvasContext = this.canvas.getContext('2d');
-        }
-
+        
+        if( this._canvasContext )
+            return this._canvasContext;
+        
+        this._canvasContext = this.context.getContext( '2d' );
+        
         return this._canvasContext;
     },
+    set canvasContext( value ) { this._canvasContext = value; },
 
     /**
      * Returns true, if we have the given shape (or name) as a children component.
@@ -135,7 +153,7 @@ ShapeBase.prototype = Utils.extend( EventObject, {
 
         // Support search for name
         if( Utils.isString( shape ) ) {
-            return (shape in this._childrenNameCache);
+            return ( shape in this._childrenNameCache );
         }
 
         // Search for a ShapeBase object
@@ -230,6 +248,7 @@ ShapeBase.prototype = Utils.extend( EventObject, {
      * @returns {ShapeBase|null}
      */
     child: function( childName ) {
+        
         if( (childName in this._childrenNameCache) ) {
             var childIndex = this._childrenNameCache[ childName ];
             return this.children[ childIndex ];
@@ -237,11 +256,21 @@ ShapeBase.prototype = Utils.extend( EventObject, {
 
         return null;
     },
+            
+    
+    eachChild: function( callback ) {
+        
+        for( var i in this._children )
+            callback.call( this._children[ i ], i );
+        
+        return this;
+    },
 
 
     set: function( args ) {
 
         if( Utils.isObject( args ) ) {
+            
             if( 'id' in args ) {
                 this.name = args.id;
             }
@@ -252,18 +281,15 @@ ShapeBase.prototype = Utils.extend( EventObject, {
                 this.name = args.name;
             }
             if( 'children' in args ) {
+                //@TODO: Shouldn't we clone all children?
+                //They will get removed in the original object on-clone right now
+                //I guess
                 this.addChild( args.children );
             }
             if( 'canvas' in args ) {
-                this._canvas = args.canvas;
-                if( Utils.isString( this._canvas ) ) {
-                    this._canvas = Utils.getDomElementById( this._canvas );
-                }
-                if( Utils.isDomNode( this._canvas ) ) {
-                    this._canvasContext = this._canvas.getContext( '2d' );
-                }
+                this.canvas = args.canvas;
             }
-            if( ('parent' in args) && args.parent !== null ) {
+            if( ('parent' in args) ) {
                 this.parent = args.parent;
             }
         }
@@ -296,10 +322,9 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         // Update also children, if this shape is not invalid
         // This is because no draw() of this shape or any children will be called
         if( this.invalid === false ) {
-            for( var i = 0; i < this._children.length; i++ ) {
-                var child = this._children[i];
-                child.update();
-            }
+            this.eachChild( function() {
+                this.update();
+            } );
         }
 
         return this;
@@ -321,9 +346,7 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         }
 
         // If we got no context to draw, get our own
-        if( !context ) {
-            context = this.canvasContext;
-        }
+        context = context || this.canvasContext;
 
         context.save();
 
@@ -331,9 +354,8 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         if( this.invalid || forceDraw ) {
             //console.log( 'Shape.draw() re-draw dirty shape:', this );
             // If parent is dirty, childs will need a re-draw too
-            var forceChildDraw = true;
-
-            this._draw( context, forceChildDraw );
+            
+            this._draw( context, true );
         }
 
         context.restore();

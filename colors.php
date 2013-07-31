@@ -4,13 +4,8 @@
 
 <div style="width: 100%; padding: 20px; font-family: monospace; border: 1px dashed #fcc" id="frames"></div><br>
 <br>
-<button onclick="grid.rows++">More Rows</button>
-<button onclick="grid.rows--">Less rows</button>
-<button onclick="grid.columns++">More Columns</button>
-<button onclick="grid.columns--">Less Columns</button>
-<br>
 
-<canvas id="stage" width="400" height="400"></canvas><br>
+<canvas id="stage" width="800" height="400"></canvas><br>
 
 
 <script src="js/grafix.nocache.js"></script>
@@ -18,22 +13,28 @@
     
     var stage = Grafix.stage( '#stage' );
     stage.color = Grafix.colors.black;
-    
+
     var grid = Grafix.grid( { 
-        width: 200, 
-        height: 200,
         virtual: false,
         align: 'center center',
         drawStyle: 'stroke',
-        color: 'blue'
+        color: 'blue',
+        columns: 360,
+        rows: 10
+    } ).set( { width: stage.width, height: stage.height } );
+    
+    grid.eachRect( function( x, y, i ) {
+        
+        if( y === 0 ) {
+            
+            var c = Grafix.color( { h: x, s: .5, l: .5 } );
+            console.log( String( c ), c.hex, x, { h: x, s: .5, l: .5 } );
+            this.color = c.hex;
+        }
+        
     } );
     
-    var thirdColumn = grid.column( 2 ).style( 'red' );
-    var ninthRow = grid.row( 8 ).style( 'yellow' );
-    var area = grid.combine( 5, 2, { x: 10, y: 5 } ).style( 'green' )
-    
-    
-    stage.addChild( [ grid, thirdColumn, ninthRow, area ] );
+    stage.addChild( [ grid ] );
 
     var frameCount = 0;
     stage.update( function( e ) {

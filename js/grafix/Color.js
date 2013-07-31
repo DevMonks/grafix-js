@@ -1,95 +1,274 @@
 var Color = function ( color ) {
     // Something WILL be done with this!
-    this.r = 0;
-    this.g = 0;
-    this.b = 0;
-    this.a = 0;
+    this._r = 0;
+    this._g = 0;
+    this._b = 0;
+    this._a = 0;
+    
+    this._hsl = null;
+    this._cymk = null;
     
     this.set( color );
 };
 
 Color.prototype = {
     
-    
-  set: function( color ) {
-    
+  set: function( color, deep ) {
+
+    deep = deep !== false;
+
     //TODO: Set color dynamically. color can have the following forms
-    //- #rgb
-    //- #rrggbb
-    //- rgb(r,g,b) (White-spaces allowed)
-    //- hsl(h,s,l) (White-spaces allowed)
-    //- cymk(c,y,m,k) (White-spaces allowed)
+    //- #rgb - DONE
+    //- #rrggbb - DONE
+    //- rgb(r,g,b) (White-spaces allowed) - DONE
+    //- hsl(h,s,l) (White-spaces allowed) - DONE
+    //- cymk(c,y,m,k) (White-spaces allowed) - DONE
     //- colorName in Color
     //- [r,g,b,a]
     //- [r,g,b]
     //- {r:, g:, b:, a:} (all optional)
     //- {h:, s:, l:} (all optional)
     
+    
+    if( Utils.isString( color ) ) {
+        
+        //@TODO: Maybe we should make a function that extracts
+        //all variables from the function name in a string
+        //e.g. xyz( xVal, yVal, zVal ) would set x, y and z to the fitting args
+        
+        if( Color.isHex( color ) )
+            color = Color.hexToRgb( color );
+        else if( Color.isHsl( color ) )
+            this.hsl = Color.extractHslString( color );
+        else if( Color.isRgba( color ) )
+            this.rgba = Color.extractRgbaString( color );
+        else if( Color.isCymk( color ) )
+            this.cymk = Color.extractCymkString( color );
+        else if( color in Color )
+            color = Color.hexToRgb( Color[ color ] );
+    }
+    
+    if( Utils.isArray( color ) ) {
+        
+        switch( color.length ) {
+            case 4:
+                this.a = color[ 3 ];
+            case 3:
+                this.b = color[ 2 ];
+            case 2:
+                this.g = color[ 1 ];
+            case 1:
+                this.r = color[ 0 ];
+        }
+    } else if( Utils.isObject( color ) ) {
+        
+        if( 'r' in color ) this.r = color.r;
+        if( 'g' in color ) this.g = color.g;
+        if( 'b' in color ) this.b = color.b;
+        
+        if( deep ) {
+            
+            if( 'h' in color ) this.h = color.h;
+            if( 's' in color ) this.s = color.s;
+            if( 'l' in color ) this.l = color.l;
+            
+            if( 'c' in color ) this.c = color.c;
+            if( 'y' in color ) this.y = color.y;
+            if( 'm' in color ) this.m = color.m;
+            if( 'k' in color ) this.k = color.k;
+                    
+            if( 'rgba' in color ) this.rgba = color.rgba;
+            if( 'rgb' in color ) this.rgb = color.rgb;
+            
+            if( 'hsl' in color ) this.hsl = color.hsl;
+            
+            if( 'cymk' in color ) this.cymk = color.cymk;
+            
+        }
+    }
+    
+    return this;
+  },
+          
+  get r() {
+      
+      return this._r;
+  },
+          
+  set r( r ) {
+      
+      this._r = r;
+      this._hsl = null;
+      this._cymk = null;
+  },
+          
+  get g() {
+      
+      return this._g;
+  },
+          
+  set g( g ) {
+      
+      this._g = g;
+      this._hsl = null;
+      this._cymk = null;
+  },
+          
+  get b() {
+      
+      return this._g;
+  },
+          
+  set b( b ) {
+      
+      this._b = b;
+      this._hsl = null;
+      this._cymk = null;
+  },
+          
+  get a() {
+      
+      return this._a;
+  },
+          
+  set a( a ) {
+      
+      this._a = a;
+      this._hsl = null;
+      this._cymk = null;
+  },
+          
+         
+  get rgb() {
+  
+      return { r: this.r, g: this.g, b: this.b };
+  },
+  set rgb( rgb ) {
+      
+      this.rgba = rgb;
+  },
+  get rgba() {
+      
+      return { r: this.r, g: this.g, b: this.b, a: this.a };
+  },
+  set rgba( rgba ) {
+    
+      this.set( rgba );
   },
   
   //HSL Getters/Setters
   get h() {
       
-      return calculatedH;
+      return this.hsl.h;
   },
   set h( h ) {
       
-      //TODO: calculate this.r/g/b/a based on hue
+      this.hsl.h = h;
+      //Trigger setter
+      this.hsl = this._hsl;
   },
   get s() {
       
-      return calculatedS;
+      return this.hsl.s;
   },
   set s( s ) {
       
-      //TODO: calculate this.r/g/b/a based on saturation
+      this.hsl.s = s;
+      //Trigger setter
+      this.hsl = this._hsl;
   },
   get l() {
       
-      return calculatedL;
+      return this.hsl.l;
   },
   set l( l ) {
       
-      //TODO: calculate this.r/g/b/a based on lightness
+      this.hsl.l = l;
+      //Trigger setter
+      this.hsl = this._hsl;
   },
     
   get hsl() { 
-      //RETURNS: array [ h, s, l ]
-      //TODO: calculate HSL
-      return calculatedHsl; 
+      
+      if( !this._hsl )
+          this._hsl = Color.rgbToHsl( this.r, this.g, this.b );
+      
+      return this._hsl;
   },
   set hsl( hsl ) {
       
-      //ALLOWS: array [ h, s, l ], object { h:, s:, l: } or string hsl(h,s,l)
-      //TODO: set this.r/g/b/a based on hsl
+      if( 'h' in hsl && 's' in hsl && 'l' in hsl ) {
+          
+        this._hsl = hsl;
+          
+        var rgb = Color.hslToRgb( this.hsl.h, this.hsl.s, this.hsl.l );
+        this.set( rgb );
+      }
   },
+          
+  
+  //CYMK Getters/Setters
+  get c() {
+      
+      return this.cymk.c;
+  },
+  set c( c ) {
+      
+      this.cymk.c = c;
+      //Trigger setter
+      this.cymk = this._cymk;
+  },
+  get y() {
+      
+      return this.cymk.y;
+  },
+  set y( y ) {
+      
+      this.cymk.y = y;
+      //Trigger setter
+      this.cymk = this._cymk;
+  },
+  get m() {
+      
+      return this.cymk.m;
+  },
+  set m( m ) {
+      
+      this.cymk.m = m;
+      //Trigger setter
+      this.cymk = this._cymk;
+  },
+  get k() {
+      
+      return this.cymk.k;
+  },
+  set k( k ) {
+      
+      this.cymk.k = k;
+      //Trigger setter
+      this.cymk = this._cymk;
+  },
+    
   get cymk() { 
-      //RETURNS: array [ c, y, m, k ]
-      //TODO: calculate CYMK
-      return calculatedCymk; 
+      
+      if( !this._cymk )
+          this._cymk = Color.rgbToCymk( this.r, this.g, this.b );
+      
+      
+      return this._cymk;
   },
   set cymk( cymk ) {
       
-      //ALLOWS: array [ c, y, m, k], object { c:, y:, m:, k: } or string cymk(c,y,m,k)
-      //TODO: set this.r/g/b/a based on cymk 
+      if( 'c' in cymk && 'y' in cymk && 'm' in cymk && 'k' in cymk ) {
+        
+        this._cymk = cymk;
+  
+  
+        var rgb = Color.cymkToRgb( this._cymk.c, this._cymk.y, this._cymk.m, this._cymk.k );
+        this.set( rgb );
+      }
   },
-  get rgb() {
-      //RETURNS: array [ r, g, b ]
-      return [ this.r, this.g, this.b ];
-  },
-  set rgb( rgb ) {
-      this.rgba = rgb;
-  },
-  get rgba() {
-      
-      //RETURNS: array [ r, g, b, a ]
-      return [ this.r, this.g, this.b, this.a ];
-  },
-  set rgba( rgba ) {
-      
-      //ALLOWS: array [ r, g, b, a ], object { r:, g:, b:, a: }, string rgb( r, g, b ) or string rgba(c, y, m, k)
-      //TODO: set this.r/g/b/a based on args
-  },
+ 
   get hex() {
       
       return Color.rgbToHex( this.r, this.g, this.b );
@@ -103,27 +282,32 @@ Color.prototype = {
   },
   
   //HSL operations
-  darken: function( factor ) {
+  hue: function( deg ) {
       
-      //Darken (L)
-  },
-  lighten: function( factor ) {
+      this.h = deg;
       
-      //Darken (L)
+      return this;
   },
   saturate: function( factor ) {
       
-      //Saturate (S)
+      this.s *= factor;
+      
+      return this;
   },
   desaturate: function( factor ) {
       
-      //Desaturate (S)
+      return this.saturate( -factor );
   },
-  hue: function( deg ) {
+  darken: function( factor ) {
       
-      //Specify hue (H)
+      this.l *= factor;
+      
+      return this;
   },
-  
+  lighten: function( factor ) {
+      
+      return this.darken( -factor );
+  },
   
   inverse: function() {
       
@@ -137,7 +321,9 @@ Color.prototype = {
   
   grayscale: function() {
     
-      //TODO: get the gray scale of this color
+      this.s = 0;
+      
+      return this;
   },
   
   mix: function( color ) {
@@ -168,30 +354,229 @@ Color.prototype = {
   radialGradientFrom: function( color, stops ) {
       
       return this.gradientFrom( 'radial', color, stops );
+  },
+          
+  toString: function() {
+      
+      return JSON.stringify( {
+        r: this.r,
+        g: this.g,
+        b: this.b,
+        a: this.a
+      } );
   }
 };
 
 Utils.merge( Color, {
-    hexToRgb: function ( hex ) {
-        // Expand shorthand (#03F) to full (#0033FF)
-        var reShorthand = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-        hex = hex.replace( reShorthand, function ( m, r, g, b ) {
-            return r + r + g + g + b + b;
-        } );
 
+    shortHexPattern: /^#?([a-f\d])([a-f\d])([a-f\d])$/i,
+
+    hexPattern: /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i,
+
+    rgbaPattern: /rgb[a]?\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)(?:\s*,\s*([0-9]+))?\s*\)/i,
+
+    hslPattern: /hsl\(\s*([0-9]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*\)/i,
+
+    cymkPattern: /cymk\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*\)/i,
+    
+    isShortHex: function( val ) { return !!this.shortHexPattern.test( val ); },
+    
+    isHex: function( val ) { return !!this.hexPattern.test( val ) && !!this.shortHexPattern.test( val ); },
+    
+    isRgba: function( val ) { return !!this.rgbaPattern.test( val ); },
+    
+    isHsl: function( val ) { return !!this.hslPattern.test( val ); },
+    
+    isCymk: function( val ) { return !!this.cymkPattern.test( val ); },
+    
+    extractRgbaString: function( str ) {
+
+        var result = this.rgbaPattern.exec( str );
+        
+        return { 
+            r: parseInt( result[ 1 ] ), 
+            g: parseInt( result[ 2 ] ), 
+            b: parseInt( result[ 3 ] ), 
+            a: typeof result[ 4 ] !== 'undefined' ? parseInt( result[ 4 ] ) : 0 
+        };
+    },
+            
+    extractHslString: function( str ) {
+        
+        var result = this.hslPattern.exec( str );
+        
+        return { 
+            h: parseInt( result[ 1 ] ), 
+            s: parseFloat( result[ 2 ] ), 
+            l: parseFloat( result[ 3 ] )
+        };
+    },
+            
+    extractCymkString: function( str ) {
+
+        var result = this.cymkPattern.exec( str );
+        
+        return { 
+            c: parseFloat( result[ 1 ] ), 
+            y: parseFloat( result[ 2 ] ), 
+            m: parseFloat( result[ 3 ] ), 
+            k: parseFloat( result[ 4 ] ) 
+        };
+    },
+    
+    expandHex: function( val ) {
+
+        return val.replace( this.shortHexPattern, function( m, r, g, b ) {
+            
+            return r * 2 + g * 2 + b * 2;
+        } );
+    },
+
+    hexToRgb: function( hex ) {
+    
+        hex = this.expandHex( hex );
+        
         // Extract single components
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec( hex );
+        var result = this.hexPattern.exec( hex );
         return result ? {
-            r: parseInt( result[1], 16 ),
-            g: parseInt( result[2], 16 ),
-            b: parseInt( result[3], 16 )
+            r: parseInt( result[ 1 ], 16 ),
+            g: parseInt( result[ 2 ], 16 ),
+            b: parseInt( result[ 3 ], 16 )
         } : null;
     },
 
-    rgbToHex: function ( r, g, b ) {
-        return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString( 16 ).slice( 1 );
+    rgbToHex: function( r, g, b ) {
+
+        return '#' + ( ( 1 << 24 ) + ( r << 16 ) + ( g << 8 ) + b ).toString( 16 ).slice( 1 );
+    },
+
+    hslToRgb: function( h, s, l ){
+        
+        var hue = 6 - ( -h % 6 ) / 60,
+            saturation = s,
+            lightness = l,
+            
+            c = ( 1 - Math.abs( ( 2 * lightness ) - 1 ) ) * saturation,
+            x = c * ( 1 - Math.abs( ( h % 2 ) - 1 ) ),
+            m = l - c / 2,
+            
+            r = 0,
+            g = 0,
+            b = 0;
+            
+        if( hue < 0 ) 
+            hue = 6 - ( -hue % 6 );
+        
+        hue %= 6;
+
+        if( hue < 1 ) {
+            r = c;
+            g = x;
+            b = 0;
+        } else if( hue < 2 ) {
+            r = x;
+            g = c;
+            b = 0;
+        } else if( hue < 3 ) {
+            r = 0;
+            g = c;
+            b = x;
+        } else if( hue < 4 ) {
+            r = 0;
+            g = x;
+            b = c;
+        } else if( hue < 5 ) {
+            r = x;
+            g = 0;
+            b = c;
+        } else {
+            r = c;
+            g = 0;
+            b = x;
+        }
+
+        r = Math.round( ( r + m ) * 255 );
+        g = Math.round( ( g + m ) * 255 );
+        b = Math.round( ( b + m ) * 255 );
+
+        return { r: r, g: g, b: b };
     },
     
+    rgbToHsl: function( r, g, b ) {
+        
+        var red = r / 255,
+            green = g / 255,
+            blue = b / 255,
+            max = Math.max( r, g, b ),
+            min = Math.min( r, g, b ),
+            diff = max - min,
+            h = 0,
+            s = 0,
+            l = ( max + min ) / 2;
+        
+        if( max !== min ) {
+            
+            s = l > 0.5 ? diff / ( 2 - max - min ) : diff / ( max + min );
+            
+            switch( max ) {
+                case red:
+                    
+                    h = ( green - blue ) / diff + ( green < blue ? 6 : 0 );
+                    break
+                case green:
+                    
+                    h = ( blue - red ) / diff + 2;
+                    break
+                case blue:
+                    
+                    h = ( red - green ) / diff + 4;
+                    break
+            }
+            
+            h /= 6;
+            h = Math.floor( h * 360 );
+        }
+        
+        
+        return { h: h, s: s, l: l };
+    },
+    
+
+    cymkToRgb: function( c, m, y, k ) {
+
+        var cyan = ( c * 255 * ( 1 - k ) ),
+            magenta = ( m * 255 * ( 1 - k ) ),
+            yellow = ( y * 255 * ( 1 - k ) ),
+            
+            black = 255 * ( 1 - k ),
+            
+            r = parseInt( black - cyan ),
+            g = parseInt( black - magenta ),
+            b = parseInt( black - yellow );
+        
+        return { r: r, g: g, b: b };
+    },
+    
+    rgbToCymk: function( r, g, b ) {
+
+        var c = 1 - ( r / 255 ),
+            m = 1 - ( g / 255 ),
+            y = 1 - ( b / 255 ),
+            k = Math.min( c, m, y ),
+            min = k;
+            
+        var cymk = { c: 0, y: 0, m: 0, k: k };
+            
+        if( c > 0 )
+            c = ( c - k ) / ( 1 - min );
+        if( m > 0 )
+            m = ( m - k ) / ( 1 - min );
+        if( y > 0 )
+            y = ( y - k ) / ( 1 - min );
+        
+        return cymk;
+    },
+            
     gradient: function( type, start, end, stops ) {
       
       //stops are formatted like this: { 0: Color, 0.2: Color, 0.5: Color, 0.8: Color, 1: Color }
@@ -365,12 +750,10 @@ Utils.merge( Color, {
     yellowgreen:          '#9acd32'
 } );
 
-/* Add ShortCut */
 if( typeof ShortCuts !== 'undefined' ) {
     ShortCuts.color = function( color ) {
         
         return new Color( color );
     };
-    
     ShortCuts.colors = Color;
 }

@@ -6,13 +6,15 @@ var Grid = function ( x, y, width, height, columns, rows ) {
     this._rows = Grid.defaults.rows;
     this._virtual = Grid.defaults.virtual;
     this._rectangles = [];
+    this._allowIndividualStyles = Grid.defaults.allowIndividualStyles;
     
     this.set( x, y, width, height, columns, rows );
 };
 Grid.defaults = {
     columns: 12,
     rows: 12,
-    virtual: true
+    virtual: true,
+    allowIndividualStyles: false
 };
 
 Grid.prototype = Utils.extend( Rectangle, {
@@ -61,6 +63,21 @@ Grid.prototype = Utils.extend( Rectangle, {
         
         this.invalid = true;
     },
+    
+    get allowIndividualStyles() { return this._allowIndividualStyles; },
+    set allowIndividualStyles( value ) {
+        
+        if( this._allowIndividualStyles === value ) {
+            return;
+        }
+        
+        if( this._delegateChanged && this.has( 'changed' ) ) {
+            this.changed( this.prepareChanged( 'allowIndividualStyles', this._allowIndividualStyles, value ) );
+        }
+        this._allowIndividualStyles = value;
+        
+        this.invalid = true;
+    },
 
     set: function( x, y, width, height, columns, rows ) {
         
@@ -71,6 +88,7 @@ Grid.prototype = Utils.extend( Rectangle, {
             if( 'columns' in x ) this.columns = x.columns;
             if( 'rows' in x ) this.rows = x.rows;
             if( 'virtual' in x ) this.virtual = x.virtual;
+            if( 'allowIndividualStyles' in x ) this.allowIndividualStyles = x.allowIndividualStyles;
         }
 
         if( typeof columns !== 'undefined' ) 
@@ -83,6 +101,7 @@ Grid.prototype = Utils.extend( Rectangle, {
     },
 
     get clone() {
+
         return new Grid( this );
     },
             
@@ -157,14 +176,10 @@ Grid.prototype = Utils.extend( Rectangle, {
         var rowRect = null;
         this.eachRowRect( row, function( x, y ) {
             
-            console.log( 'creating rect at', this.position.toString() );
-         
             if( !rowRect )
                 rowRect =  new Rectangle( { size: this.size, position: this.position } );
             else
                 rowRect.expand( this );
-            
-            console.log( 'created rect at', rowRect.position.toString() );
         } );
         
         return rowRect;
@@ -249,7 +264,10 @@ Grid.prototype = Utils.extend( Rectangle, {
         var grid = this;
         this.eachRect( function( x, y, i ) {
             
-            var drawFn = this.style( grid )[ style ];
+            if( !grid.allowIndividualStyles )
+                this.style( grid );
+            
+            var drawFn = this[ style ];
             
             drawFn.call( this, canvasContext );
         } );
