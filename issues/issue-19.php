@@ -27,7 +27,7 @@
                 virtual: false,
                 align: 'center center',
                 drawStyle: 'stroke',
-                color: 'blue'
+                color: Grafix.colors.blue
             } ).set( { size: stage.size } );
 
             stage = Grafix.stage( '#stage' ).set( { color: Grafix.colors.limegreen } );

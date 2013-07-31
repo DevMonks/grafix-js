@@ -48,7 +48,7 @@ Rectangle.prototype = Utils.extend( Shape, {
     /* Calculation operations */
     add:        function ( rect ) {
         if ( Utils.isNumeric( rect ) ) {
-            rect = { x: rect, y: rect };
+            rect = { x: rect, y: rect, width: rect, height: rect };
         }
 
         if ( rect.x ) {

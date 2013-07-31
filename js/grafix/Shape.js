@@ -14,40 +14,72 @@ var Shape = function( x, y ) {
 
     // Shape position and style properties
     this._position = new Point( { parent: this, delegateChanged: this._delegateChanged } );
-    if(this._delegateChanged) {
+    if( this._delegateChanged ) {
         this._position.changed(this.changed, this);
     }
     this._size = new Size( { parent: this, delegateChanged: this._delegateChanged } );
-    if(this._delegateChanged) {
+    if( this._delegateChanged ) {
         this._size.changed(this.changed, this);
     }
 
     /* Style Properties */
     this._offset = new Point( { parent: this, delegateChanged: this._delegateChanged } );
-    if(this._delegateChanged) {
+    if( this._delegateChanged ) {
         this._offset.changed(this.changed, this);
     }
     this._scale = new Point( { x: 1, y: 1, parent: this, delegateChanged: this._delegateChanged } );
-    if(this._delegateChanged) {
+    if( this._delegateChanged ) {
         this._scale.changed(this.changed, this);
     }
     this._angle = 0;
     this._skew = new Point( { parent: this, delegateChanged: this._delegateChanged } );
-    if(this._delegateChanged) {
+    if( this._delegateChanged ) {
         this._skew.changed(this.changed, this);
     }
     this._color = Color.black;
-    this._drawStyle = 'fill';  //stroke, fill...
+    this._drawStyle = Shape.drawStyle.default;
     this._lineWidth = 1;
-    this._lineCap = 'bull'; //bull, round, square...
+    this._lineCap = Shape.lineCap.default;
     this._miterLimit = null;
-    this._lineJoin = 'miter'; //miter, bevel, round...
+    this._lineJoin = Shape.lineJoin.default;
     this._closePath = null;
-    this._alignContext = 'parent'; //parent, root, [object Shape]
+    this._alignContext = Shape.alignContext.default;
     this._align = 'top left'; //inner, outer, left, right, bottom, center, top, or all together...
 
     this.set( x, y );
 };
+
+Shape.drawStyle = Utils.makeEnum({
+    fill: 'fill',
+    stroke: 'clear',
+    clear: 'clear'
+}, 'fill' );
+
+Shape.lineCap = Utils.makeEnum({
+    butt: 'butt',
+    round: 'round',
+    square: 'square'
+}, 'butt' );
+
+Shape.lineJoin = Utils.makeEnum({
+    miter: 'miter',
+    bevel: 'bevel',
+    round: 'round'
+}, 'miter' );
+
+Shape.alignContext = Utils.makeEnum({
+    parent: 'parent',
+    root: 'root',
+}, 'parent' );
+
+Shape.align = Utils.makeEnum({
+    top: 'top',
+    bottom: 'bottom',
+    left: 'left',
+    right: 'right',
+    inner: 'inner',
+    outer: 'outer'
+} );
 
 Shape.prototype = Utils.extend( ShapeBase, {
     get clone() {
@@ -155,7 +187,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
             return;
         }
 
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'angle', this._angle, value ) );
         }
         this._angle = value;
@@ -168,7 +200,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get color() { return this._color; },
     set color( value ) {
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'color', this._color, value ) );
         }
         this._color = value;
@@ -178,11 +210,11 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get drawStyle() { return this._drawStyle; },
     set drawStyle( value ) {
-        if( !Utils.inArray( ['stroke', 'fill', 'clear'], value ) ) {
-            value = 'fill';
+        if( !(value in Shape.drawStyle) ) {
+            value = Shape.drawStyle.default;
         }
 
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'drawStyle', this._drawStyle, value ) );
         }
         this._drawStyle = value;
@@ -192,7 +224,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get lineWidth() { return this._lineWidth; },
     set lineWidth( value ) {
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'lineWidth', this._lineWidth, value ) );
         }
         this._lineWidth = value;
@@ -202,7 +234,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get lineCap() { return this._lineCap; },
     set lineCap( value ) {
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'lineCap', this._lineCap, value ) );
         }
         this._lineCap = value;
@@ -216,7 +248,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
             return;
         }
 
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'miterLimit', this._miterLimit, value ) );
         }
         this._miterLimit = value;
@@ -226,7 +258,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get lineJoin() { return this._lineJoin; },
     set lineJoin( value ) {
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'lineJoin', this._lineJoin, value ) );
         }
         this._lineJoin = value;
@@ -236,7 +268,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get closePath() { return this._closePath; },
     set closePath( value ) {
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'closePath', this._closePath, value ) );
         }
         this._closePath = value;
@@ -248,11 +280,11 @@ Shape.prototype = Utils.extend( ShapeBase, {
     set align( value ) {
         var alignContext = null;
         switch ( this.alignContext ) {
-            case 'parent':
+            case Shape.alignContext.parent:
 
                 alignContext = this.parent;
                 break;
-            case 'root':
+            case Shape.alignContext.root:
 
                 alignContext = this.root;
                 break;
@@ -265,7 +297,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
             var align = Utils.isString( this.align ) ? this.align : 'center center center';
             this.alignBy( alignContext, align );
         }
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'align', this._align, value ) );
         }
         this._align = value;
@@ -276,7 +308,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
     get alignContext() { return this._alignContext; },
     set alignContext( value ) {
         this.alignBy( value, this.align );
-        if(this._delegateChanged && this.has('changed')) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'alignContext', this._alignContext, value ) );
         }
         this._alignContext = value;
@@ -498,48 +530,36 @@ Shape.prototype = Utils.extend( ShapeBase, {
             for( var i in tokens ) {
 
                 var token = tokens[ i ];
-                switch( token ) {
-                    case 'fill':
-                    case 'clear':
-                    case 'stroke':
+                if( (token in Shape.drawStyle) ) {
 
-                        this.drawStyle = token;
-                        break;
-                    case 'bull':
-                    case 'round':
-                    case 'square':
-
-                        this.lineCap = token;
-                        break;
-                    case 'miter':
-                    case 'bevel':
-                    case 'round':
-
-                        this.miterLimit = token;
-                        break;
-                    case 'parent':
-                    case 'root':
-
-                        this.alignContext = token;
-                        break;
-                    case 'inner':
-                    case 'outer':
-                    case 'left':
-                    case 'right':
-                    case 'bottom':
-                        /*TODO: These would need to be collected
-                         * and passed as one string to this.align
-                         **/
-                        break;
-                    default:
-
-                        if( Utils.isNumeric( token ) )
-                        //lets take it as the lineWidth
-                            this.lineWidth = parseInt( token );
-                        else
-                        //it's probably the color, heh
-                            this.color = token;
+                    this.drawStyle = token;
                 }
+                else if( (token in Shape.lineCap) ) {
+
+                    this.lineCap = token;
+                }
+                else if( (token in Shape.miterLimit) ) {
+
+                    this.miterLimit = token;
+                }
+                else if( (token in Shape.alignContext) ) {
+
+                    this.alignContext = token;
+                }
+                else if( (token in Shape.align) ) {
+
+                    // @TODO: These would need to be collected and passed as one string to this.align
+                }
+                else {
+                    // @FIXME: Bad default suggestion..
+                    if( Utils.isNumeric( token ) )
+                    //lets take it as the lineWidth
+                        this.lineWidth = parseInt( token );
+                    else
+                    //it's probably the color, heh
+                        this.color = token;
+                }
+
             }
         } else if( Utils.isObject( style ) ) {
 

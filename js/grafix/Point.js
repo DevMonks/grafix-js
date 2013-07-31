@@ -69,7 +69,11 @@ Point.prototype = Utils.extend( ShapeBase, {
     },
 
     isZero: function () {
-        return !( this.x || this.y );
+        return this.is( 0 );
+    },
+
+    is: function ( value ) {
+        return ( this.x === value && this.y === value );
     },
 
     equals: function ( point ) {

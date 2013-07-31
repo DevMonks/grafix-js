@@ -1,4 +1,4 @@
-var Path = function ( args ) {
+var Path = function( args ) {
     ShapeBase.call( this );
 
     this._points = [];
@@ -16,32 +16,30 @@ Path.prototype = Utils.extend( ShapeBase, {
     },
 
 
-    set: function ( args ) {
+    set: function( args ) {
 
         ShapeBase.prototype.set.call(this, args);
 
         var i;
 
-        if ( Utils.isObject( args ) && args.points ) {
+        if( Utils.isObject( args ) && ('points' in args) && Utils.isArray( args.points ) ) {
 
-            if ( args.points && Utils.isArray( args.points ) ) {
-                // Assume instances of Point or arrays of [x, y]
-                for ( i = 0; i < args.points.length; i++ ) {
-                    this.add( args.points[ i ] );
-                }
+            // Assume instances of Point or arrays of [x, y]
+            for ( i = 0; i < args.points.length; i++ ) {
+                this.add( args.points[ i ] );
             }
 
         }
         // Maybe only a single Point instance
-        else if ( Utils.isType( args, 'Point') ) {
+        else if( Utils.isType( args, 'Point') ) {
             this.add( args );
         }
         // Maybe an array of [x, y]
-        else if ( Utils.isArray( args ) ) {
+        else if( Utils.isArray( args ) ) {
             // Could be an array of Points, too
             for ( i = 0; i < args.length; i++ ) {
-                // If we got anumeric value, args is an array of [x, y]
-                if ( Utils.isNumeric( args[ i ] ) ) {
+                // If we got a anumeric value, args is a spot defined as array [x, y]
+                if( Utils.isNumeric( args[ i ] ) ) {
                     this.add( args );
                     break;
                 }
@@ -54,22 +52,22 @@ Path.prototype = Utils.extend( ShapeBase, {
         return this;
     },
 
-    add: function ( x, y ) {
-        // Could be..
+    add: function( x, y ) {
+        // Could be:
         //  x, y
         //  {x: x.x, y: x.y}
         //  x: [x, y]
         //  x: Point(x, y)
 
-        if ( Utils.isType(x, 'Point') ) {
+        if( Utils.isType(x, 'Point') ) {
 
             this.points.push( x );
 
-        } else if ( Utils.isArray( x ) ) {
+        } else if( Utils.isArray( x ) ) {
 
             this.points.push( new Point( x[0], y[1] ) );
 
-        } else if ( Utils.isObject( x ) && ('x' in x) && ('y' in x) ) {
+        } else if( Utils.isObject( x ) && ('x' in x) && ('y' in x) ) {
 
             this.points.push( new Point(x.x, y.y) );
 
@@ -79,7 +77,7 @@ Path.prototype = Utils.extend( ShapeBase, {
 
         }
 
-        if (this._delegateChanged) {
+        if( this._delegateChanged ) {
             this.changed( this.prepareChanged('points', null, this.points[ this.length - 1] ) );
         }
 
@@ -87,9 +85,9 @@ Path.prototype = Utils.extend( ShapeBase, {
     },
 
 
-    isEmpty: function () {
+    isEmpty: function() {
 
-        return this.points.length == 0;
+        return this.length == 0;
     }
 
 } );

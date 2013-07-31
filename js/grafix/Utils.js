@@ -27,6 +27,17 @@ var Utils = {
         return instance;
     },
 
+
+    makeEnum: function( object, defaultmember ) {
+        var enumeration = Utils.merge( {}, object );
+        if( defaultmember ) {
+            enumeration.default = enumeration[ defaultmember ];
+        }
+
+        return enumeration;
+    },
+
+
     resolveClass: function ( classPath, scope ) {
         // Default to grafix-js as scope
         if ( !scope ) {
