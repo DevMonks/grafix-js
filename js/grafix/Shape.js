@@ -278,40 +278,24 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get align() { return this._align; },
     set align( value ) {
-        var alignContext = null;
-        switch ( this.alignContext ) {
-            case Shape.alignContext.parent:
-
-                alignContext = this.parent;
-                break;
-            case Shape.alignContext.root:
-
-                alignContext = this.root;
-                break;
-            default:
-                alignContext = this.alignContext;
-                break;
-        }
-
-        if( alignContext ) {
-            var align = Utils.isString( this.align ) ? this.align : 'center center center';
-            this.alignBy( alignContext, align );
-        }
+        
         if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'align', this._align, value ) );
         }
         this._align = value;
+        this.alignBy();
         // Informs also parent
         this.invalid = true;
     },
 
     get alignContext() { return this._alignContext; },
     set alignContext( value ) {
-        this.alignBy( value, this.align );
+
         if( this._delegateChanged ) {
             this.changed( this.prepareChanged( 'alignContext', this._alignContext, value ) );
         }
         this._alignContext = value;
+        this.alignBy();
         // Informs also parent
         this.invalid = true;
     },
@@ -684,26 +668,36 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 // @TODO: This causes an overlay problem..
                 //        We have to check if any child needs a redraw and, if so, we have to redraw everything
                 //        Only redrawing dirty childs will make them overlapping ther other not-yet-dirty childs
-                if( this.collidesWith( child )/* && child.isDirty */) {
+                // @TODO: This is not always the case
+                // if( this.collidesWith( child )/* && child.isDirty */) {
                     //console.log('Shape.draw() poke child for draw (dirty=', child.isDirty, '):', child);
                     child.draw( context, forceChildDraw );
-                }
+                //}
             }
         }
 
         return this;
     },
 
-    alignBy:      function( context, position ) {
+    alignBy: function( context, position ) {
 
-        if(!context) {
-            context = this.canvasContext;
-        } else if( Utils.isString(context) ) {
-            position = context;
-            context = this.canvasContext;
+        context = context || this.alignContext;
+        console.log( 'aligning ', this.toString(), context.toString(), position );
+        switch ( context ) {
+            case Shape.alignContext.parent:
+
+                context = this.parent;
+                break;
+            case Shape.alignContext.root:
+
+                context = this.root;
+                break;
         }
+        
+        if( !context )
+            return this;
 
-        position = (position || '').split( ' ' );
+        position = ( position || this.align ).split( ' ' );
         var type = 'center';
         var xType = null;
         var yType = null;
