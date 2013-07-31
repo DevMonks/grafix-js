@@ -135,7 +135,7 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     },
 
 
-    
+
     _draw: function( canvasContext ) {
 
         if( !this.loaded )

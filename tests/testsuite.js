@@ -6,7 +6,6 @@
 		"components/grafix.js",
 		"components/random.js",
 		"components/shapebase.js",
-		"components/uid.js",
 		"components/utils.js"
 	];
 	

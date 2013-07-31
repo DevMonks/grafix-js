@@ -1,4 +1,6 @@
 var Utils = {
+    _currentId: 0,
+
     
     merge: function( target, source ) {
         
@@ -54,7 +56,7 @@ var Utils = {
 
 
     getUid: function() {
-        return Uid.create();
+        return ++Utils._currentId;
     },
 
 

@@ -1,7 +1,6 @@
 @@prioritize
 Polyfill.requestAnimationFrame
 Utils
-Uid
 Color
 Easing
 EventArgs
@@ -57,7 +56,6 @@ var Grafix = (function( undefined ) {
         Shape: Shape,
         Size: Size,
         Utils: Utils,
-        Uid: Uid,
 		/*
 			You can call "import()" somewhere for a namespace (global namespace is default)
 			in order to export it to that namespace

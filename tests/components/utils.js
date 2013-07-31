@@ -20,4 +20,15 @@ define(
 
         });
 
+        QUnit.test("Utils.uid tests", function() {
+            var id1 = Grafix.Utils.getUid(),
+                id2 = Grafix.Utils.getUid(),
+                id3 = Grafix.Utils.getUid();
+
+            QUnit.ok(id1 !== id2, 'Id1 it not equal id2');
+            QUnit.ok(id2 !== id3, 'Id2 it not equal id3');
+            QUnit.ok(id1 !== id3, 'Id1 it not equal id3');
+
+        });
+
     });
