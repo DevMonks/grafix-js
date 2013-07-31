@@ -48,6 +48,11 @@ Size.prototype = Utils.extend( ShapeBase, {
             if ( 'height' in width ) {
                 this.height = width.height;
             }
+        } else if ( Utils.isNumeric( width ) && typeof height === 'undefined' ) {
+
+            var fac = parseFloat( width );
+            this.width = fac;
+            this.height = fac;
         } else if ( typeof width !== 'undefined' ) {
 
             this.width = parseInt( width );

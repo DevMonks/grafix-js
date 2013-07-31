@@ -135,29 +135,7 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     },
 
 
-    // Image manipulation methods
-
-    /**
-     * Set the destination scale factor for any of width or height.
-     *
-     * @param {float|Size} width
-     * @param {float|undefined} height
-     * @returns {self}
-     */
-    scaled: function( width, height ) {
-        // Allow to scale all with 1
-        if( Utils.isNumeric(width) && height === undefined ) {
-
-            this.scale.mul( width );
-
-            return this;
-        }
-
-        this.scale.set(width, height);
-        return this;
-    },
-
-            
+    
     _draw: function( canvasContext ) {
 
         if( !this.loaded )
