@@ -138,22 +138,22 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     // Image manipulation methods
 
     /**
-     * Set the destination scale factor for any of x or y.
+     * Set the destination scale factor for any of width or height.
      *
-     * @param {int|Point} x
-     * @param {int|undefined} y
+     * @param {float|Size} width
+     * @param {float|undefined} height
      * @returns {self}
      */
-    scaled: function( x, y ) {
+    scaled: function( width, height ) {
         // Allow to scale all with 1
-        if( Utils.isNumeric(x) && y === undefined ) {
+        if( Utils.isNumeric(width) && height === undefined ) {
 
-            this.scale.mul( x );
+            this.scale.mul( width );
 
             return this;
         }
 
-        this.scale.set(x, y);
+        this.scale.set(width, height);
         return this;
     },
 
@@ -194,3 +194,11 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     }
     
 } );
+
+/* Add ShortCut */
+if( typeof ShortCuts !== 'undefined' )
+    ShortCuts.bmp = function( path, x, y, width, height ) {
+
+        return new Bitmap( path, x, y, width, height );
+    };
+

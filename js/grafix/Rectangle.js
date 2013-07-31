@@ -26,8 +26,7 @@ Rectangle.prototype = Utils.extend( Shape, {
      * @returns {Rectangle}
      */
     get bounds() {
-        var scale = { width: this.scale.x, height: this.scale.y };
-        return this.originBounds.mul( scale );
+        return this.originBounds.clone.mul( this.scale );
     },
 
 

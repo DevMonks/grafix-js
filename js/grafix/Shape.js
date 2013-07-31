@@ -27,7 +27,7 @@ var Shape = function( x, y ) {
     if( this._delegateChanged ) {
         this._offset.changed(this.changed, this);
     }
-    this._scale = new Point( { x: 1, y: 1, parent: this, delegateChanged: this._delegateChanged } );
+    this._scale = new Size( { width: 1, height: 1, parent: this, delegateChanged: this._delegateChanged } );
     if( this._delegateChanged ) {
         this._scale.changed(this.changed, this);
     }
@@ -179,7 +179,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
     set offset( value ) { throw 'Cannot redeclare offset, use Shape.offset.set( x/Object, y ) instead'; },
 
     get scale() { return this._scale; },
-    set scale( value ) { throw 'Cannot redeclare scale, use Shape.scale.set( x/Object, y ) instead'; },
+    set scale( value ) { throw 'Cannot redeclare scale, use Shape.scale.set( width/Object, height ) instead'; },
 
     get angle() { return this._angle; },
     set angle( value ) {
@@ -453,8 +453,8 @@ Shape.prototype = Utils.extend( ShapeBase, {
             context.translate( this.offset.x, this.offset.y );
         }
 
-        if( this.scale instanceof Point && (this.scale.x !== 1 || this.scale.y !== 1) ) {
-            context.scale( this.scale.x, this.scale.y );
+        if( this.scale instanceof Size && (this.scale.width !== 1 || this.scale.height !== 1) ) {
+            context.scale( this.scale.width, this.scale.height );
         }
 
         if( this.angle !== 0 ) {
