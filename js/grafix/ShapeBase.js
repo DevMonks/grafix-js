@@ -20,8 +20,6 @@ var ShapeBase = function( args ) {
 
     /** @var Input */
     this._input = null;
-    
-    this.set( args );
 };
 ShapeBase.defaults = {
     delegateChanged: false
@@ -137,7 +135,8 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         if( this._canvasContext )
             return this._canvasContext;
         
-        this._canvasContext = this.context.getContext( '2d' );
+        if( this.context )
+            this._canvasContext = this.context.getContext( '2d' );
         
         return this._canvasContext;
     },
