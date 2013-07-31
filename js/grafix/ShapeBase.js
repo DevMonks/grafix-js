@@ -252,11 +252,16 @@ ShapeBase.prototype = Utils.extend( EventObject, {
                 this.name = args.name;
             }
             if( 'children' in args ) {
+                //@TODO: Shouldn't we clone all children?
+                //They will get removed in the original object on-clone right now
+                //I guess
                 this.addChild( args.children );
             }
             if( 'canvas' in args ) {
                 this.canvas = args.canvas;
-                this._canvasContext = this.canvas.getContext( '2d' );
+                
+                if( this.canvas )
+                    this._canvasContext = this.canvas.getContext( '2d' );
             }
         }
 
