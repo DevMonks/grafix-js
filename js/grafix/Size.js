@@ -48,9 +48,6 @@ Size.prototype = Utils.extend( ShapeBase, {
             if ( 'height' in width ) {
                 this.height = width.height;
             }
-            if ( 'parent' in width ) {
-                this.parent = width.parent;
-            }
         } else if ( typeof width !== 'undefined' ) {
 
             this.width = parseInt( width );

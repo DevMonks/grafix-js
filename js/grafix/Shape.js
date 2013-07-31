@@ -299,9 +299,6 @@ Shape.prototype = Utils.extend( ShapeBase, {
             if( 'height' in x ) {
                 this.height = x.height;
             }
-            if( 'parent' in x ) {
-                this.parent = x.parent;
-            }
             if( 'offset' in x ) {
                 this.offset.set( x.offset );
             }
@@ -347,12 +344,12 @@ Shape.prototype = Utils.extend( ShapeBase, {
             if( 'y' in x ) {
                 this.y = x.y;
             }
-            if( 'canvas' in x ) {
-                this.canvas = x.canvas;
-                this._canvasContext = this.canvas.getContext( '2d' );
-            }
             
             // Also clone child shapes!
+            // @TODO: ShapeBase.set have to take care of childrens
+            //        Also clone wont work as expected because we have to store a reference to the exact child
+            //        Clone would create a new instance instead
+            /*
             if( 'children' in x && x.children.length > 0 ) {
                 for( var i in x.children ) {
                     
@@ -362,6 +359,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                         this.addChild( child.clone );
                 }
             }
+            */
 
             if( deep ) {
 

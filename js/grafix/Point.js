@@ -45,6 +45,8 @@ Point.prototype = Utils.extend( ShapeBase, {
 
     set: function( x, y ) {
 
+        ShapeBase.prototype.set.call( this, x );
+
         if ( Utils.isObject( x ) ) {
 
             if ( 'x' in x ) {
@@ -52,9 +54,6 @@ Point.prototype = Utils.extend( ShapeBase, {
             }
             if ( 'y' in x ) {
                 this.y = x.y;
-            }
-            if ( 'parent' in x ) {
-                this.parent = x.parent;
             }
         } else if( typeof x !== 'undefined' ) {
             
