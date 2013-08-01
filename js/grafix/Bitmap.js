@@ -6,7 +6,7 @@ var Bitmap = function( path, x, y, width, height ) {
 
     this._path = null;
     this._image = null;
-    this._argbData = [];
+    this._filters = [];
 
     this._crop = new Rectangle;
     if( this._delegateChanged ) {
@@ -58,6 +58,35 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         img.src = value;
         
         this._image = img;
+        
+        this.invalid = true;
+    },
+            
+    get filters() {
+
+        return this._filters;
+    },
+            
+    set filters( value ) {
+        
+        if( this._delegateChanged && this.has( 'changed' ) ) {
+            
+            this.changed( this.prepareChanged( 'filters', this._path, value ) );
+        }
+        
+        this._filters = value;
+        
+        this.invalid = true;
+    },
+            
+    get filter() {
+        
+        return this._filter.length < 1 ? null : this._filter[ 0 ];
+    },
+            
+    set filter( value ) {
+        
+        this.filters = [ value ];
     },
             
     get image() { return this._image; },
@@ -72,6 +101,8 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             
             if( 'path' in path ) this.path = path.path;
             if( 'crop' in path ) this.crop.set( path.crop );
+            if( 'filters' in path ) this.filters = path.filters;
+            if( 'filter' in path ) this.filter = path.filter;
 
         } else if( typeof path !== 'undefined' ) 
             this.path = path;
@@ -91,6 +122,13 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         return this;
     },
             
+    addFilter: function( filter ) {
+        
+        this.filters.push( filter );
+        
+        return this;
+    },
+            
     load: function( args ) {
         
         return this.on( 'load', args );
@@ -103,12 +141,15 @@ Bitmap.prototype = Utils.extend( Rectangle, {
 
     _draw: function( canvasContext ) {
         
-        console.log( 'drawing', this );
-        
-        if( !this.image.complete )
-            return;
-        
-        console.log( 'And it really gets drawn...' );
+        if( !this.image.complete ) { //come back when it is please!
+            
+            this.load( function drawOnce( e ) {
+                
+                e.bitmap.invalid = true;
+                e.bitmap.unbind( 'load', drawOnce );
+            } );
+            return this;
+        }
         
         // Get source and destination bounds
         var sourceRect = this.cropped ? this.crop : new Rectangle( {
@@ -116,11 +157,30 @@ Bitmap.prototype = Utils.extend( Rectangle, {
                 height: this.image.height
             } ),
             destinationRect = this,
-            drawnObject = this._image;
+            img = this.image;
+    
+        
+        //Apply filters
+        if( this.filters.length > 0 ) {
+            
+            img = document.createElement( 'canvas' );
+            img.width = this.image.width;
+            img.height = this.image.height;
+            var ctx = img.getContext( '2d' );
+            ctx.drawImage( this.image, 0, 0, this.image.width, this.image.height );
+            
+            var imageData = ctx.getImageData( 0, 0, this.image.width, this.image.height );
+            
+            //apply filters
+            for( var i in this.filters )
+                this.filters[ i ].process( imageData );
+            
+            ctx.putImageData( imageData, 0, 0 );
+        }
 
         // Draw it
         canvasContext.drawImage(
-            this._image,
+            img,
             // The source rectangle
             sourceRect.x,
             sourceRect.y,

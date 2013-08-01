@@ -62,6 +62,7 @@ Color.prototype = {
         if( 'r' in color ) this.r = color.r;
         if( 'g' in color ) this.g = color.g;
         if( 'b' in color ) this.b = color.b;
+        if( 'a' in color ) this.a = color.a;
         
         if( deep ) {
             
@@ -495,7 +496,7 @@ Utils.merge( Color, {
             h = 0,
             s = 0,
             l = ( max + min ) / 2;
-        
+            
         if( max !== min ) {
             
             s = l > 0.5 ? diff / ( 2 - max - min ) : diff / ( max + min );

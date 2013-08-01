@@ -42,6 +42,7 @@ var Grafix = (function( undefined ) {
         EventObject: EventObject,
         EventArgs: EventArgs,
         EventHandler: EventHandler,
+        Filter: Filter,
         Input: Input,
         InputBase: InputBase,
         Keyboard: Keyboard,

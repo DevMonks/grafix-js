@@ -10,7 +10,7 @@ var Filter = function( name, type, callback ) {
     
     this._name = name || null;
     this._type = type;
-    this._callback = null;
+    this._callback = callback || function() {};
     
     if( name ) {
         
@@ -22,21 +22,33 @@ Filter.defaults = {
 };
 
 Filter.prototype = {
-    process: function( pixels ) {
+    process: function( imageData ) {
         
         switch( this._type ) {
-            case 'pixels':
+            case 'raw':
                 
-                pixels = callback( pixels );
+                this._callback( imageData.data );
                 break;
             case 'pixel':
                 
-                for( var i in pixels )
-                    pixels[ i ] = callback( pixels[ i ].a, pixels[ i ].r, pixels[ i ].g, pixels[ i ].b );
+                for( var i = 0; i < imageData.data.length; i += 4 ) {
+                    
+                    var pixel = this._callback( 
+                        imageData.data[ i ], 
+                        imageData.data[ i + 1 ], 
+                        imageData.data[ i + 2 ], 
+                        imageData.data[ i + 3 ]
+                    );
+                    
+                    imageData.data[ i ] = pixel.r;
+                    imageData.data[ i + 1 ] = pixel.g;
+                    imageData.data[ i + 2 ] = pixel.b;
+                    imageData.data[ i + 3 ] = pixel.a;
+                }
                 
         }
         
-        return pixels;
+        return this;
     }
 };
 
@@ -46,14 +58,30 @@ Filter.create = function( name, type, callback ) {
 };
 
 
-Filter.create( 'rToG', 'pixel', function( a, r, g, b ) {
+Filter.create( 'sepia', 'pixel', function( r, g, b, a ) {
     
-    return { a: a, r: g, g: r, b: b };
+    //@TODO: Make this a real sepia
+    return { a: a, r: r * 0.9, g: g * 0.9, b: b * 0.2 };
 } );
 
-Filter.create( 'gToB', 'pixel', function( a, r, g, b ) {
+Filter.create( 'noRed', 'pixel', function( r, g, b, a ) {
     
-    return { a: a, r: r, g: b, b: g };
+    return { a: a, r: 0, g: g, b: b };
+} );
+
+Filter.create( 'noGreen', 'pixel', function( r, g, b, a ) {
+    
+    return { a: a, r: r, g: 0, b: b };
+} );
+
+Filter.create( 'noBlue', 'pixel', function( r, g, b, a ) {
+    
+    return { a: a, r: r, g: g, b: 0 };
+} );
+
+Filter.create( 'inverse', 'pixel', function( r, g, b, a ) {
+    
+    return { a: a, r: 255 - r, g: 255 - g, b: 255 - b };
 } );
 
 if( typeof ShortCuts !== 'undefined' )
