@@ -522,7 +522,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
                     this.lineCap = token;
                 }
-                else if( (token in Shape.miterLimit) ) {
+                else if( (token in Shape.lineJoin) ) {
 
                     this.miterLimit = token;
                 }
