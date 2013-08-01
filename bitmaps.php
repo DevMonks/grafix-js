@@ -16,9 +16,11 @@
     var stage = new Stage( '#stage' );
     stage.color = Color.black;
     
-    var muffin = new Bitmap({ path: 'img/muffin.jpg', width: 100 }),
-        muffinCrop = new Bitmap({ path: 'img/muffin.jpg', x: 110, width: 100, height: 100, crop: { x: 130, y: 130, width: 100, height: 100 } }),
-        muffinScaled = new Bitmap({ path: 'img/muffin.jpg', x: 220, scale: 0.2 });
+    var muffin = new Bitmap( { path: 'img/muffin.jpg', width: 100 }),
+        muffinCrop = new Bitmap( { path: 'img/muffin.jpg', x: 110, width: 100, height: 100, crop: { x: 130, y: 130, width: 100, height: 100 } }),
+        muffinScaled = new Bitmap( { path: 'img/muffin.jpg', x: 220, width: 200, height: 200 } );
+
+    muffinScaled.size.div( 2 );
 
     stage.addChild( [ muffin, muffinCrop, muffinScaled ] );
 

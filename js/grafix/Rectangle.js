@@ -11,24 +11,6 @@ Rectangle.prototype = Utils.extend( Shape, {
         return new Rectangle( this );
     },
 
-    /**
-     * Gets the image destination bounds (unscaled)
-     * @returns {Rectangle}
-     */
-    get originBounds() {
-        // @TODO: Maybe cache this
-        return new Rectangle( this.x, this.y, this.width, this.height );
-    },
-
-    /**
-     * Gets the image destination bounds (scaled)
-     * @returns {Rectangle}
-     */
-    get bounds() {
-        return this.originBounds.clone.mul( this.scale );
-    },
-
-
     set: function( x, y, width, height ) {
         
         Shape.prototype.set.call( this, x, y );
@@ -44,7 +26,7 @@ Rectangle.prototype = Utils.extend( Shape, {
 
 
     /* Calculation operations */
-    add:        function ( rect ) {
+    add: function ( rect ) {
         if ( Utils.isNumeric( rect ) ) {
             rect = { x: rect, y: rect, width: rect, height: rect };
         }
