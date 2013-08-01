@@ -1,5 +1,6 @@
 @@prioritize
 Polyfill.requestAnimationFrame
+Polyfill.addEventListener
 Utils
 Color
 Easing

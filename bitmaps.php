@@ -18,9 +18,12 @@
     
     var muffin = new Bitmap( { path: 'img/muffin.jpg', width: 100 }),
         muffinCrop = new Bitmap( { path: 'img/muffin.jpg', x: 110, width: 100, height: 100, crop: { x: 130, y: 130, width: 100, height: 100 } }),
-        muffinScaled = new Bitmap( { path: 'img/muffin.jpg', x: 220, width: 200, height: 200 } );
+        muffinScaled = new Bitmap( { path: 'img/muffin.jpg', x: 220 } );
 
-    muffinScaled.size.div( 2 );
+    muffinScaled.loaded( function( e ) {
+        
+        e.bitmap.size.mul( 0.2 );
+    } );
 
     stage.addChild( [ muffin, muffinCrop, muffinScaled ] );
 

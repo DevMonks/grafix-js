@@ -6,11 +6,21 @@ var Bitmap = function( path, x, y, width, height ) {
 
     this._path = null;
     this._image = null;
+    this._argbData = [];
 
     this._crop = new Rectangle;
     if( this._delegateChanged ) {
         this._crop.changed( this.changed, this );
     }
+    
+    this.loaded( function( e ) {
+        
+        if( e.bitmap.width === 0 )
+            e.bitmap.width = e.image.width;
+        
+        if( e.bitmap.height === 0 )
+            e.bitmap.height = e.image.height;
+    } );
 
     this.set( path, x, y, width, height );
 };
@@ -28,53 +38,26 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     get path() { return this._path; },
     set path( value ) {
         
+        if( this._path === value )
+            return;
+
         if( this._delegateChanged && this.has( 'changed' ) ) {
             
             this.changed( this.prepareChanged( 'path', this._path, value ) );
         }
         this._path = value;
         
-        if( this._image )
-            return this._image;
+        var img = value in Bitmap.cache ? Bitmap.cache[ value ] : new Image,
+            bmp = this;
         
-        var bmp = this;
-        var fixSize = function() {
-                
-                console.log( 'Fixing width of', bmp );
-            if( bmp.width === 0 )
-                bmp.width = bmp._image.width;
-
-            if( bmp.height === 0 )
-                bmp.height = bmp._image.height;
-
-            bmp.invalid = true;
-        };
-
-        // Try get image from cache, based on the given path
-        if( value in Bitmap.cache && Bitmap.cache[ value ].complete ) {
+        bmp.load( { bitmap: bmp, image: img } );
+        img.addEventListener( 'load', function( e ) {
             
-            this._image = Bitmap.cache[ value ];
-            fixSize();
-        } else if( value in Bitmap.cache ) {
-            
-            this._image = Bitmap.cache[ value ];
-            Bitmap.cache[ value ]._loadedCallbacks.push( fixSize );
-        } else {
-            
-            console.log( 'Attempt to load image', value );
-            
-            var img = new Image;
-            img._loadedCallbacks = [ fixSize ];
-            this._image = img;
-            img.onload = function( e ) {
-                
-                console.log( 'Running callbacks' );
-                for( var i in img._loadedCallbacks )
-                    img._loadedCallbacks[ i ]();
-            };
-            img.src = value;
-            Bitmap.cache[ value ] = img;
-        }
+            bmp.loaded( { bitmap: bmp, image: img } );
+        } );
+        img.src = value;
+        
+        this._image = img;
     },
             
     get image() { return this._image; },
@@ -107,6 +90,16 @@ Bitmap.prototype = Utils.extend( Rectangle, {
 
         return this;
     },
+            
+    load: function( args ) {
+        
+        return this.on( 'load', args );
+    },
+            
+    loaded: function( args ) {
+
+        return this.on( 'loaded', args );
+    },
 
     _draw: function( canvasContext ) {
         
@@ -122,7 +115,8 @@ Bitmap.prototype = Utils.extend( Rectangle, {
                 width: this.image.width,
                 height: this.image.height
             } ),
-            destinationRect = this;
+            destinationRect = this,
+            drawnObject = this._image;
 
         // Draw it
         canvasContext.drawImage(
