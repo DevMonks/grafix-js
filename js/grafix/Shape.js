@@ -923,6 +923,30 @@ Shape.prototype = Utils.extend( ShapeBase, {
         
         return this;
     },
+            
+    animate: function( props, duration, easing, callback ) {
+        
+        //@TODO: Also allow the following variable orders
+//        Shape Shape.animate( properties, args );
+//        Shape Shape.animate( properties );
+//        Shape Shape.animate( properties, duration );
+//        Shape Shape.animate( properties, complete );
+//        Shape Shape.animate( properties, easing );
+//        Shape Shape.animate( properties, easing, complete );
+//        Shape Shape.animate( properties, duration, easing );
+//        Shape Shape.animate( properties, duration, complete );
+//        Shape Shape.animate( properties, duration, easing, complete );
+//        Shape Shape.animate( keyFrames );
+//        Shape Shape.animate( keyFrames, duration );
+//        Shape Shape.animate( keyFrames, complete );
+        
+        return new Animation( this, props, { 
+            duration: duration || Animation.defaults.duration,
+            completed: callback || function() {},
+            easing: easing || Animation.defaults.easing,
+            start: true
+        } );
+    },
 
             
     toString: function() {

@@ -177,6 +177,9 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             
             ctx.putImageData( imageData, 0, 0 );
         }
+        
+        canvasContext.save();
+        this.applyStyles( canvasContext );
 
         // Draw it
         canvasContext.drawImage(
@@ -192,6 +195,8 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             destinationRect.width,
             destinationRect.height
         );
+            
+        canvasContext.restore();
 
         return this;
     }

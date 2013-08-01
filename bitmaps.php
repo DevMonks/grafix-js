@@ -32,7 +32,7 @@
         
         e.bitmap.size.mul( 0.2 );
     } );
-
+    
     stage.addChild( [ muffin, muffinCrop, muffinScaled, muffinFilter ] );
 
     var frameCount = 0;

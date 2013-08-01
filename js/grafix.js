@@ -23,6 +23,7 @@ Stage
 Group
 Bitmap
 Text
+Animation
 @@
 @@before
 
@@ -36,6 +37,7 @@ var Grafix = (function( undefined ) {
 @@after
 
 	var Export = {
+        Animation: Animation,
         Color: Color,
         Circle: Circle,
         Easing: Easing,

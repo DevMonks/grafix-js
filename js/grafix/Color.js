@@ -12,20 +12,7 @@ Color.prototype = {
     
   set: function( color, deep ) {
 
-    deep = deep !== false;
-
-    //TODO: Set color dynamically. color can have the following forms
-    //- #rgb - DONE
-    //- #rrggbb - DONE
-    //- rgb(r,g,b) (White-spaces allowed) - DONE
-    //- hsl(h,s,l) (White-spaces allowed) - DONE
-    //- cymk(c,y,m,k) (White-spaces allowed) - DONE
-    //- colorName in Color
-    //- [r,g,b,a]
-    //- [r,g,b]
-    //- {r:, g:, b:, a:} (all optional)
-    //- {h:, s:, l:} (all optional)
-    
+    deep = deep !== false;    
     
     if( Utils.isString( color ) ) {
         
@@ -578,6 +565,7 @@ Utils.merge( Color, {
         
       
       //TODO: create a canvas gradient out of this
+      
       
       return theGreatGradient;
     },
