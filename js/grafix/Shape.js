@@ -428,7 +428,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     applyStyles: function( context ) {
 
-        if(!context) {
+        if( !context ) {
             context = this.canvasContext;
         }
 

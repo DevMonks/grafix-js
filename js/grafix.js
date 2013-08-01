@@ -21,6 +21,7 @@ Input
 Stage
 Group
 Bitmap
+Text
 @@
 @@before
 
@@ -55,6 +56,7 @@ var Grafix = (function( undefined ) {
         ShapeBase: ShapeBase,
         Shape: Shape,
         Size: Size,
+        Text: Text,
         Utils: Utils,
 		/*
 			You can call "import()" somewhere for a namespace (global namespace is default)
