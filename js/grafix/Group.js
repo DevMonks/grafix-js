@@ -4,7 +4,7 @@ var Group = function( shapes, virtual ) {
     
     this._virtual = typeof virtual !== 'undefined' ? virtual : Group.defaults.virtual;
     
-    ShapeBase.call( this );
+    Shape.call( this );
     
     if( shapes )
         this.addChild( shapes );
@@ -46,24 +46,28 @@ Group.prototype = Utils.extend( Shape, {
 
         return new Group( this );
     },
+            
+    _drawGroup: function( canvasContext, style ) {
+        
+        if( this.virtual ) //virtual grids dont get drawn
+            return;
+        
+        Shape.prototype[ style ].call( this, canvasContext );
+    },
+            
+    fill: function( canvasContext ) {
 
-    addChild: function( shape ) {
-        
-        if( Utils.isArray( shape ) )
-            for( var i in shape ) {
-                
-                this.addChild( shape[ i ] );
-                return this;
-            }
-        
-        if( this.children.length < 1 )
-            this.set( { size: shape.size, position: shape.position } );
-        else
-            this.expand( shape );
-        
-        Shape.prototype.addChild.call( this, shape );
-        
-        return this;
+        this._drawGroup( canvasContext, 'fill' );
+    },
+            
+    stroke: function( canvasContext ) {
+
+        this._drawGroup( canvasContext, 'stroke' );
+    },
+    
+    clear: function( canvasContext ) {
+
+        this._drawGroup( canvasContext, 'clear' );
     }
 });
 

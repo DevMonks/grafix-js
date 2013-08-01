@@ -125,18 +125,12 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get right() { return this.width + this.x; },
     set right( value ) {
-        if( Utils.isNumeric( value ) === false ) {
-            return;
-        }
 
         this.width = value - this.x;
     },
 
     get top() { return this.y; },
     set top( value ) {
-        if( Utils.isNumeric( value ) === false ) {
-            return;
-        }
 
         this.height -= this.y - value;
         this.y = value;
@@ -144,9 +138,6 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get bottom() { return this.y + this.height; },
     set bottom( value ) {
-        if( Utils.isNumeric( value ) === false ) {
-            return;
-        }
 
         this.height = value - this.y;
     },

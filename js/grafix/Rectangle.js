@@ -8,12 +8,12 @@ Rectangle.prototype = Utils.extend( Shape, {
 
     get clone() {
         
-        return new Rectangle( this );
+        return new Rectangle( this, false );
     },
 
-    set: function( x, y, width, height ) {
+    set: function( x, y, width, height, deep ) {
         
-        Shape.prototype.set.call( this, x, y );
+        Shape.prototype.set.call( this, x, y, deep );
         
         if( typeof width !== 'undefined' )
             this.width = width;
