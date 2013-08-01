@@ -682,7 +682,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
     alignBy: function( context, position ) {
 
         context = context || this.alignContext;
-        console.log( 'aligning ', this.toString(), context.toString(), position );
+        
         switch ( context ) {
             case Shape.alignContext.parent:
 
