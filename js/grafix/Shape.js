@@ -91,18 +91,12 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get right() { return this.width + this.x; },
     set right( value ) {
-        if( Utils.isNumeric( value ) === false ) {
-            return;
-        }
 
         this.width = value - this.x;
     },
 
     get top() { return this.y; },
     set top( value ) {
-        if( Utils.isNumeric( value ) === false ) {
-            return;
-        }
 
         this.height -= this.y - value;
         this.y = value;
@@ -110,9 +104,6 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get bottom() { return this.y + this.height; },
     set bottom( value ) {
-        if( Utils.isNumeric( value ) === false ) {
-            return;
-        }
 
         this.height = value - this.y;
     },
@@ -185,9 +176,10 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get lineWidth() { return this.prop( 'lineWidth' ); },
     set lineWidth( value ) {
-        this.prop( 'lineWidth', value );
-        // Informs also parent
-        this.invalid = true;
+        if( this.prop( 'lineWidth', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
+        }
     },
 
     get lineCap() { return this.prop( 'lineCap' ); },
@@ -395,9 +387,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     applyStyles: function( context ) {
 
-        if( !context ) {
-            context = this.canvasContext;
-        }
+        context = context || this.canvasContext;
 
         // Apply styles if needed (If no style selected, properties won't change for performance reasons)
         if( this.offset instanceof Point && this.offset.isZero() === false ) {
@@ -627,17 +617,17 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 //        We have to check if any child needs a redraw and, if so, we have to redraw everything
                 //        Only redrawing dirty childs will make them overlapping ther other not-yet-dirty childs
                 // @TODO: This is not always the case
-                if( shape.collidesWith( this )/* && child.isDirty */) {
+                //if( shape.collidesWith( this )/* && child.isDirty */) {
                     //console.log('Shape.draw() poke child for draw (dirty=', child.isDirty, '):', child);
                     this.draw( context, forceChildDraw );
-                }
+                //}
             } );
         }
 
         return this;
     },
 
-    alignBy:      function( context, position ) {
+    alignBy: function( context, position ) {
 
         context = context || this.alignContext;
 
@@ -651,7 +641,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 context = this.root;
                 break;
         }
-
+        
         if( !context )
             return this;
 

@@ -230,4 +230,5 @@ Animation.prototype = Utils.extend( EventBase, {
 
         return this.on( 'completed', args );
     }
+
 } );

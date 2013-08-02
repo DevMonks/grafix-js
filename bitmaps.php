@@ -12,6 +12,11 @@
     <option value="noRed">noRed</option>
     <option value="noGreen">noGreen</option>
     <option value="noBlue">noBlue</option>
+    <option value="onlyRed">onlyRed</option>
+    <option value="onlyGreen">onlyGreen</option>
+    <option value="onlyBlue">onlyBlue</option>
+    <option value="grayScale">grayScale</option>
+    <option value="contrast">contrast</option>
 </select>
 
 
@@ -26,9 +31,19 @@
     var muffin = new Bitmap( { path: 'img/muffin.jpg', width: 100 } ),
         muffinCrop = new Bitmap( { path: 'img/muffin.jpg', x: 110, width: 100, height: 100, crop: { x: 130, y: 130, width: 100, height: 100 } }),
         muffinScaled = new Bitmap( { path: 'img/muffin.jpg', x: 220 } ),
-        muffinFilter = new Bitmap( { path: 'img/muffin.jpg', x: 400, filter: Filter.sepia } );
+        muffinFilter = new Bitmap( { path: 'img/houses.jpg', x: 400, y: 50, filter: Filter.sepia } );
 
-    stage.addChild( [ muffin, muffinCrop, muffinScaled ] );
+    muffinScaled.loaded( function( e ) {
+        
+        e.bitmap.size.mul( 0.2 );
+    } );
+    
+    muffinFilter.loaded( function( e ) {
+        
+        e.bitmap.size.mul( 0.3 );
+    } );
+    
+    stage.addChild( [ muffin, muffinCrop, muffinScaled, muffinFilter ] );
 
     var frameCount = 0;
     stage.update( function( e ) {

@@ -7,11 +7,18 @@ var Bitmap = function( path, x, y, width, height ) {
     this._path = null;
     this._image = null;
     this._filters = [];
+    this._filters = [];
 
     this._crop = new Rectangle;
-    if( this._delegateChanged ) {
-        this._crop.changed( this.changed, this );
-    }
+    
+    this.loaded( function( e ) {
+        
+        if( e.bitmap.width === 0 )
+            e.bitmap.width = e.image.width;
+        
+        if( e.bitmap.height === 0 )
+            e.bitmap.height = e.image.height;
+    } );
     
     this.loaded( function( e ) {
         
@@ -59,6 +66,11 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         if( this.prop( 'image', img ) !== false ) {
             this.invalid = true;
         }
+    },
+            
+    get filter() {
+        
+        return this._filter.length < 1 ? null : this._filter[ 0 ];
     },
             
     get filters() { return this.prop( 'filters' ); },
