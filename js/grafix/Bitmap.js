@@ -7,18 +7,8 @@ var Bitmap = function( path, x, y, width, height ) {
     this._path = null;
     this._image = null;
     this._filters = [];
-    this._filters = [];
 
     this._crop = new Rectangle;
-    
-    this.loaded( function( e ) {
-        
-        if( e.bitmap.width === 0 )
-            e.bitmap.width = e.image.width;
-        
-        if( e.bitmap.height === 0 )
-            e.bitmap.height = e.image.height;
-    } );
     
     this.loaded( function( e ) {
         
@@ -67,10 +57,16 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             this.invalid = true;
         }
     },
-            
+
     get filter() {
-        
-        return this._filter.length < 1 ? null : this._filter[ 0 ];
+
+        var filters = this.prop( 'filters' );
+        return filters.length < 1 ? null : filters[ 0 ];
+    },
+
+    set filter( value ) {
+
+        this.filters = [ value ];
     },
             
     get filters() { return this.prop( 'filters' ); },
@@ -79,17 +75,6 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         if( this.prop( 'filters', value ) !== false ) {
             this.invalid = true;
         }
-    },
-            
-    get filter() {
-
-        var filters = this.prop( 'filters' );
-        return filters.length < 1 ? null : filters[ 0 ];
-    },
-            
-    set filter( value ) {
-        
-        this.filters = [ value ];
     },
             
     get image() { return this.prop( 'image' ); },
@@ -107,86 +92,37 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             if( 'filters' in path ) this.filters = path.filters;
             if( 'filter' in path ) this.filter = path.filter;
 
-        } else if( typeof path !== 'undefined' ) 
+            Rectangle.prototype.set.call( this, path );
+        } else if( typeof path !== 'undefined' ) {
+
             this.path = path;
-        
-        if( typeof x !== 'undefined' )
-            this.x = x;
-        
-        if( typeof y !== 'undefined' )
-            this.y = y;
-        
-        if( typeof width !== 'undefined' )
-            this.width = width;
-        
-        if( typeof height !== 'undefined' )
-            this.height = height;
+        }
 
         return this;
     },
-            
-    addFilter: function( filter ) {
-        
-        this.filters.push( filter );
-        
-        return this;
-    },
-            
-    load: function( args ) {
-        
-        return this.on( 'load', args );
-    },
-            
-    loaded: function( args ) {
 
-        return this.on( 'loaded', args );
-    },
+
 
     _draw: function( canvasContext ) {
-        
-        if( !this.image.complete ) { //come back when it is please!
-            
-            this.load( function drawOnce( e ) {
-                
-                e.bitmap.invalid = true;
-                e.bitmap.unbind( 'load', drawOnce );
-            } );
+
+        if( !this.loaded )
             return this;
-        }
-        
+
         // Get source and destination bounds
-        var sourceRect = this.cropped ? this.crop : new Rectangle( {
-                width: this.image.width,
-                height: this.image.height
-            } ),
-            destinationRect = this,
-            img = this.image;
-    
-        
-        //Apply filters
-        if( this.filters.length > 0 ) {
-            
-            img = document.createElement( 'canvas' );
-            img.width = this.image.width;
-            img.height = this.image.height;
-            var ctx = img.getContext( '2d' );
-            ctx.drawImage( this.image, 0, 0, this.image.width, this.image.height );
-            
-            var imageData = ctx.getImageData( 0, 0, this.image.width, this.image.height );
-            
-            //apply filters
-            for( var i in this.filters )
-                this.filters[ i ].process( imageData );
-            
-            ctx.putImageData( imageData, 0, 0 );
+        var sourceRect = this.sourceRect,
+            destinationRect = this.destinationRect,
+            drawData = this._image;
+
+        // Lil debug
+        if( this.isCropped ) {
+            console.log( 'Drawing cropped', this.crop.toString() );
+        } else {
+            console.log( 'Drawing uncropped', this.toString() );
         }
-        
-        canvasContext.save();
-        this.applyStyles( canvasContext );
 
         // Draw it
         canvasContext.drawImage(
-            img,
+            drawData,
             // The source rectangle
             sourceRect.x,
             sourceRect.y,
@@ -198,8 +134,6 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             destinationRect.width,
             destinationRect.height
         );
-            
-        canvasContext.restore();
 
         return this;
     }

@@ -251,6 +251,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get alignContext() { return this.prop( 'alignContext' ); },
     set alignContext( value ) {
+        
         this.alignBy( value, this.align );
         if( this.prop( 'alignContext', value ) !== false ) {
             this.alignBy();
