@@ -102,27 +102,69 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     },
 
 
+    addFilter: function( filter ) {
+
+        this.filters.push( filter );
+
+        return this;
+    },
+
+    load: function( args ) {
+
+        return this.on( 'load', args );
+    },
+
+    loaded: function( args ) {
+
+        return this.on( 'loaded', args );
+    },
+
 
     _draw: function( canvasContext ) {
 
-        if( !this.loaded )
+        if( !this.image.complete ) { //come back when it is please!
+
+            this.load( function drawOnce( e ) {
+
+                e.bitmap.invalid = true;
+                e.bitmap.unbind( 'load', drawOnce );
+            } );
             return this;
+        }
 
         // Get source and destination bounds
-        var sourceRect = this.sourceRect,
-            destinationRect = this.destinationRect,
-            drawData = this._image;
+        var sourceRect = this.cropped ? this.crop : new Rectangle( {
+                width: this.image.width,
+                height: this.image.height
+            } ),
+            destinationRect = this,
+            img = this.image;
 
-        // Lil debug
-        if( this.isCropped ) {
-            console.log( 'Drawing cropped', this.crop.toString() );
-        } else {
-            console.log( 'Drawing uncropped', this.toString() );
+
+        //Apply filters
+        if( this.filters.length > 0 ) {
+
+            img = document.createElement( 'canvas' );
+            img.width = this.image.width;
+            img.height = this.image.height;
+            var ctx = img.getContext( '2d' );
+            ctx.drawImage( this.image, 0, 0, this.image.width, this.image.height );
+
+            var imageData = ctx.getImageData( 0, 0, this.image.width, this.image.height );
+
+            //apply filters
+            for( var i in this.filters )
+                this.filters[ i ].process( imageData );
+
+            ctx.putImageData( imageData, 0, 0 );
         }
+
+        canvasContext.save();
+        this.applyStyles( canvasContext );
 
         // Draw it
         canvasContext.drawImage(
-            drawData,
+            img,
             // The source rectangle
             sourceRect.x,
             sourceRect.y,
@@ -134,6 +176,8 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             destinationRect.width,
             destinationRect.height
         );
+
+        canvasContext.restore();
 
         return this;
     }
