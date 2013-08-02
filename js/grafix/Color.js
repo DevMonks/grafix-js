@@ -5,9 +5,6 @@ var Color = function ( color ) {
     this._b = 0;
     this._a = 0;
     
-    this._hsl = null;
-    this._cymk = null;
-    
     this.set( color );
 };
 
@@ -15,20 +12,7 @@ Color.prototype = {
     
   set: function( color, deep ) {
 
-    deep = deep !== false;
-
-    //TODO: Set color dynamically. color can have the following forms
-    //- #rgb - DONE
-    //- #rrggbb - DONE
-    //- rgb(r,g,b) (White-spaces allowed) - DONE
-    //- hsl(h,s,l) (White-spaces allowed) - DONE
-    //- cymk(c,y,m,k) (White-spaces allowed) - DONE
-    //- colorName in Color
-    //- [r,g,b,a]
-    //- [r,g,b]
-    //- {r:, g:, b:, a:} (all optional)
-    //- {h:, s:, l:} (all optional)
-    
+    deep = deep !== false;    
     
     if( Utils.isString( color ) ) {
         
@@ -65,17 +49,30 @@ Color.prototype = {
         if( 'r' in color ) this.r = color.r;
         if( 'g' in color ) this.g = color.g;
         if( 'b' in color ) this.b = color.b;
+        if( 'a' in color ) this.a = color.a;
         
         if( deep ) {
             
-            if( 'h' in color ) this.h = color.h;
-            if( 's' in color ) this.s = color.s;
-            if( 'l' in color ) this.l = color.l;
+            if( 'h' in color && 's' in color && 'l' in color ) {
+                
+                this.hsl = { h: color.h, s: color.s, l: color.l };
+            } else {
+
+                if( 'h' in color ) this.h = color.h;
+                if( 's' in color ) this.s = color.s;
+                if( 'l' in color ) this.l = color.l;
+            }
             
-            if( 'c' in color ) this.c = color.c;
-            if( 'y' in color ) this.y = color.y;
-            if( 'm' in color ) this.m = color.m;
-            if( 'k' in color ) this.k = color.k;
+            if( 'c' in color && 'y' in color && 'm' in color && 'k' in color ) {
+                
+                this.cymk = { c: color.c, y: color.y, m: color.m, k: color.k };
+            } else {
+
+                if( 'c' in color ) this.c = color.c;
+                if( 'y' in color ) this.y = color.y;
+                if( 'm' in color ) this.m = color.m;
+                if( 'k' in color ) this.k = color.k;
+            }
                     
             if( 'rgba' in color ) this.rgba = color.rgba;
             if( 'rgb' in color ) this.rgb = color.rgb;
@@ -98,8 +95,6 @@ Color.prototype = {
   set r( r ) {
       
       this._r = r;
-      this._hsl = null;
-      this._cymk = null;
   },
           
   get g() {
@@ -110,8 +105,6 @@ Color.prototype = {
   set g( g ) {
       
       this._g = g;
-      this._hsl = null;
-      this._cymk = null;
   },
           
   get b() {
@@ -122,8 +115,6 @@ Color.prototype = {
   set b( b ) {
       
       this._b = b;
-      this._hsl = null;
-      this._cymk = null;
   },
           
   get a() {
@@ -134,8 +125,6 @@ Color.prototype = {
   set a( a ) {
       
       this._a = a;
-      this._hsl = null;
-      this._cymk = null;
   },
           
          
@@ -163,9 +152,9 @@ Color.prototype = {
   },
   set h( h ) {
       
-      this.hsl.h = h;
-      //Trigger setter
-      this.hsl = this._hsl;
+      var hsl = this.hsl;
+      hsl.h = h;
+      this.hsl = hsl;
   },
   get s() {
       
@@ -173,9 +162,9 @@ Color.prototype = {
   },
   set s( s ) {
       
-      this.hsl.s = s;
-      //Trigger setter
-      this.hsl = this._hsl;
+      var hsl = this.hsl;
+      hsl.s = s;
+      this.hsl = hsl;
   },
   get l() {
       
@@ -183,27 +172,18 @@ Color.prototype = {
   },
   set l( l ) {
       
-      this.hsl.l = l;
-      //Trigger setter
-      this.hsl = this._hsl;
+      var hsl = this.hsl;
+      hsl.l = l;
+      this.hsl = hsl;
   },
     
   get hsl() { 
       
-      if( !this._hsl )
-          this._hsl = Color.rgbToHsl( this.r, this.g, this.b );
-      
-      return this._hsl;
+      return Color.rgbToHsl( this.r, this.g, this.b );
   },
   set hsl( hsl ) {
       
-      if( 'h' in hsl && 's' in hsl && 'l' in hsl ) {
-          
-        this._hsl = hsl;
-          
-        var rgb = Color.hslToRgb( this.hsl.h, this.hsl.s, this.hsl.l );
-        this.set( rgb );
-      }
+      this.set( Color.hslToRgb( hsl.h, hsl.s, hsl.l ) );
   },
           
   
@@ -214,9 +194,9 @@ Color.prototype = {
   },
   set c( c ) {
       
-      this.cymk.c = c;
-      //Trigger setter
-      this.cymk = this._cymk;
+      var cymk = this.cymk;
+      cymk.c = c;
+      this.cymk = cymk;
   },
   get y() {
       
@@ -224,9 +204,9 @@ Color.prototype = {
   },
   set y( y ) {
       
-      this.cymk.y = y;
-      //Trigger setter
-      this.cymk = this._cymk;
+      var cymk = this.cymk;
+      cymk.y = y;
+      this.cymk = cymk;
   },
   get m() {
       
@@ -234,9 +214,9 @@ Color.prototype = {
   },
   set m( m ) {
       
-      this.cymk.m = m;
-      //Trigger setter
-      this.cymk = this._cymk;
+      var cymk = this.cymk;
+      cymk.m = m;
+      this.cymk = cymk;
   },
   get k() {
       
@@ -244,29 +224,18 @@ Color.prototype = {
   },
   set k( k ) {
       
-      this.cymk.k = k;
-      //Trigger setter
-      this.cymk = this._cymk;
+      var cymk = this.cymk;
+      cymk.k = k;
+      this.cymk = cymk;
   },
     
-  get cymk() { 
+  get cymk() {       
       
-      if( !this._cymk )
-          this._cymk = Color.rgbToCymk( this.r, this.g, this.b );
-      
-      
-      return this._cymk;
+      return Color.rgbToCymk( this.r, this.g, this.b );
   },
   set cymk( cymk ) {
       
-      if( 'c' in cymk && 'y' in cymk && 'm' in cymk && 'k' in cymk ) {
-        
-        this._cymk = cymk;
-  
-  
-        var rgb = Color.cymkToRgb( this._cymk.c, this._cymk.y, this._cymk.m, this._cymk.k );
-        this.set( rgb );
-      }
+      this.set( Color.cymkToRgb( cymk.c, cymk.y, cymk.m, cymk.k ) );
   },
  
   get hex() {
@@ -275,10 +244,7 @@ Color.prototype = {
   },
   set hex( hex ) {
       
-      var c = Color.hexToRgb( hex );
-      if( c.r ) this.r = c.r;
-      if( c.g ) this.g = c.g;
-      if( c.b ) this.b = c.b;
+      this.set( Color.hexToRgb( hex ) );
   },
   
   //HSL operations
@@ -296,7 +262,9 @@ Color.prototype = {
   },
   desaturate: function( factor ) {
       
-      return this.saturate( -factor );
+      this.s /= factor;
+      
+      return this;
   },
   darken: function( factor ) {
       
@@ -306,7 +274,9 @@ Color.prototype = {
   },
   lighten: function( factor ) {
       
-      return this.darken( -factor );
+      this.l /= factor;
+      
+      return this;
   },
   
   inverse: function() {
@@ -513,7 +483,7 @@ Utils.merge( Color, {
             h = 0,
             s = 0,
             l = ( max + min ) / 2;
-        
+            
         if( max !== min ) {
             
             s = l > 0.5 ? diff / ( 2 - max - min ) : diff / ( max + min );
@@ -595,6 +565,7 @@ Utils.merge( Color, {
         
       
       //TODO: create a canvas gradient out of this
+      
       
       return theGreatGradient;
     },

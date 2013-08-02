@@ -1,6 +1,5 @@
 var Rectangle = function( x, y, width, height ) {
-
-    Shape.call( this, x, y );
+    Shape.call( this );
 
     this.set( x, y, width, height );
 };
@@ -9,30 +8,12 @@ Rectangle.prototype = Utils.extend( Shape, {
 
     get clone() {
         
-        return new Rectangle( this );
+        return new Rectangle( this, false );
     },
 
-    /**
-     * Gets the image destination bounds (unscaled)
-     * @returns {Rectangle}
-     */
-    get originBounds() {
-        // @TODO: Maybe cache this
-        return new Rectangle( this.x, this.y, this.width, this.height );
-    },
-
-    /**
-     * Gets the image destination bounds (scaled)
-     * @returns {Rectangle}
-     */
-    get bounds() {
-        return this.originBounds.clone.mul( this.scale );
-    },
-
-
-    set: function( x, y, width, height ) {
+    set: function( x, y, width, height, deep ) {
         
-        Shape.prototype.set.call( this, x, y );
+        Shape.prototype.set.call( this, x, y, deep );
         
         if( typeof width !== 'undefined' )
             this.width = width;
@@ -45,7 +26,7 @@ Rectangle.prototype = Utils.extend( Shape, {
 
 
     /* Calculation operations */
-    add:        function ( rect ) {
+    add: function ( rect ) {
         if ( Utils.isNumeric( rect ) ) {
             rect = { x: rect, y: rect, width: rect, height: rect };
         }

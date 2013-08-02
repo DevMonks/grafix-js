@@ -17,7 +17,7 @@
     Grafix.import();
 
     var stage = Grafix.stage( '#stage' );
-    stage.color = Color.black;
+    stage.color = Color.gray;
     
     
     var rect1 = Grafix.rect( { x: 20, y: 20, width: 20, height: 20, color: 'darkred' } ),

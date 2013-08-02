@@ -5,20 +5,25 @@ var Bitmap = function( path, x, y, width, height ) {
     Rectangle.call(this);
 
     this._path = null;
-    this._loaded = false;
     this._image = null;
+    this._filters = [];
 
     this._crop = new Rectangle;
     if( this._delegateChanged ) {
         this._crop.changed( this.changed, this );
     }
-
-    // A simple rectangle used to store/cache the image's source bounds (untouched)
-    this._imageBounds = null;
+    
+    this.loaded( function( e ) {
+        
+        if( e.bitmap.width === 0 )
+            e.bitmap.width = e.image.width;
+        
+        if( e.bitmap.height === 0 )
+            e.bitmap.height = e.image.height;
+    } );
 
     this.set( path, x, y, width, height );
 };
-
 Bitmap.cache = {};
 
 Bitmap.prototype = Utils.extend( Rectangle, {
@@ -32,131 +37,144 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     
     get path() { return this.prop( 'path' ); },
     set path( value ) {
-
-        if( this.prop('path', value ) === false ) {
+        
+        if( this.prop( 'path', value ) === false ) {
             return;
         }
 
-        // Try get image from cache, based on the given path
-        // @TODO: Loading queue
-        if( value in Bitmap.cache ) {
-            
-            this._image = Bitmap.cache[ value ];
-            
-            if( this.width === 0 )
-                this.width = this._image.width;
-            
-            if( this.height === 0 )
-                this.height = this._image.height;
-            
-            this._loaded = true;
+        // Get from cache or create new object
+        var img = value in Bitmap.cache ? Bitmap.cache[ value ] : new Image,
+            bmp = this;
+
+        // Trigger 'load' event on our object
+        bmp.load( { bitmap: bmp, image: img } );
+        // Add browser load event on element
+        img.addEventListener( 'load', function( e ) {
+
+            // Trigger out 'loaded' event
+            bmp.loaded( { bitmap: bmp, image: img } );
+        } );
+        img.src = value;
+        
+        if( this.prop( 'image', img ) !== false ) {
             this.invalid = true;
-
-            return;
         }
-            
-        var p = this;
-        this._image = new Image;
-        this._loaded = false;
-        this._image.onload = function( e ) {
-
-            if( p.width === 0 )
-                p.width = p._image.width;
-
-            if( p.height === 0 )
-                p.height = p._image.height;
-
-            p._loaded = true;
-            p.invalid = true;
-
-            // We got it - now cache it
-            Bitmap.cache[ value ] = this;
-
-            p.trigger('loaded');
-        };
-        this._image.onerror = function(e) {
-            console.error('Failed to load image', p._image, ':', e);
-            throw e;
-        };
-        this._image.src = value;
-
-        this.trigger('load');
     },
             
-    get loaded() { return this.prop( 'loaded' ); },
+    get filters() { return this.prop( 'filters' ); },
+    set filters( value ) {
+
+        if( this.prop( 'filters', value ) !== false ) {
+            this.invalid = true;
+        }
+    },
+            
+    get filter() {
+
+        var filters = this.prop( 'filters' );
+        return filters.length < 1 ? null : filters[ 0 ];
+    },
+            
+    set filter( value ) {
+        
+        this.filters = [ value ];
+    },
             
     get image() { return this.prop( 'image' ); },
 
-    get originWidth() { return this.image.width; },
-    get originHeight() { return this.image.height; },
-
-    get isCropped() { return ( this.crop.x !== 0 || this.crop.y !== 0 || this.crop.width !== 0 || this.crop.height !== 0 ); },
-
-    /**
-     * Gets the image source bounds (crop'ed or origin)
-     * @returns {Rectangle}
-     */
-    get sourceRect() {
-        // Return crop'ed area, if needed
-        if( this.isCropped ) {
-            return this.crop;
-        }
-
-        // Create and return origin bounds
-        if( !this._imageBounds ) {
-            this._imageBounds = new Rectangle(0, 0, this.originWidth, this.originHeight);
-        }
-        return this._imageBounds;
-    },
-
-    /**
-     * Gets the image destination bounds (scaled)
-     * @returns {Rectangle}
-     */
-    get destinationRect() {
-        return this.bounds;
-    },
+    get cropped() { return ( this.crop.x !== 0 || this.crop.y !== 0 || this.crop.width !== 0 || this.crop.height !== 0 ); },
 
     set: function( path, x, y, width, height ) {
 
-        Rectangle.prototype.set.call( this, x, y, width, height );
-
         if( Utils.isObject( path ) ) {
+            
+            Rectangle.prototype.set.call( this, path );
             
             if( 'path' in path ) this.path = path.path;
             if( 'crop' in path ) this.crop.set( path.crop );
+            if( 'filters' in path ) this.filters = path.filters;
+            if( 'filter' in path ) this.filter = path.filter;
 
-            Rectangle.prototype.set.call( this, path );
-        } else if( typeof path !== 'undefined' ) {
-
+        } else if( typeof path !== 'undefined' ) 
             this.path = path;
-        }
+        
+        if( typeof x !== 'undefined' )
+            this.x = x;
+        
+        if( typeof y !== 'undefined' )
+            this.y = y;
+        
+        if( typeof width !== 'undefined' )
+            this.width = width;
+        
+        if( typeof height !== 'undefined' )
+            this.height = height;
 
         return this;
     },
+            
+    addFilter: function( filter ) {
+        
+        this.filters.push( filter );
+        
+        return this;
+    },
+            
+    load: function( args ) {
+        
+        return this.on( 'load', args );
+    },
+            
+    loaded: function( args ) {
 
-
+        return this.on( 'loaded', args );
+    },
 
     _draw: function( canvasContext ) {
-
-        if( !this.loaded )
+        
+        if( !this.image.complete ) { //come back when it is please!
+            
+            this.load( function drawOnce( e ) {
+                
+                e.bitmap.invalid = true;
+                e.bitmap.unbind( 'load', drawOnce );
+            } );
             return this;
-
-        // Get source and destination bounds
-        var sourceRect = this.sourceRect,
-            destinationRect = this.destinationRect,
-            drawData = this._image;
-
-        // Lil debug
-        if( this.isCropped ) {
-            console.log( 'Drawing cropped', this.crop.toString() );
-        } else {
-            console.log( 'Drawing uncropped', this.toString() );
         }
+        
+        // Get source and destination bounds
+        var sourceRect = this.cropped ? this.crop : new Rectangle( {
+                width: this.image.width,
+                height: this.image.height
+            } ),
+            destinationRect = this,
+            img = this.image;
+    
+        
+        //Apply filters
+        if( this.filters.length > 0 ) {
+            
+            img = document.createElement( 'canvas' );
+            img.width = this.image.width;
+            img.height = this.image.height;
+            var ctx = img.getContext( '2d' );
+            ctx.drawImage( this.image, 0, 0, this.image.width, this.image.height );
+            
+            var imageData = ctx.getImageData( 0, 0, this.image.width, this.image.height );
+            
+            //apply filters
+            for( var i in this.filters )
+                this.filters[ i ].process( imageData );
+            
+            ctx.putImageData( imageData, 0, 0 );
+        }
+        
+        canvasContext.save();
+        this.applyStyles( canvasContext );
 
         // Draw it
         canvasContext.drawImage(
-            drawData,
+            img,
             // The source rectangle
             sourceRect.x,
             sourceRect.y,
@@ -168,6 +186,8 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             destinationRect.width,
             destinationRect.height
         );
+            
+        canvasContext.restore();
 
         return this;
     }

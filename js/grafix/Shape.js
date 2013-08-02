@@ -251,6 +251,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
         }
 
         if( this.prop( 'align', value ) !== false ) {
+            this.alignBy();
             // Informs also parent
             this.invalid = true;
         }
@@ -258,9 +259,9 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get alignContext() { return this.prop( 'alignContext' ); },
     set alignContext( value ) {
-
         this.alignBy( value, this.align );
         if( this.prop( 'alignContext', value ) !== false ) {
+            this.alignBy();
             // Informs also parent
             this.invalid = true;
         }
@@ -479,6 +480,10 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
                     this.lineCap = token;
                 }
+                else if( (token in Shape.defaults.lineJoins) ) {
+
+                    this.lineJoin = token;
+                }
                 else if( (token in Shape.defaults.alignContexts) ) {
 
                     this.alignContext = token;
@@ -621,6 +626,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 // @TODO: This causes an overlay problem..
                 //        We have to check if any child needs a redraw and, if so, we have to redraw everything
                 //        Only redrawing dirty childs will make them overlapping ther other not-yet-dirty childs
+                // @TODO: This is not always the case
                 if( shape.collidesWith( this )/* && child.isDirty */) {
                     //console.log('Shape.draw() poke child for draw (dirty=', child.isDirty, '):', child);
                     this.draw( context, forceChildDraw );
@@ -633,14 +639,23 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     alignBy:      function( context, position ) {
 
-        if( !context ) {
-            context = this.canvasContext;
-        } else if( Utils.isString(context) ) {
-            position = context;
-            context = this.canvasContext;
+        context = context || this.alignContext;
+
+        switch ( context ) {
+            case 'parent':
+
+                context = this.parent;
+                break;
+            case 'root':
+
+                context = this.root;
+                break;
         }
 
-        position = (position || '').split( ' ' );
+        if( !context )
+            return this;
+
+        position = ( position || this.align ).split( ' ' );
         var type = 'center';
         var xType = null;
         var yType = null;
@@ -874,6 +889,30 @@ Shape.prototype = Utils.extend( ShapeBase, {
             this.bottom = shape.bottom;
         
         return this;
+    },
+
+    animate: function( props, duration, easing, callback ) {
+
+        //@TODO: Also allow the following variable orders
+//        Shape Shape.animate( properties, args );
+//        Shape Shape.animate( properties );
+//        Shape Shape.animate( properties, duration );
+//        Shape Shape.animate( properties, complete );
+//        Shape Shape.animate( properties, easing );
+//        Shape Shape.animate( properties, easing, complete );
+//        Shape Shape.animate( properties, duration, easing );
+//        Shape Shape.animate( properties, duration, complete );
+//        Shape Shape.animate( properties, duration, easing, complete );
+//        Shape Shape.animate( keyFrames );
+//        Shape Shape.animate( keyFrames, duration );
+//        Shape Shape.animate( keyFrames, complete );
+
+        return new Animation( this, props, {
+            duration: duration || Animation.defaults.duration,
+            completed: callback || function() {},
+            easing: easing || Animation.defaults.easing,
+            start: true
+        } );
     },
 
             

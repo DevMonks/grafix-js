@@ -5,7 +5,14 @@
 <div style="width: 100%; padding: 20px; font-family: monospace; border: 1px dashed #fcc" id="frames"></div><br>
 <br>
 
-<canvas id="stage" width="800" height="500"></canvas><br>
+<canvas id="stage" width="900" height="500"></canvas><br>
+<select onchange="muffinFilter.filter=Filter[this.value]">
+    <option value="sepia">sepia</option>
+    <option value="inverse">inverse</option>
+    <option value="noRed">noRed</option>
+    <option value="noGreen">noGreen</option>
+    <option value="noBlue">noBlue</option>
+</select>
 
 
 <script src="js/grafix.nocache.js"></script>
@@ -16,13 +23,10 @@
     var stage = new Stage( '#stage' );
     stage.color = Color.black;
     
-    var muffin = new Bitmap({ path: 'img/muffin.jpg', width: 100 }),
-        muffinCrop = new Bitmap({ path: 'img/muffin.jpg', x: 110, width: 100, height: 100, crop: { x: 130, y: 130, width: 100, height: 100 } }),
-        muffinScaled = new Bitmap({ path: 'img/muffin.jpg', x: 220, scale: 0.2 });
-
-    muffin.on( 'loaded', function() {
-        console.log('muffin 1 was loaded: ', muffin);
-    });
+    var muffin = new Bitmap( { path: 'img/muffin.jpg', width: 100 } ),
+        muffinCrop = new Bitmap( { path: 'img/muffin.jpg', x: 110, width: 100, height: 100, crop: { x: 130, y: 130, width: 100, height: 100 } }),
+        muffinScaled = new Bitmap( { path: 'img/muffin.jpg', x: 220 } ),
+        muffinFilter = new Bitmap( { path: 'img/muffin.jpg', x: 400, filter: Filter.sepia } );
 
     stage.addChild( [ muffin, muffinCrop, muffinScaled ] );
 
