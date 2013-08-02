@@ -1,8 +1,5 @@
 var Point = function ( x, y ) {
-    ShapeBase.call( this );
-
-    // Will changes to own properties delegated to the changed() event?
-    this._delegateChanged = (Utils.isObject(x) && x.delegateChanged ? true : false);
+    EventBase.call( this );
 
     this._x = 0;
     this._y = 0;
@@ -10,33 +7,29 @@ var Point = function ( x, y ) {
     this.set( x, y );
 };
 
-Point.prototype = Utils.extend( ShapeBase, {
-    get x() { return this._x; },
+Point.prototype = Utils.extend( EventBase, {
+    get x() { return this.prop( 'x' ); },
     set x( value ) {
-        if ( Utils.isNumeric( value ) === false || this._x === value ) {
+        if( Utils.isNumeric( value ) === false ) {
             return;
         }
 
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'x', this._x, value ) );
+        if( this.prop( 'x', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._x = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
-    get y() { return this._y; },
+    get y() { return this.prop( 'y' ); },
     set y( value ) {
-        if ( Utils.isNumeric( value ) === false || this._y === value ) {
+        if( Utils.isNumeric( value ) === false ) {
             return;
         }
 
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'y', this._y, value ) );
+        if( this.prop( 'y', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._y = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
     get clone() {
@@ -44,8 +37,6 @@ Point.prototype = Utils.extend( ShapeBase, {
     },
 
     set: function( x, y ) {
-
-        ShapeBase.prototype.set.call( this, x );
 
         if ( Utils.isObject( x ) ) {
 

@@ -13,83 +13,49 @@ var Shape = function( x, y ) {
 
 
     // Shape position and style properties
-    this._position = new Point( { parent: this, delegateChanged: this._delegateChanged } );
-    if( this._delegateChanged ) {
-        this._position.changed(this.changed, this);
-    }
-    this._size = new Size( { parent: this, delegateChanged: this._delegateChanged } );
-    if( this._delegateChanged ) {
-        this._size.changed(this.changed, this);
-    }
+    this._position = new Point( { parent: this } );
+    this._size = new Size( { parent: this } );
 
     /* Style Properties */
-    this._offset = new Point( { parent: this, delegateChanged: this._delegateChanged } );
-    if( this._delegateChanged ) {
-        this._offset.changed(this.changed, this);
-    }
-    this._scale = new Size( { width: 1, height: 1, parent: this, delegateChanged: this._delegateChanged } );
-    if( this._delegateChanged ) {
-        this._scale.changed(this.changed, this);
-    }
+    this._offset = new Point( { parent: this } );
+    this._scale = new Size( { width: 1, height: 1, parent: this } );
     this._angle = 0;
-    this._skew = new Point( { parent: this, delegateChanged: this._delegateChanged } );
-    if( this._delegateChanged ) {
-        this._skew.changed(this.changed, this);
-    }
+    this._skew = new Point( { parent: this } );
     this._color = Color.black;
-    this._drawStyle = Shape.drawStyle.default;
+    this._drawStyle = Shape.defaults.drawStyle;
     this._lineWidth = 1;
-    this._lineCap = Shape.lineCap.default;
+    this._lineCap = Shape.defaults.lineCap;
     this._miterLimit = null;
-    this._lineJoin = Shape.lineJoin.default;
+    this._lineJoin = Shape.defaults.lineJoin;
     this._closePath = null;
-    this._alignContext = Shape.alignContext.default;
-    this._align = 'top left'; //inner, outer, left, right, bottom, center, top, or all together...
+    this._alignContext = Shape.defaults.alignContext;
+    this._align = Shape.defaults.align;
 
     this.set( x, y );
 };
 
-Shape.drawStyle = Utils.makeEnum({
-    fill: 'fill',
-    stroke: 'clear',
-    clear: 'clear'
-}, 'fill' );
-
-Shape.lineCap = Utils.makeEnum({
-    butt: 'butt',
-    round: 'round',
-    square: 'square'
-}, 'butt' );
-
-Shape.lineJoin = Utils.makeEnum({
-    miter: 'miter',
-    bevel: 'bevel',
-    round: 'round'
-}, 'miter' );
-
-Shape.alignContext = Utils.makeEnum({
-    parent: 'parent',
-    root: 'root',
-}, 'parent' );
-
-Shape.align = Utils.makeEnum({
-    top: 'top',
-    bottom: 'bottom',
-    left: 'left',
-    right: 'right',
-    inner: 'inner',
-    outer: 'outer'
-} );
+Shape.defaults = {
+    drawStyles: [ 'fill', 'stroke', 'clear' ],
+    drawStyle: 'fill',
+    lineCaps: [ 'butt', 'round', 'square' ],
+    lineCap: 'butt',
+    lineJoins: [ 'miter', 'bevel', 'round' ],
+    lineJoin: 'miter',
+    alignContexts: [ 'parent', 'root' ],
+    alignContext: 'parent',
+    aligns: [ 'top', 'bottom', 'left', 'ritght', 'inner', 'outer' ],
+    align: 'top left'
+};
 
 Shape.prototype = Utils.extend( ShapeBase, {
     get clone() {
         return new Shape( this );
     },
 
-    get position() { return this._position; },
+    get position() { return this.prop('position'); },
     set position( value ) { throw 'Cannot redeclare position, use Shape.position.set( x/Object, y ) instead';},
 
-    get size() { return this._size; },
+    get size() { return this.prop('size'); },
     set size( value ) { throw 'Cannot redeclare size, use Shape.size.set( width/Object, height ) instead'; },
 
     get x() { return this.position.x; },
@@ -175,116 +141,101 @@ Shape.prototype = Utils.extend( ShapeBase, {
         this.bottom = value.y;
     },
 
-    get offset() { return this._offset; },
+    get offset() { return this.prop( 'offset' ); },
     set offset( value ) { throw 'Cannot redeclare offset, use Shape.offset.set( x/Object, y ) instead'; },
 
-    get scale() { return this._scale; },
+    get scale() { return this.prop( 'scale' ); },
     set scale( value ) { throw 'Cannot redeclare scale, use Shape.scale.set( width/Object, height ) instead'; },
 
-    get angle() { return this._angle; },
+    get angle() { return this.prop( 'angle' ); },
     set angle( value ) {
         if( Utils.isNumeric( value ) === false ) {
             return;
         }
 
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'angle', this._angle, value ) );
+        if( this.prop( 'angle', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._angle = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
-    get skew() { return this._skew; },
+    get skew() { return this.prop( 'skew' ); },
     set skew( value ) { throw 'Cannot redeclare skew, use Shape.skew.set( x/Object, y ) instead'; },
 
-    get color() { return this._color; },
+    get color() { return this.prop( 'color' ); },
     set color( value ) {
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'color', this._color, value ) );
+        if( this.prop( 'color', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._color = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
-    get drawStyle() { return this._drawStyle; },
+    get drawStyle() { return this.prop( 'drawStyle' ); },
     set drawStyle( value ) {
-        if( !(value in Shape.drawStyle) ) {
-            value = Shape.drawStyle.default;
+
+        if( !(value in Shape.defaults.drawStyles) ) {
+            value = Shape.defaults.drawStyle;
         }
 
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'drawStyle', this._drawStyle, value ) );
+        if( this.prop( 'drawStyle', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._drawStyle = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
-    get lineWidth() { return this._lineWidth; },
+    get lineWidth() { return this.prop( 'lineWidth' ); },
     set lineWidth( value ) {
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'lineWidth', this._lineWidth, value ) );
-        }
-        this._lineWidth = value;
+        this.prop( 'lineWidth', value );
         // Informs also parent
         this.invalid = true;
     },
 
-    get lineCap() { return this._lineCap; },
+    get lineCap() { return this.prop( 'lineCap' ); },
     set lineCap( value ) {
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'lineCap', this._lineCap, value ) );
+        if( this.prop( 'lineCap', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._lineCap = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
-    get miterLimit() { return this._miterLimit; },
+    get miterLimit() { return this.prop( 'miterLimit' ); },
     set miterLimit( value ) {
         if( Utils.isNumeric( value ) === false ) {
             return;
         }
 
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'miterLimit', this._miterLimit, value ) );
+        if( this.prop( 'miterLimit', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._miterLimit = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
-    get lineJoin() { return this._lineJoin; },
+    get lineJoin() { return this.prop( 'lineJoin' ); },
     set lineJoin( value ) {
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'lineJoin', this._lineJoin, value ) );
+        if( this.prop( 'lineJoin', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._lineJoin = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
-    get closePath() { return this._closePath; },
+    get closePath() { return this.prop( 'closePath' ); },
     set closePath( value ) {
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'closePath', this._closePath, value ) );
+        if( this.prop( 'closePath', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._closePath = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
-    get align() { return this._align; },
+    get align() { return this.prop( 'align' ); },
     set align( value ) {
         var alignContext = null;
+        // @TODO: Make this using Shape.defaults.alignContexts!
         switch ( this.alignContext ) {
-            case Shape.alignContext.parent:
+            case 'parent':
 
                 alignContext = this.parent;
                 break;
-            case Shape.alignContext.root:
+            case 'root':
 
                 alignContext = this.root;
                 break;
@@ -294,26 +245,25 @@ Shape.prototype = Utils.extend( ShapeBase, {
         }
 
         if( alignContext ) {
+            // @TODO: Shouln'd this use Shape.defaults.align?
             var align = Utils.isString( this.align ) ? this.align : 'center center center';
             this.alignBy( alignContext, align );
         }
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'align', this._align, value ) );
+
+        if( this.prop( 'align', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._align = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
-    get alignContext() { return this._alignContext; },
+    get alignContext() { return this.prop( 'alignContext' ); },
     set alignContext( value ) {
+
         this.alignBy( value, this.align );
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'alignContext', this._alignContext, value ) );
+        if( this.prop( 'alignContext', value ) !== false ) {
+            // Informs also parent
+            this.invalid = true;
         }
-        this._alignContext = value;
-        // Informs also parent
-        this.invalid = true;
     },
 
     set: function( x, y, deep ) {
@@ -444,12 +394,12 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     applyStyles: function( context ) {
 
-        if(!context) {
+        if( !context ) {
             context = this.canvasContext;
         }
 
-        //Apply styles if needed (If no style selected, properties won't change for performance reasons)
-        if( this.offset instanceof Point && !this.offset.isZero() ) {
+        // Apply styles if needed (If no style selected, properties won't change for performance reasons)
+        if( this.offset instanceof Point && this.offset.isZero() === false ) {
             context.translate( this.offset.x, this.offset.y );
         }
 
@@ -477,14 +427,14 @@ Shape.prototype = Utils.extend( ShapeBase, {
             context.lineJoin = this.lineJoin;
         }
 
-        if( this.skew instanceof Point && !this.skew.isZero() ) {
+        if( this.skew instanceof Point && this.skew.isZero() === false ) {
             context.transform( 1, this.skew.x, this.skew.y, 1, 0, 0 );
         }
 
         var colorProp = this.drawStyle + 'Style';
         // the color will only be re-set, if it changes
-        if( this.color !== context[colorProp] ) {
-            context[colorProp] = this.color;
+        if( this.color !== context[ colorProp ] ) {
+            context[ colorProp ] = this.color;
         }
 
         return this;
@@ -492,10 +442,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     fill: function( context ) {
 
-        if(!context) {
-            context = this.canvasContext;
-        }
-
+        context = context || this.canvasContext;
         context.fillRect( this.x, this.y, this.width, this.height );
 
         return this;
@@ -503,10 +450,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     stroke: function( context ) {
 
-        if(!context) {
-            context = this.canvasContext;
-        }
-
+        context = context || this.canvasContext;
         context.strokeRect( this.x, this.y, this.width, this.height );
 
         return this;
@@ -514,10 +458,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     clear: function( context ) {
 
-        if(!context) {
-            context = this.canvasContext;
-        }
-
+        context = context || this.canvasContext;
         context.clearRect( this.x, this.y, this.width, this.height );
     },
 
@@ -530,23 +471,19 @@ Shape.prototype = Utils.extend( ShapeBase, {
             for( var i in tokens ) {
 
                 var token = tokens[ i ];
-                if( (token in Shape.drawStyle) ) {
+                if( (token in Shape.defaults.drawStyles) ) {
 
                     this.drawStyle = token;
                 }
-                else if( (token in Shape.lineCap) ) {
+                else if( (token in Shape.defaults.lineCaps) ) {
 
                     this.lineCap = token;
                 }
-                else if( (token in Shape.miterLimit) ) {
-
-                    this.miterLimit = token;
-                }
-                else if( (token in Shape.alignContext) ) {
+                else if( (token in Shape.defaults.alignContexts) ) {
 
                     this.alignContext = token;
                 }
-                else if( (token in Shape.align) ) {
+                else if( (token in Shape.defaults.aligns) ) {
 
                     // @TODO: These would need to be collected and passed as one string to this.align
                 }
@@ -678,17 +615,17 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
         // Draw dirty children
         if( this.children.length ) {
-            for ( var i = 0; i < this.children.length; i++ ) {
-                var child = this.children[i];
+            var shape = this;
+            this.eachChild( function( childIndex ) {
                 // Redraw shapes that are directly connected to this parent only
                 // @TODO: This causes an overlay problem..
                 //        We have to check if any child needs a redraw and, if so, we have to redraw everything
                 //        Only redrawing dirty childs will make them overlapping ther other not-yet-dirty childs
-                if( this.collidesWith( child )/* && child.isDirty */) {
+                if( shape.collidesWith( this )/* && child.isDirty */) {
                     //console.log('Shape.draw() poke child for draw (dirty=', child.isDirty, '):', child);
-                    child.draw( context, forceChildDraw );
+                    this.draw( context, forceChildDraw );
                 }
-            }
+            } );
         }
 
         return this;
@@ -696,7 +633,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     alignBy:      function( context, position ) {
 
-        if(!context) {
+        if( !context ) {
             context = this.canvasContext;
         } else if( Utils.isString(context) ) {
             position = context;

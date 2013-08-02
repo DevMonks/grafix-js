@@ -5,7 +5,7 @@ Color
 Easing
 EventArgs
 EventHandler
-EventObject
+EventBase
 ShapeBase
 Shape
 Point
@@ -37,7 +37,7 @@ var Grafix = (function( undefined ) {
         Color: Color,
         Circle: Circle,
         Easing: Easing,
-        EventObject: EventObject,
+        EventBase: EventBase,
         EventArgs: EventArgs,
         EventHandler: EventHandler,
         Input: Input,

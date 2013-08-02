@@ -5,14 +5,15 @@ var Point3D = function ( x, y, z ) {
 };
 
 Point3D.prototype = Utils.extend( Point, {
-    get z() { return this._z; },
+    get z() { return this.prop( 'z' ); },
     set z( value ) {
         if ( Utils.isNumeric( value ) == false ) {
             return;
         }
 
-        this.changed( this.prepareChanged( 'z', this._z, value ) );
-        this._z = value;
+        if ( this.prop( 'z', value ) === false ) {
+            return;
+        }
 
         this.invalid = true;
     },

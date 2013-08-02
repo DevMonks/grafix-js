@@ -18,6 +18,7 @@ var Bitmap = function( path, x, y, width, height ) {
 
     this.set( path, x, y, width, height );
 };
+
 Bitmap.cache = {};
 
 Bitmap.prototype = Utils.extend( Rectangle, {
@@ -26,18 +27,18 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         return new Bitmap( this );
     },
     
-    get crop() { return this._crop; },
+    get crop() { return this.prop( 'crop' ); },
     set crop( value ) { throw 'Cannot redeclare crop, use Bitmap.crop.set( object ) instead'; },
     
-    get path() { return this._path; },
+    get path() { return this.prop( 'path' ); },
     set path( value ) {
-        
-        if( this._delegateChanged && this.has( 'changed' ) ) {
-            this.changed( this.prepareChanged( 'path', this._path, value ) );
+
+        if( this.prop('path', value ) === false ) {
+            return;
         }
-        this._path = value;
 
         // Try get image from cache, based on the given path
+        // @TODO: Loading queue
         if( value in Bitmap.cache ) {
             
             this._image = Bitmap.cache[ value ];
@@ -82,9 +83,9 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         this.trigger('load');
     },
             
-    get loaded() { return this._loaded; },
+    get loaded() { return this.prop( 'loaded' ); },
             
-    get image() { return this._image; },
+    get image() { return this.prop( 'image' ); },
 
     get originWidth() { return this.image.width; },
     get originHeight() { return this.image.height; },

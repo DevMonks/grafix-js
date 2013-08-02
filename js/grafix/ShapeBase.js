@@ -1,5 +1,5 @@
 var ShapeBase = function( args ) {
-    EventObject.call( this );
+    EventBase.call( this );
 
     // Support a parent and invalidate flag
     this._parent = null;
@@ -15,17 +15,15 @@ var ShapeBase = function( args ) {
     this._canvas = null;
     this._canvasContext = null;
 
-    // Will changes to own and children properties delegated to the changed() event?
-    this._delegateChanged = ShapeBase.defaults.delegateChanged;
-
     /** @var Input */
     this._input = null;
 };
+
 ShapeBase.defaults = {
-    delegateChanged: false
+
 };
 
-ShapeBase.prototype = Utils.extend( EventObject, {
+ShapeBase.prototype = Utils.extend( EventBase, {
     
     get clone() { 
         throw 'Cannot clone ShapeBase, please use any of the derived classes instead'; 
@@ -40,15 +38,20 @@ ShapeBase.prototype = Utils.extend( EventObject, {
     },
     set name( value ) {
 
+        // DONT use .prop() here which enables events to cancel the update; we WANT (and need) a name/uid
         this._name = value;
         this.invalid = true;
     },
 
     get invalid() { return this._invalid; },
     set invalid( value ) {
-        
-        if( this._invalid !== value )
+
+        // Also no usage of .prop() here
+        if( this._invalid !== value ) {
             this._invalid = value;
+
+            this.changed( 'invalid' );
+        }
         
         // Inform parent
         var parent = this.parent;
@@ -57,35 +60,35 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         }
     },
 
-    get children() { return this._children; },
+    get children() { return this.prop( 'children' ); },
     set children( value ) { throw 'Cannot set children manually, use addChild instead'; },
 
-    get parent() { return this._parent; },
+    get parent() { return this.prop( 'parent' ); },
     set parent( value ) {
         
         if( this._parent === value ) {
             return;
         }
 
-        if( !( value instanceof ShapeBase ) && value !== null ) {
+        if( value !== null && !( value instanceof ShapeBase ) ) {
             
             throw 'Only an instance of Shape are allowed to be set as a parent';
         }
 
         // Add us as a child to our (new)parent
-        if( value !== null && !value.hasChild( this ) )
+        if( value !== null && value.hasChild( this ) === false ) {
             value.addChild( this );
+        }
 
         // If we got a parent already, remove it
-        if( this._parent )
+        if( this._parent ) {
             this.parent.removeChild( this );
-
-        // Delegate changed() events from our parent to us
-        if( this._delegateChanged && this.has( 'changed' ) ) {
-            this.changed( this.prepareChanged( 'parent', this._parent, value ) );
         }
+
         // Store it
         this._parent = value;
+
+        this.changed( 'parent' );
     },
 
     get input() {
@@ -102,7 +105,7 @@ ShapeBase.prototype = Utils.extend( EventObject, {
 
         return this._input;
     },
-    set input( value ) { this._input = value; },
+    set input( value ) { return this.prop('input', value); },
 
     get canvas() {
         
@@ -122,12 +125,15 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         return this._canvas;
     },
     set canvas( value ) { 
-        
+
+        // This allows to set a selector too
         if( Utils.isString( value ) )
             value = Utils.getDomElementById( value );
-        
-        this._canvasContext = null;
-        this._canvas = value; 
+
+        if( this.prop( 'canvas', value ) !== false ) {
+            // Lazy getter will fetch the context (even from a cache) so no worry
+            this._canvasContext = null;
+        }
     },
 
     get canvasContext() {
@@ -140,7 +146,7 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         
         return this._canvasContext;
     },
-    set canvasContext( value ) { this._canvasContext = value; },
+    set canvasContext( value ) { return this.prop( 'canvasContext', value ); },
 
     /**
      * Returns true, if we have the given shape (or name) as a children component.
@@ -150,9 +156,9 @@ ShapeBase.prototype = Utils.extend( EventObject, {
      */
     hasChild: function( shape ) {
 
-        // Support search for name
+        // Support to search for name
         if( Utils.isString( shape ) ) {
-            return ( shape in this._childrenNameCache );
+            return !!( shape in this._childrenNameCache );
         }
 
         // Search for a ShapeBase object
@@ -169,12 +175,13 @@ ShapeBase.prototype = Utils.extend( EventObject, {
      * Add's the given shape as out children component.
      * Also ensures the correct {shape.parent} value.
      *
-     * @param {ShapeBase} shape
+     * @param {ShapeBase|ShapeBase[]} shape
      * @returns {self}
      */
     addChild: function( shape ) {
+
         if( Utils.isArray( shape ) ) {
-            for ( var i = 0; i < shape.length; i++ ) {
+            for( var i = 0; i < shape.length; i++ ) {
                 this.addChild( shape[i] );
             }
 
@@ -182,7 +189,7 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         }
 
         if( !( shape instanceof ShapeBase ) ) {
-            throw 'Can only add arrays or instances of ShapeBase to children';
+            throw 'Can only add arrays or instances of ShapeBase as a children';
         }
 
         // Add as a children component
@@ -191,12 +198,8 @@ ShapeBase.prototype = Utils.extend( EventObject, {
         this._childrenNameCache[ shape.name ] = (this.children.length - 1);
 
         shape.parent = this;
-        // Delegate children changed() to our changed() handler
-        if( this._delegateChanged ) {
-            shape.changed( this.changed, this );
-        }
 
-        // Take care of invalid flag of the new child
+        // Take care of invalid flag of the new child which would normaly delegated to us
         if( shape.invalid ) {
             this.invalid = true;
         }
@@ -207,33 +210,48 @@ ShapeBase.prototype = Utils.extend( EventObject, {
     /**
      * Removes the given shape from our children components.
      *
-     * @param {ShapeBase} shape
+     * @param {ShapeBase|string|ShapeBase[]|string[]} shape
      * @returns {self}
      */
     removeChild: function( shape ) {
+
         var i;
+        // This will allow to remove an array of childs
         if( Utils.isArray( shape ) ) {
-            for ( i = 0; i < shape.length; i++ ) {
+            for( i = 0; i < shape.length; i++ ) {
                 this.removeChild( shape[i] );
             }
 
             return this;
         }
 
-        for( i = 0; i < this.children.length; i++ ) {
-            if( this.children[i] === shape ) {
-                this.children.splice( i, 1 );
+        // Allow to remove a children by name too
+        var searchByName = !!Utils.isString( shape );
+        // In case of the remove-by-name call, we dont have to search the index - its stored in our cache
+        if( searchByName ) {
+            if( !(shape in this._childrenNameCache) ) {
+                // No child with this name
+                return this;
+            }
+
+            i = this._childrenNameCache[ shape ];
+            this.children.splice( i, 1 );
+        } else {
+            // Search for the reference
+            for( i = 0; i < this.children.length; i++ ) {
+                // @TODO: Would be faster to just compare the .name property
+                //        But this would be unique even for cloned shapes
+                //        Which would also lead to fail in the following compare
+                //        Maybe we need a .equals( shape ) method which wont compare the unique properties?
+                if( this.children[i] === shape ) {
+                    this.children.splice( i, 1 );
+                }
             }
         }
 
         // Remove from search index
         if( (shape.name in this._childrenNameCache) ) {
             delete this._childrenNameCache[ shape.name ];
-        }
-
-        // Remove event from child
-        if( this._delegateChanged ) {
-            shape.unbind( 'changed', new EventHandler( this.changed, this ) );
         }
 
         return this;
@@ -259,8 +277,12 @@ ShapeBase.prototype = Utils.extend( EventObject, {
     
     eachChild: function( callback ) {
         
-        for( var i in this._children )
-            callback.call( this._children[ i ], i );
+        for( var i in this._children ) {
+            // Support to break out of the loop
+            if( callback.call( this._children[ i ], i ) === false) {
+                break;
+            }
+        }
         
         return this;
     },
@@ -269,7 +291,8 @@ ShapeBase.prototype = Utils.extend( EventObject, {
     set: function( args ) {
 
         if( Utils.isObject( args ) ) {
-            
+
+            // 3 ways to set the name
             if( 'id' in args ) {
                 this.name = args.id;
             }
@@ -279,10 +302,10 @@ ShapeBase.prototype = Utils.extend( EventObject, {
             else if( 'name' in args ) {
                 this.name = args.name;
             }
+
             if( 'children' in args ) {
-                //@TODO: Shouldn't we clone all children?
-                //They will get removed in the original object on-clone right now
-                //I guess
+                // @TODO: Shouldn't we clone all children?
+                //        They will get removed in the original object on-clone right now - I guess
                 this.addChild( args.children );
             }
             if( 'canvas' in args ) {
@@ -318,10 +341,10 @@ ShapeBase.prototype = Utils.extend( EventObject, {
             canvasContext: this.canvasContext
         } );
 
-        // Update also children, if this shape is not invalid
-        // This is because no draw() of this shape or any children will be called
+        // Update also children, if the shape is valid (not invalid)
+        // Reason: draw() wont be called if the shape is not invalid, so no child would be update'd or drawn
         if( this.invalid === false ) {
-            this.eachChild( function() {
+            this.eachChild( function( childIndex ) {
                 this.update();
             } );
         }
@@ -354,7 +377,7 @@ ShapeBase.prototype = Utils.extend( EventObject, {
             //console.log( 'Shape.draw() re-draw dirty shape:', this );
             // If parent is dirty, childs will need a re-draw too
             
-            this._draw( context, true );
+            this._draw( context, /*forceDraw on child*/true );
         }
 
         context.restore();

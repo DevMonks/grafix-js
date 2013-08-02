@@ -20,6 +20,10 @@
         muffinCrop = new Bitmap({ path: 'img/muffin.jpg', x: 110, width: 100, height: 100, crop: { x: 130, y: 130, width: 100, height: 100 } }),
         muffinScaled = new Bitmap({ path: 'img/muffin.jpg', x: 220, scale: 0.2 });
 
+    muffin.on( 'loaded', function() {
+        console.log('muffin 1 was loaded: ', muffin);
+    });
+
     stage.addChild( [ muffin, muffinCrop, muffinScaled ] );
 
     var frameCount = 0;

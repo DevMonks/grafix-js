@@ -4,38 +4,34 @@ define(
 
         // Simple test object to test the scopre of events and ensure each instance has his own scopre
         var SimpleEventedObject = function () {
-            Grafix.EventObject.call(this);
+            Grafix.EventBase.call(this);
 
             this._testFlag = 0;
 
-            this.bind('changed', function() {
+            this.changed( function() {
                 // Increment test flag
                 this._testFlag++;
-            });
+            } );
         };
 
-        SimpleEventedObject.prototype = Grafix.Utils.extend(Grafix.EventObject, {
-            get testFlag() { return this._testFlag; },
-
-            testInvokeOfChanged: function() {
-                // Just call changed() event to trigger internal handler
-                this.changed(new Grafix.EventArgs());
-            }
+        SimpleEventedObject.prototype = Grafix.Utils.extend(Grafix.EventBase, {
+            get testFlag() { return this.prop( 'testFlag' ); },
+            set testFlag( value ) { return this.prop( 'testFlag', value ); }
         });
 
 
         // More common object to test event delegation by children
         var ChildrenEventedObject = function () {
-            Grafix.EventObject.call(this);
+            Grafix.EventBase.call(this);
 
             this._onChangeTriggerCount = 0;
-            this.changed(this.onChange, this);
+            this.changed(this.onChange);
 
-            this._child = new Grafix.Point({delegateChanged: true});
-            this._child.changed(this.changed, this);
+            this._child = new Grafix.Point();
+            this._child.changed(new Grafix.EventHandler(this.changed, this));
         };
 
-        ChildrenEventedObject.prototype = Grafix.Utils.extend(Grafix.EventObject, {
+        ChildrenEventedObject.prototype = Grafix.Utils.extend(Grafix.EventBase, {
             get onChangeTriggerCount() { return this._onChangeTriggerCount; },
 
             testChangeChildrenToInvokeChanged: function() {
@@ -51,15 +47,15 @@ define(
 
 
 
-        QUnit.module("EventObject tests");
+        QUnit.module("EventBase tests");
 
-        QUnit.test("EventObject core tests", function() {
+        QUnit.test("EventBase core tests", function() {
             var emptyFunc = function() {
                     QUnit.ok(true, 'Event handler was triggered');
                 },
                 simpleHandler = new Grafix.EventHandler(emptyFunc, null),
                 eventName = 'test-event',
-                obj = new Grafix.EventObject();
+                obj = new Grafix.EventBase();
 
             QUnit.equal(obj.eventCallbacks.length, 0, 'No callbacks after initialisation');
 
@@ -75,30 +71,30 @@ define(
             QUnit.equal(obj.has(eventName), false, 'Object\'s handler has been removed');
         });
 
-        QUnit.test("EventObject trigger affection scopre", function() {
+        QUnit.test("EventBase trigger affection scope", function() {
             var obj = new SimpleEventedObject();
             var obj2 = new SimpleEventedObject();
 
             QUnit.equal(obj.testFlag, 0, "obj.testFlag is 0 after initialisation");
             QUnit.equal(obj2.testFlag, 0, "obj2.testFlag is 0 after initialisation");
 
-            obj.testInvokeOfChanged();
+            obj.testFlag++;
             QUnit.equal(obj.testFlag, 1, "obj.testFlag is 1 after first changed() call");
             QUnit.equal(obj2.testFlag, 0, "obj2.testFlag is still 0");
 
-            obj.testInvokeOfChanged();
-            obj2.testInvokeOfChanged();
+            obj.testFlag++;
+            obj2.testFlag++;
             QUnit.equal(obj.testFlag, 2, "obj.testFlag is 2 after second changed() call");
             QUnit.equal(obj2.testFlag, 1, "obj2.testFlag is 1 after first changed() call");
         });
 
-        QUnit.test("EventObject children delegation", function() {
+        QUnit.test("EventBase children delegation", function() {
             var obj = new ChildrenEventedObject();
 
             obj.testChangeChildrenToInvokeChanged();
             QUnit.equal(obj.onChangeTriggerCount, 2, "Changed x and y of child item, obj.onChange() triggered 2 times");
 
-            obj.changed(obj.prepareChanged('test', 1, 2));
+            obj.changed('test');
             QUnit.equal(obj.onChangeTriggerCount, 3, "obj.changed() direct invocation");
         });
 

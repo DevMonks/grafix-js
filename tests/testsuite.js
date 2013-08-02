@@ -2,7 +2,7 @@
     QUnit.config.autostart = false;
 
 	var testModules = [
-		"components/eventobject.js",
+		"components/eventbase.js",
 		"components/grafix.js",
 		"components/random.js",
 		"components/shapebase.js",
