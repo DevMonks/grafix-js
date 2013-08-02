@@ -8,20 +8,66 @@ var Filter = function( name, type, callback ) {
         name = null;
     }
     
-    this._name = name || null;
-    this._type = type;
-    this._callback = callback || function() {};
+    this._name = null;
+    this._type = Filter.defaults.type;
+    this._callback = null;
     
-    if( name ) {
-        
-        Filter[ name ] = this;
-    }
+    this.set( name, type, callback );
 };
 Filter.defaults = {
-    types: [ 'pixel', 'pixels' ]
+    types: [ 'pixel', 'raw' ],
+    type: 'pixel'
 };
 
 Filter.prototype = {
+    
+    get name() { return this._name; },
+    set name( value ) {
+
+        if( this._name === value )
+            return;
+
+        Filter[ this._name ] = null;
+        Filter[ value ] = this;
+        
+        this._name = value;
+    },
+            
+    get type() { return this._type; },
+    set type( value ) { this._type = value; },
+    
+    get callback() { return this._callback; },
+    set callback( value ) { this._callback = value; },
+      
+    set: function( name, type, callback ) {
+
+        if( Utils.isObject( name ) ) {
+            
+            if( 'name' in name )
+                this.name = name.name;
+            
+            if( 'type' in name )
+                this.type = name.type;
+            
+            if( 'callback' in name )
+                this.callback = name.callback;
+            
+        } else if( typeof name !== 'undefined' )
+            this.name = name;
+        
+        var args = { type: type, callback: callback };
+        for( var i in args )
+            if( Utils.isFunction( args[ i ] ) )
+                this.callback = args[ i ];
+            else if( Utils.isString( args[ i ] ) )
+                this.type = args[ i ]
+            else if( typeof args[ i ] !== 'undefined' )
+                this[ i ] = args[ i ];
+        
+        
+        return this;
+    },
+    
     process: function( imageData ) {
         
         switch( this._type ) {
@@ -61,7 +107,7 @@ Filter.create = function( name, type, callback ) {
 Filter.create( 'sepia', 'pixel', function( r, g, b, a ) {
     
     //@TODO: Make this a real sepia
-    return { a: a, r: r * 0.9, g: g * 0.9, b: b * 0.2 };
+    return { a: a, r: r * 0.8, g: g * 0.7, b: b * 0.2 };
 } );
 
 Filter.create( 'noRed', 'pixel', function( r, g, b, a ) {
@@ -77,6 +123,36 @@ Filter.create( 'noGreen', 'pixel', function( r, g, b, a ) {
 Filter.create( 'noBlue', 'pixel', function( r, g, b, a ) {
     
     return { a: a, r: r, g: g, b: 0 };
+} );
+
+Filter.create( 'onlyRed', 'pixel', function( r, g, b, a ) {
+    
+    return { a: a, r: r, g: 0, b: 0 };
+} );
+
+Filter.create( 'onlyGreen', 'pixel', function( r, g, b, a ) {
+    
+    return { a: a, r: 0, g: g, b: 0 };
+} );
+
+Filter.create( 'onlyBlue', 'pixel', function( r, g, b, a ) {
+    
+    return { a: a, r: 0, g: 0, b: b };
+} );
+
+Filter.create( 'grayScale', 'pixel', function( r, g, b, a ) {
+    
+    var max = Math.max( r, g, b );
+    
+    return { a: a, r: max, g: max, b: max };
+} );
+
+Filter.create( 'contrast', 'pixel', function( r, g, b, a ) {
+    
+    var max = Math.max( r, g, b ),
+        value = max > 127 ? 255 : 0;
+    
+    return { a: a, r: value, g: value, b: value };
 } );
 
 Filter.create( 'inverse', 'pixel', function( r, g, b, a ) {
