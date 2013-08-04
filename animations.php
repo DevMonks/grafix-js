@@ -49,7 +49,7 @@
 
     }, 1000 );
 
-    /*rect.mouseHover( function() {
+    rect.mouseHover( function() {
             this.color = Color.lime;
         }, function() {
             this.color = Color.green;
@@ -65,7 +65,7 @@
             this.color = Color.navy;
         }, function() {
             this.color = Color.blue;
-        } );*/
+        } );
 
     scene.addChild( [ rect, rect2, circle ] );
 

@@ -1,26 +1,13 @@
-<!doctype html>
-<html lang="en">
-    <head>
-        <title>Grafix.js - Demo</title>
-        <link rel="stylesheet" href="css/bootstrap.min.css">
-    </head>
-    <body style="padding: 40px">
+<?php include 'includes/head.php'; ?>
+<?php include 'includes/nav.php'; ?>
 
-        <div>
 
-            <div class="alert alert-info" style="margin-bottom: 40px">
-                <strong>Debug Output:</strong>
-                <pre id="debug"></pre>
-            </div>
+<div style="width: 100%; padding: 20px; font-family: monospace; border: 1px dashed #fcc" id="frames"></div><br>
+<br>
+<canvas id="layer" width="500" height="500"></canvas><br>
 
-            <div class="well well-small">
-                <canvas id="layer" width="700px" height="400px"></canvas>
-            </div>
-
-        </div>
-
-        <script src="js/grafix.nocache.js"></script>
-        <script>
+<script src="js/grafix.nocache.js"></script>
+<script>
             Grafix.import();
 
             var stage = new Stage( '#layer' );
@@ -40,7 +27,5 @@
                 //document.getElementById( 'frames' ).innerHTML = ++frameCount;
             } ).start( true );
 
-        </script>
-
-    </body>
-</html>
+</script>
+<?php include 'includes/foot.php'; ?>

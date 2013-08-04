@@ -1,9 +1,6 @@
 var ShapeBase = function( args ) {
     EventBase.call( this );
 
-    // Support a parent and invalidate flag
-    this._parent = null;
-    this._invalid = true;
     // Array of ShapeBase children
     this._children = [];
     // Object of children references, stored by name, for fast look-up
@@ -41,23 +38,6 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         // DONT use .prop() here which enables events to cancel the update; we WANT (and need) a name/uid
         this._name = value;
         this.invalid = true;
-    },
-
-    get invalid() { return this._invalid; },
-    set invalid( value ) {
-
-        // Also no usage of .prop() here
-        if( this._invalid !== value ) {
-            this._invalid = value;
-
-            this.changed( 'invalid' );
-        }
-        
-        // Inform parent
-        var parent = this.parent;
-        if( parent ) {
-            parent.invalid = value;
-        }
     },
 
     get children() { return this.prop( 'children' ); },

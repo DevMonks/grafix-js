@@ -28,7 +28,8 @@ KeyFrame.prototype = {
             //@TODO: What if not all properties set in previous/next frame?
             var diff = endFrame.properties[ i ] - this._properties[ i ],
                 newValue = endFrame.properties[ i ] + diff * ( easing( completion ) );
-        
+
+            //console.log( 'KeyFrame.diff() changed ', i, ' to ', newValue);
             context[ i ] = newValue;
         }
         

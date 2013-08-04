@@ -62,6 +62,9 @@ Animation.prototype = Utils.extend( EventBase, {
             
             if( 'easing' in duration )
                 this._easing = duration.easing;
+
+            if( 'parent' in duration )
+                this.easing = duration.parent;
             
             if( 'start' in duration )
                 this.start( duration.start );

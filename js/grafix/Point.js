@@ -46,6 +46,9 @@ Point.prototype = Utils.extend( EventBase, {
             if ( 'y' in x ) {
                 this.y = x.y;
             }
+            if ( 'parent' in x ) {
+                this.parent = x.parent;
+            }
         } else if( typeof x !== 'undefined' ) {
             
             this.x = parseInt( x );
