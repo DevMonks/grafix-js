@@ -21,6 +21,7 @@ Keyboard
 Input
 Stage
 Group
+Line
 Bitmap
 Text
 Animation
@@ -48,6 +49,7 @@ var Grafix = (function( undefined ) {
         Input: Input,
         InputBase: InputBase,
         Keyboard: Keyboard,
+        Line: Line,
         Mouse: Mouse,
         Grid: Grid,
         Group: Group,

@@ -155,7 +155,7 @@ Text.prototype = Utils.extend( Rectangle, {
                 this.fontSize = string.fontSize;
             
         } else if( typeof string !== 'undefined' )
-            this._string = string;
+            this.string = string;
         
         if( typeof x !== 'undefined' )
             this.x = x;

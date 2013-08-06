@@ -15,11 +15,13 @@ Rectangle.prototype = Utils.extend( Shape, {
         
         Shape.prototype.set.call( this, x, y, deep );
         
-        if( typeof width !== 'undefined' )
+        if( Utils.isUndefined( width ) === false ) {
             this.width = width;
-        
-        if( typeof height !== 'undefined' )
+        }
+
+        if( Utils.isUndefined( height ) === false ) {
             this.height = height;
+        }
         
         return this;
     },

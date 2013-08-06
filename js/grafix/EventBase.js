@@ -4,51 +4,12 @@ var EventBase = function () {
     this._reportsChanges = false;
     // Array of callbacks, sorted by event name
     this._eventCallbacks = [];
-    // This object may be invalid which is done after property changes
-    this._invalid = true;
-    // Support a parent
-    this._parent = null;
 };
 
 EventBase.prototype = {
     get eventCallbacks() { return this.prop( 'eventCallbacks' ); },
 
     get reportsChanges() { return this.prop( 'reportsChanges' ); },
-
-    get invalid() { return this.prop( 'invalid' ); },
-    set invalid( value ) {
-
-        // No usage of .prop() here, this shouln't be canceled
-        if( this._invalid !== value ) {
-            this._invalid = value;
-
-            this.changed( 'invalid' );
-        }
-
-        // Inform parent
-        var parent = this.parent;
-        if( parent ) {
-            parent.invalid = value;
-        }
-    },
-
-    get parent() { return this.prop( 'parent' ); },
-    set parent( value ) {
-
-        if( this._parent === value ) {
-            return;
-        }
-
-        if( value !== null && !( value instanceof EventBase ) ) {
-
-            throw 'Only an instance of EventBase are allowed to be set as a parent';
-        }
-
-        // Store it
-        this._parent = value;
-
-        this.changed( 'parent' );
-    },
 
     /**
      *

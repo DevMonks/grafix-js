@@ -28,9 +28,9 @@
         color: 'blue'
     } );
     
-    var thirdColumn = grid.column( 2 ).style( 'red' );
-    var ninthRow = grid.row( 8 ).style( 'yellow' );
-    var area = grid.combine( 5, 2, { x: 10, y: 5 } ).style( 'green' )
+    var thirdColumn = grid.column( 2 ).style( 'red'),
+        ninthRow = grid.row( 8 ).style( 'yellow'),
+        area = grid.combine( 5, 2, { x: 10, y: 5 } ).style( 'green' );
     
     
     stage.addChild( [ grid, thirdColumn, ninthRow, area ] );

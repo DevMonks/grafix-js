@@ -1,6 +1,10 @@
 var ShapeBase = function( args ) {
     EventBase.call( this );
 
+    // This object may be invalid which is done after property changes
+    this._invalid = true;
+    // Support a parent
+    this._parent = null;
     // Array of ShapeBase children
     this._children = [];
     // Object of children references, stored by name, for fast look-up
@@ -26,32 +30,32 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         throw 'Cannot clone ShapeBase, please use any of the derived classes instead'; 
     },
 
-    get name() { 
-        
-        if( !this._name )
-            this._name = Utils.getUid();
-        
-        return this._name; 
-    },
-    set name( value ) {
+    get invalid() { return this.prop( 'invalid' ); },
+    set invalid( value ) {
 
-        // DONT use .prop() here which enables events to cancel the update; we WANT (and need) a name/uid
-        this._name = value;
-        this.invalid = true;
-    },
+        // No usage of .prop() here, this shouln't be canceled
+        if( this._invalid !== value ) {
+            this._invalid = value;
 
-    get children() { return this.prop( 'children' ); },
-    set children( value ) { throw 'Cannot set children manually, use addChild instead'; },
+            this.changed( 'invalid' );
+        }
+
+        // Inform parent
+        var parent = this.parent;
+        if( parent ) {
+            parent.invalid = value;
+        }
+    },
 
     get parent() { return this.prop( 'parent' ); },
     set parent( value ) {
-        
+
         if( this._parent === value ) {
             return;
         }
 
         if( value !== null && !( value instanceof ShapeBase ) ) {
-            
+
             throw 'Only an instance of Shape are allowed to be set as a parent';
         }
 
@@ -70,6 +74,23 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
         this.changed( 'parent' );
     },
+
+    get name() { 
+        
+        if( !this._name )
+            this._name = Utils.getUid();
+        
+        return this._name; 
+    },
+    set name( value ) {
+
+        // DONT use .prop() here which enables events to cancel the update; we WANT (and need) a name/uid
+        this._name = value;
+        this.invalid = true;
+    },
+
+    get children() { return this.prop( 'children' ); },
+    set children( value ) { throw 'Cannot set children manually, use addChild instead'; },
 
     get input() {
         
@@ -179,7 +200,7 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
         shape.parent = this;
 
-        // Take care of invalid flag of the new child which would normaly delegated to us
+        // Take care of invalid flag of the new child which would be normaly bubble to us
         if( shape.invalid ) {
             this.invalid = true;
         }
@@ -259,12 +280,39 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         
         for( var i in this._children ) {
             // Support to break out of the loop
-            if( callback.call( this._children[ i ], i ) === false) {
+            if( callback.call( this._children[ i ], i ) === false ) {
                 break;
             }
         }
         
         return this;
+    },
+
+
+    /**
+     * Gets or sets the value of a private property, named _{name}.
+     * If this object reports changes, the change event will be called before update.
+     * If the event returns {false} no update will be done.
+     *
+     * @param {string} name
+     * @param {*} value
+     * @returns {self|boolean|*}
+     */
+    prop: function( name, value ) {
+
+        var baseReturn = EventBase.prototype.prop.call( this, name, value );
+        // Called as getter?
+        if( Utils.isUndefined( value ) ) {
+            return baseReturn;
+        }
+
+        // Acting as setter, mark as invalid on successfull change
+        if( baseReturn === false ) {
+            return false;
+        }
+
+        this.invalid = true;
+        return baseReturn;
     },
 
 
@@ -362,6 +410,7 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
         context.restore();
 
+        // Note: We dont want to set our parent too, so set the property directly
         this._invalid = false;
 
         return this;

@@ -65,6 +65,11 @@ var Utils = {
         return typeof val === type;
     },
 
+    isUndefined: function( val, type ) {
+
+        return Utils.isType( val, 'undefined' );
+    },
+
     isString: function( val ) {
 
         return this.isType( val, 'string' );

@@ -19,65 +19,17 @@ Grid.defaults = {
 
 Grid.prototype = Utils.extend( Rectangle, {
 
-    get columns() { return this._columns; },
-    set columns( value ) {
-        
-        if( this._columns === value ) {
-            return;
-        }
-        
-        if( this._delegateChanged && this.has( 'changed' ) ) {
-            this.changed( this.prepareChanged( 'columns', this._columns, value ) );
-        }
-        this._columns = value;
-        
-        this.invalid = true;
-    },
-    
-    get rows() { return this._rows; },
-    set rows( value ) {
-        
-        if( this._rows === value ) {
-            return;
-        }
-        
-        if( this._delegateChanged && this.has( 'changed' ) ) {
-            this.changed( this.prepareChanged( 'rows', this._rows, value ) );
-        }
-        this._rows = value;
-        
-        this.invalid = true;
-    },
-    
-    get virtual() { return this._virtual; },
-    set virtual( value ) {
-        
-        if( this._virtual === value ) {
-            return;
-        }
-        
-        if( this._delegateChanged && this.has( 'changed' ) ) {
-            this.changed( this.prepareChanged( 'virtual', this._virtual, value ) );
-        }
-        this._virtual = value;
-        
-        this.invalid = true;
-    },
-    
-    get allowIndividualStyles() { return this._allowIndividualStyles; },
-    set allowIndividualStyles( value ) {
-        
-        if( this._allowIndividualStyles === value ) {
-            return;
-        }
-        
-        if( this._delegateChanged && this.has( 'changed' ) ) {
-            this.changed( this.prepareChanged( 'allowIndividualStyles', this._allowIndividualStyles, value ) );
-        }
-        this._allowIndividualStyles = value;
-        
-        this.invalid = true;
-    },
+    get columns() { return this.prop( 'columns' ); },
+    set columns( value ) { return this.prop( 'columns', value ); },
+
+    get rows() { return this.prop( 'rows' ); },
+    set rows( value ) { return this.prop( 'rows', value ); },
+
+    get virtual() { return this.prop( 'virtual' ); },
+    set virtual( value ) { return this.prop( 'virtual', value ); },
+
+    get allowIndividualStyles() { return this.prop( 'allowIndividualStyles' ); },
+    set allowIndividualStyles( value ) { return this.prop( 'allowIndividualStyles', value ); },
 
     set: function( x, y, width, height, columns, rows ) {
         
@@ -107,15 +59,17 @@ Grid.prototype = Utils.extend( Rectangle, {
             
     _rectAt: function( x, y ) {
         
-        if( !this._rectangles[ y ] )
+        if( !this._rectangles[ y ] ) {
             this._rectangles[ y ] = [];
-        
-        
+        }
+
+
+        var rectWidth, rectHeight;
         
         if( !this._rectangles[ y ][ x ] ) {
             
-            var rectWidth = this.width / this.columns,
-                rectHeight = this.height / this.rows;
+            rectWidth = this.width / this.columns;
+            rectHeight = this.height / this.rows;
             
             this._rectangles[ y ][ x ] = new Rectangle( {
                 x: this.x + x * rectWidth,
@@ -125,8 +79,9 @@ Grid.prototype = Utils.extend( Rectangle, {
             } );
         } else if( this.invalid !== false ) {
             
-            var rectWidth = this.width / this.columns,
-                rectHeight = this.height / this.rows;
+            rectWidth = this.width / this.columns;
+            rectHeight = this.height / this.rows;
+
             this._rectangles[ y ][ x ].set( {
                 x: this.x + x * rectWidth,
                 y: this.y + y * rectHeight,
@@ -185,20 +140,19 @@ Grid.prototype = Utils.extend( Rectangle, {
         return rowRect;
     },
             
-    //allows any kind of points (IN THE GRID) and combines the rectangles
-    //that it finds
-    //Signature: combine( x1, y1, x2, y2, { x: x3, y: y3 }, x4, y4, etc. )
+    // allows any kind of points (IN THE GRID) and combines the rectangles that it finds
+    // Signature: combine( x1, y1, x2, y2, { x: x3, y: y3 }, x4, y4, etc. )
     combine: function() {
         
         var points = [],
             currentPoint = {};
-        for( var i in arguments )
-            if( Utils.isObject( arguments[ i ] ) )
+        for( var i in arguments ) {
+            if( Utils.isObject( arguments[ i ] ) ) {
                 points.push( {
                     x: arguments[ i ].x || 0,
                     y: arguments[ i ].y || 0
                 } );
-            else if( currentPoint.x ) {
+            } else if( currentPoint.x ) {
                 
                 currentPoint.y = arguments[ i ];
                 points.push( currentPoint );
@@ -207,21 +161,22 @@ Grid.prototype = Utils.extend( Rectangle, {
                 
                 currentPoint.x = arguments[ i ];
             }
+        }
        
-       var rect = null;
-       for( var i in points ) {
+        var rect = null;
+        for( var i in points ) {
            
-           var currentRect = this.rectAt( points[ i ] );
-           if( !rect )
-               rect = new Rectangle( { size: currentRect.size, position: currentRect.position } );
-           else
-            rect.expand( currentRect );
-       }
+            var currentRect = this.rectAt( points[ i ] );
+            if( !rect )
+                rect = new Rectangle( { size: currentRect.size, position: currentRect.position } );
+            else
+                rect.expand( currentRect );
+        }
        
-       return rect;
+        return rect;
     },
     
-    //callback signature: function( x, y, index )(Context: Rectangle)
+    // callback signature: function( x, y, index )(Context: Rectangle)
     eachRect: function( callback ) {
         
         for( var y = 0; y < this.rows; y++ )
@@ -263,10 +218,12 @@ Grid.prototype = Utils.extend( Rectangle, {
         // it would just overwrite the borders of the side rects
         var grid = this;
         this.eachRect( function( x, y, i ) {
-            
+
+            // @TODO: IMO this may happen in _rectAt() including a cache strategy
             if( !grid.allowIndividualStyles )
                 this.style( grid );
-            
+
+            // Calls 'fill', 'stroke', 'clear' or any other drawStyle on the Rectangle object
             var drawFn = this[ style ];
             
             drawFn.call( this, canvasContext );
@@ -288,12 +245,15 @@ Grid.prototype = Utils.extend( Rectangle, {
         this._drawGrid( canvasContext, 'clear' );
     },
             
-    draw: function( context, forceDraw ) {
+    _draw: function( context, forceDraw ) {
+
+        // Clear rectangles on invalid state
+        this._rectangles = [];
         
         // @TODO: This is okay, but this will still apply the styles
         //        unnessecarily. Maybe need a third "applyStyles" parameter
         //        in Shape? This function exists to pass "FALSE" to it then later.
-        Shape.prototype.draw.call( this, context, forceDraw );
+        Shape.prototype._draw.call( this, context, forceDraw );
     },
    
             

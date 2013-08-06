@@ -12,15 +12,20 @@ var Shape = function( x, y ) {
     this._isMouseDragging = false;
 
 
-    // Shape position and style properties
-    this._position = new Point( { parent: this } );
-    this._size = new Size( { parent: this } );
+    // Shape position and size
+    this._x = 0;
+    this._y = 0;
+    this._width = 0;
+    this._height = 0;
 
-    /* Style Properties */
-    this._offset = new Point( { parent: this } );
-    this._scale = new Size( { width: 1, height: 1, parent: this } );
+    // Style properties
+    this._offsetX = 0;
+    this._offsetY = 0;
+    this._scaleX = 1;
+    this._scaleY = 1;
     this._angle = 0;
-    this._skew = new Point( { parent: this } );
+    this._skewX = 0;
+    this._skewY = 0;
     this._color = Color.black;
     this._drawStyle = Shape.defaults.drawStyle;
     this._lineWidth = 1;
@@ -52,23 +57,170 @@ Shape.prototype = Utils.extend( ShapeBase, {
         return new Shape( this );
     },
 
-    get position() { return this.prop('position'); },
-    set position( value ) { throw 'Cannot redeclare position, use Shape.position.set( x/Object, y ) instead';},
+    get x() { return this.prop( 'x' ); },
+    set x( value ) { this.prop( 'x', value ); },
 
-    get size() { return this.prop('size'); },
-    set size( value ) { throw 'Cannot redeclare size, use Shape.size.set( width/Object, height ) instead'; },
+    get y() { return this.prop( 'y' ); },
+    set y( value ) { this.prop( 'y', value ); },
 
-    get x() { return this.position.x; },
-    set x( value ) { this.position.x = value; },
+    get width() { return this.prop( 'width' ); },
+    set width( value ) { this.prop( 'width', value ); },
 
-    get y() { return this.position.y; },
-    set y( value ) { this.position.y = value; },
+    get height() { return this.prop( 'height' ); },
+    set height( value ) { this.prop( 'height', value ); },
 
-    get width() { return this.size.width; },
-    set width( value ) { this.size.width = value; },
+    get angle() { return this.prop( 'angle' ); },
+    set angle( value ) { this.prop( 'angle', value ); },
 
-    get height() { return this.size.height; },
-    set height( value ) { this.size.height = value; },
+    get skewX() { return this.prop( 'skewX' ); },
+    set skewX( value ) { this.prop( 'skewX', value ); },
+
+    get skewY() { return this.prop( 'skewY' ); },
+    set skewY( value ) { this.prop( 'skewY', value ); },
+
+    get offsetX() { return this.prop( 'offsetX' ); },
+    set offsetX( value ) { this.prop( 'offsetX', value ); },
+
+    get offsetY() { return this.prop( 'offsetY' ); },
+    set offsetY( value ) { this.prop( 'offsetY', value ); },
+
+    get scaleX() { return this.prop( 'scaleX' ); },
+    set scaleX( value ) { this.prop( 'scaleX', value ); },
+
+    get scaleY() { return this.prop( 'scaleY' ); },
+    set scaleY( value ) { this.prop( 'scaleY', value ); },
+
+    get color() { return this.prop( 'color' ); },
+    set color( value ) { return this.prop( 'color', value ); },
+
+    get drawStyle() { return this.prop( 'drawStyle' ); },
+    set drawStyle( value ) { return this.prop( 'drawStyle', value ); },
+
+    get lineWidth() { return this.prop( 'lineWidth' ); },
+    set lineWidth( value ) { return this.prop( 'lineWidth', value ); },
+
+    get lineCap() { return this.prop( 'lineCap' ); },
+    set lineCap( value ) { return this.prop( 'lineCap', value ); },
+
+    get miterLimit() { return this.prop( 'miterLimit' ); },
+    set miterLimit( value ) { return this.prop( 'miterLimit', value ); },
+
+    get lineJoin() { return this.prop( 'lineJoin' ); },
+    set lineJoin( value ) { return this.prop( 'lineJoin', value ); },
+
+    get closePath() { return this.prop( 'closePath' ); },
+    set closePath( value ) { return this.prop( 'closePath', value ); },
+
+    get align() { return this.prop( 'align' ); },
+    set align( value ) {
+        var alignContext = null;
+        // @TODO: Make this using Shape.defaults.alignContexts!
+        switch ( this.alignContext ) {
+            case 'parent':
+
+                alignContext = this.parent;
+                break;
+            case 'root':
+
+                alignContext = this.root;
+                break;
+            default:
+                alignContext = this.alignContext;
+                break;
+        }
+
+        if( alignContext ) {
+            // @TODO: Shouln'd this use Shape.defaults.align?
+            var align = Utils.isString( this.align ) ? this.align : 'center center center';
+            this.alignBy( alignContext, align );
+        }
+
+        if( this.prop( 'align', value ) !== false ) {
+            this.alignBy();
+        }
+    },
+
+    get alignContext() { return this.prop( 'alignContext' ); },
+    set alignContext( value ) {
+
+        this.alignBy( value, this.align );
+        if( this.prop( 'alignContext', value ) !== false ) {
+            this.alignBy();
+        }
+    },
+
+    get position() { return new Point( this.x, this.y ); },
+    set position( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'x' in value ) { this.x = value.x; }
+            if( 'y' in value ) { this.y = value.y; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.x = this.y = value;
+        } else {
+            throw "Invalid type of value for property Shape.position: " + value;
+        }
+    },
+
+    get size() { return new Size( this.width, this.height ); },
+    set size( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'width' in value ) { this.width = value.width; }
+            if( 'height' in value ) { this.height = value.height; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.width = this.height = value;
+        } else {
+            throw "Invalid type of value for property Shape.size: " + value;
+        }
+    },
+
+    get offset() { return new Point( this.offsetX, this.offsetY ); },
+    set offset( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'x' in value ) { this.offsetX = value.x; }
+            else if( 'offsetX' in value ) { this.offsetX = value.offsetX; }
+            if( 'y' in value ) { this.offsetY = value.y; }
+            else if( 'offsetY' in value ) { this.offsetY = value.offsetY; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.offsetX = this.offsetY = value;
+        } else {
+            throw "Invalid type of value for property Shape.offset: " + value;
+        }
+    },
+
+    get scale() { return new Point( this.scaleX, this.scaleY ); },
+    set scale( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'x' in value ) { this.scaleX = value.x; }
+            else if( 'scaleX' in value ) { this.scaleX = value.scaleX; }
+            if( 'y' in value ) { this.scaleY = value.y; }
+            else if( 'scaleY' in value ) { this.scaleY = value.scaleY; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.scaleX = this.scaleY = value;
+        } else {
+            throw "Invalid type of value for property Shape.scale: " + value;
+        }
+    },
+
+    get skew() { return new Point( this.skewX, this.skewY ); },
+    set skew( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'x' in value ) { this.skewX = value.x; }
+            else if( 'skewX' in value ) { this.skewX = value.skewX; }
+            if( 'y' in value ) { this.skewY = value.y; }
+            else if( 'skewY' in value ) { this.skewY = value.skewY; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.skewX = this.skewY = value;
+        } else {
+            throw "Invalid type of value for property Shape.skew: " + value;
+        }
+    },
+
+    get rect() { return new Rectangle( this.x, this.y, this.width, this.height ); },
 
     get center() {
         return new Point( this.x + this.width / 2, this.y + this.height / 2 );
@@ -132,143 +284,26 @@ Shape.prototype = Utils.extend( ShapeBase, {
         this.bottom = value.y;
     },
 
-    get offset() { return this.prop( 'offset' ); },
-    set offset( value ) { throw 'Cannot redeclare offset, use Shape.offset.set( x/Object, y ) instead'; },
-
-    get scale() { return this.prop( 'scale' ); },
-    set scale( value ) { throw 'Cannot redeclare scale, use Shape.scale.set( width/Object, height ) instead'; },
-
-    get angle() { return this.prop( 'angle' ); },
-    set angle( value ) {
-        if( Utils.isNumeric( value ) === false ) {
-            return;
-        }
-
-        if( this.prop( 'angle', value ) !== false ) {
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
-
-    get skew() { return this.prop( 'skew' ); },
-    set skew( value ) { throw 'Cannot redeclare skew, use Shape.skew.set( x/Object, y ) instead'; },
-
-    get color() { return this.prop( 'color' ); },
-    set color( value ) {
-        if( this.prop( 'color', value ) !== false ) {
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
-
-    get drawStyle() { return this.prop( 'drawStyle' ); },
-    set drawStyle( value ) {
-
-        if( !(value in Shape.defaults.drawStyles) ) {
-            value = Shape.defaults.drawStyle;
-        }
-
-        if( this.prop( 'drawStyle', value ) !== false ) {
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
-
-    get lineWidth() { return this.prop( 'lineWidth' ); },
-    set lineWidth( value ) {
-        if( this.prop( 'lineWidth', value ) !== false ) {
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
-
-    get lineCap() { return this.prop( 'lineCap' ); },
-    set lineCap( value ) {
-        if( this.prop( 'lineCap', value ) !== false ) {
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
-
-    get miterLimit() { return this.prop( 'miterLimit' ); },
-    set miterLimit( value ) {
-        if( Utils.isNumeric( value ) === false ) {
-            return;
-        }
-
-        if( this.prop( 'miterLimit', value ) !== false ) {
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
-
-    get lineJoin() { return this.prop( 'lineJoin' ); },
-    set lineJoin( value ) {
-        if( this.prop( 'lineJoin', value ) !== false ) {
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
-
-    get closePath() { return this.prop( 'closePath' ); },
-    set closePath( value ) {
-        if( this.prop( 'closePath', value ) !== false ) {
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
-
-    get align() { return this.prop( 'align' ); },
-    set align( value ) {
-        var alignContext = null;
-        // @TODO: Make this using Shape.defaults.alignContexts!
-        switch ( this.alignContext ) {
-            case 'parent':
-
-                alignContext = this.parent;
-                break;
-            case 'root':
-
-                alignContext = this.root;
-                break;
-            default:
-                alignContext = this.alignContext;
-                break;
-        }
-
-        if( alignContext ) {
-            // @TODO: Shouln'd this use Shape.defaults.align?
-            var align = Utils.isString( this.align ) ? this.align : 'center center center';
-            this.alignBy( alignContext, align );
-        }
-
-        if( this.prop( 'align', value ) !== false ) {
-            this.alignBy();
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
-
-    get alignContext() { return this.prop( 'alignContext' ); },
-    set alignContext( value ) {
-        
-        this.alignBy( value, this.align );
-        if( this.prop( 'alignContext', value ) !== false ) {
-            this.alignBy();
-            // Informs also parent
-            this.invalid = true;
-        }
-    },
 
     set: function( x, y, deep ) {
         deep = deep || true;
 
         ShapeBase.prototype.set.call(this, x, y);
 
-        this.position.set( x, y );
-
         if( Utils.isObject( x ) ) {
-            
+
+            if( 'position' in x ) {
+                this.position = x.position;
+            }
+            if( 'size' in x ) {
+                this.size = x.size;
+            }
+            if( 'x' in x ) {
+                this.x = x.x;
+            }
+            if( 'y' in x ) {
+                this.y = x.y;
+            }
             if( 'width' in x ) {
                 this.width = x.width;
             }
@@ -276,16 +311,16 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 this.height = x.height;
             }
             if( 'offset' in x ) {
-                this.offset.set( x.offset );
+                this.offset = x.offset;
             }
             if( 'scale' in x ) {
-                this.scale.set( x.scale );
+                this.scale = x.scale;
             }
             if( 'angle' in x ) {
                 this.angle = x.angle;
             }
             if( 'skew' in x ) {
-                this.skew.set( x.skew );
+                this.skew = x.skew;
             }
             if( 'color' in x ) {
                 this.color = x.color;
@@ -314,12 +349,6 @@ Shape.prototype = Utils.extend( ShapeBase, {
             if( 'align' in x ) {
                 this.align = x.align;
             }
-            if( 'x' in x ) {
-                this.x = x.x;
-            }
-            if( 'y' in x ) {
-                this.y = x.y;
-            }
             
             // Also clone child shapes!
             // @TODO: ShapeBase.set have to take care of childrens
@@ -339,17 +368,11 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
             if( deep ) {
 
-                //we allow those, too! they just dont make sense in a copy
-                //this extends our possibilities in animating later on
-                //They are not needed, because each of those properties
-                //just modify x and y and we already set these in a plain copy
-                //for a copy of an object, use either (new Shape).set( source ) or Shape.clone( source )
-                if( 'position' in x )
-                    this.position.set( x.position );
-                
-                if( 'size' in x ) {
-                    this.size.set( x.size );
-                }
+                // We allow those, too! they just dont make sense in a copy
+                // this extends our possibilities in animating later on
+                // They are not needed, because each of those properties
+                // just modify x and y and we already set these in a plain copy
+                // for a copy of an object, use either (new Shape).set( source ) or Shape.clone( source )
                 if( 'center' in x ) {
                     this.center = x.center;
                 }
@@ -379,7 +402,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 }
             }
 
-        } else if( x !== undefined ) {
+        } else if( Utils.isUndefined( x ) === false ) {
             this.x = x;
         }
 
@@ -497,10 +520,10 @@ Shape.prototype = Utils.extend( ShapeBase, {
         } else if( Utils.isObject( style ) ) {
 
             //You can just pass a shape and copy its styles
-            if( style.offset ) this.offset.set( style.offset );
-            if( style.scale ) this.scale.set( style.scale );
+            if( style.offset ) this.offset = style.offset;
+            if( style.scale ) this.scale = style.scale;
             if( style.angle ) this.angle = style.angle;
-            if( style.skew ) this.skew.set( style.skew );
+            if( style.skew ) this.skew = style.skew;
             if( style.color ) this.color = style.color;
             if( style.drawStyle ) this.drawStyle = style.drawStyle;
             if( style.lineWidth ) this.lineWidth = style.lineWidth;

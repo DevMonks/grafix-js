@@ -5,22 +5,14 @@ var Point3D = function ( x, y, z ) {
 };
 
 Point3D.prototype = Utils.extend( Point, {
-    get z() { return this.prop( 'z' ); },
-    set z( value ) {
-        if ( Utils.isNumeric( value ) == false ) {
-            return;
-        }
-
-        if ( this.prop( 'z', value ) === false ) {
-            return;
-        }
-
-        this.invalid = true;
-    },
 
     get clone() {
         return new Point3D( this );
     },
+
+    get z() { return this.prop( 'z' ); },
+    set z( value ) { return this.prop( 'z', value ); },
+
 
     set: function ( x, y, z ) {
 

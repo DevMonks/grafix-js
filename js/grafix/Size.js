@@ -1,5 +1,5 @@
 var Size = function ( width, height ) {
-    EventBase.call( this );
+    ShapeBase.call( this );
 
     this._width = 0;
     this._height = 0;
@@ -7,20 +7,12 @@ var Size = function ( width, height ) {
     this.set( width, height );
 };
 
-Size.prototype = Utils.extend( EventBase, {
+Size.prototype = Utils.extend( ShapeBase, {
     get width() { return this.prop( 'width' ); },
-    set width( value ) {
-        this.prop( 'width', value );
-        // Informs also parent
-        this.invalid = true;
-    },
+    set width( value ) { return this.prop( 'width', value ); },
 
     get height() { return this.prop( 'height' ); },
-    set height( value ) {
-        this.prop( 'height', value );
-        // Informs also parent
-        this.invalid = true;
-    },
+    set height( value ) { return this.prop( 'height', value ); },
 
     get clone() {
         return new Size( this );
@@ -28,8 +20,6 @@ Size.prototype = Utils.extend( EventBase, {
 
 
     set: function( width, height ) {
-
-        ShapeBase.prototype.set.call(this, width);
 
         if ( Utils.isObject( width ) ) {
 
@@ -42,8 +32,7 @@ Size.prototype = Utils.extend( EventBase, {
         } else if ( Utils.isNumeric( width ) && typeof height === 'undefined' ) {
 
             var fac = parseFloat( width );
-            this.width = fac;
-            this.height = fac;
+            this.width = this.height = fac;
         } else if ( typeof width !== 'undefined' ) {
 
             this.width = parseInt( width );

@@ -8,7 +8,10 @@ var Bitmap = function( path, x, y, width, height ) {
     this._image = null;
     this._filters = [];
 
-    this._crop = new Rectangle;
+    this._cropX = 0;
+    this._cropY = 0;
+    this._cropWidth = 0;
+    this._cropHeight = 0;
     
     this.loaded( function( e ) {
         
@@ -28,9 +31,24 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     get clone() {
         return new Bitmap( this );
     },
-    
-    get crop() { return this.prop( 'crop' ); },
-    set crop( value ) { throw 'Cannot redeclare crop, use Bitmap.crop.set( object ) instead'; },
+
+
+    get crop() { return new Rectangle( this.cropX, this.cropY, this.cropWidth, this.cropHeight ); },
+    set crop( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'x' in value ) { this.cropX = value.x; }
+            else if( 'cropX' in value ) { this.cropX = value.cropX; }
+            if( 'y' in value ) { this.cropY = value.y; }
+            else if( 'cropY' in value ) { this.cropY = value.cropY; }
+            if( 'width' in value ) { this.width = value.width; }
+            else if( 'cropWidth' in value ) { this.cropWidth = value.cropWidth; }
+            if( 'height' in value ) { this.height = value.height; }
+            else if( 'dropHeight' in value ) { this.cropHeight = value.cropHeight; }
+        } else {
+            throw "Invalid type of value for property Bitmap.crop: " + value;
+        }
+    },
     
     get path() { return this.prop( 'path' ); },
     set path( value ) {
@@ -52,7 +70,8 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             bmp.loaded( { bitmap: bmp, image: img } );
         } );
         img.src = value;
-        
+
+        // @TODO: We changed path already, currently we ARE invalid
         if( this.prop( 'image', img ) !== false ) {
             this.invalid = true;
         }
@@ -70,12 +89,7 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     },
             
     get filters() { return this.prop( 'filters' ); },
-    set filters( value ) {
-
-        if( this.prop( 'filters', value ) !== false ) {
-            this.invalid = true;
-        }
-    },
+    set filters( value ) { return this.prop( 'filters', value ); },
             
     get image() { return this.prop( 'image' ); },
 
@@ -88,10 +102,11 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             Rectangle.prototype.set.call( this, path );
             
             if( 'path' in path ) this.path = path.path;
-            if( 'crop' in path ) this.crop.set( path.crop );
+            if( 'crop' in path ) this.crop = path.crop;
             if( 'filters' in path ) this.filters = path.filters;
             if( 'filter' in path ) this.filter = path.filter;
 
+            // @FIXME: Why 2 times?
             Rectangle.prototype.set.call( this, path );
         } else if( typeof path !== 'undefined' ) {
 

@@ -2,8 +2,6 @@ var Circle = function(x, y, radius, startAngle, endAngle, clockwise) {
 
     Shape.call( this );
 
-    this._x = 0;
-    this._y = 0;
     this._radius = 0;
     this._startAngle = 0;
     this._endAngle = 360;
@@ -43,7 +41,8 @@ Circle.prototype = Utils.extend( Shape, {
             if ( x.endAngle ) this.endAngle = x.endAngle;
             if ( x.clockwise ) this.clockwise = x.clockwise;
 
-        } else {
+        } else if( Utils.isUndefined( x ) === false ) {
+
             this.x = x;
         }
 
@@ -66,6 +65,7 @@ Circle.prototype = Utils.extend( Shape, {
             if( x.endAngle ) this.endAngle += x.endAngle;
             if( x.clockwise ) this.clockwise += x.clockwise;
         } else {
+
             this.x += x;
         }
 
@@ -90,6 +90,7 @@ Circle.prototype = Utils.extend( Shape, {
             if( x.endAngle ) this.endAngle -= x.endAngle;
             if( x.clockwise ) this.clockwise -= x.clockwise;
         } else {
+
             this.x -= x;
         }
 
@@ -114,6 +115,7 @@ Circle.prototype = Utils.extend( Shape, {
             if( x.endAngle ) this.endAngle *= x.endAngle;
             if( x.clockwise ) this.clockwise *= x.clockwise;
         } else {
+
             this.x *= x;
         }
 
@@ -138,6 +140,7 @@ Circle.prototype = Utils.extend( Shape, {
             if( x.endAngle ) this.endAngle /= x.endAngle;
             if( x.clockwise ) this.clockwise /= x.clockwise;
         } else {
+
             this.x /= x;
         }
 
@@ -171,6 +174,7 @@ Circle.prototype = Utils.extend( Shape, {
 
     circle: function() {
 
+        // @TODO: Hi, clone?
         return new Circle( {x: this.x, y: this.y, radius: this.radius, startAngle: this.startAngle, endAngle: this.endAngle, clockwise: this.clockwise} );
     },
 
