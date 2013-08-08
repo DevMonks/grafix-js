@@ -21,8 +21,8 @@ var Shape = function( x, y ) {
     // Style properties
     this._offsetX = 0;
     this._offsetY = 0;
-    this._scaleX = 1;
-    this._scaleY = 1;
+    this._scaleWidth = 1;
+    this._scaleHeight = 1;
     this._angle = 0;
     this._skewX = 0;
     this._skewY = 0;
@@ -84,11 +84,11 @@ Shape.prototype = Utils.extend( ShapeBase, {
     get offsetY() { return this.prop( 'offsetY' ); },
     set offsetY( value ) { this.prop( 'offsetY', value ); },
 
-    get scaleX() { return this.prop( 'scaleX' ); },
-    set scaleX( value ) { this.prop( 'scaleX', value ); },
+    get scaleWidth() { return this.prop( 'scaleWidth' ); },
+    set scaleWidth( value ) { this.prop( 'scaleWidth', value ); },
 
-    get scaleY() { return this.prop( 'scaleY' ); },
-    set scaleY( value ) { this.prop( 'scaleY', value ); },
+    get scaleHeight() { return this.prop( 'scaleHeight' ); },
+    set scaleHeight( value ) { this.prop( 'scaleHeight', value ); },
 
     get color() { return this.prop( 'color' ); },
     set color( value ) { return this.prop( 'color', value ); },
@@ -179,10 +179,10 @@ Shape.prototype = Utils.extend( ShapeBase, {
     set offset( value ) {
 
         if( Utils.isObject( value ) ) {
-            if( 'x' in value ) { this.offsetX = value.x; }
-            else if( 'offsetX' in value ) { this.offsetX = value.offsetX; }
-            if( 'y' in value ) { this.offsetY = value.y; }
-            else if( 'offsetY' in value ) { this.offsetY = value.offsetY; }
+            if( 'offsetX' in value ) { this.offsetX = value.offsetX; }
+            else if( 'x' in value )  { this.offsetX = value.x; }
+            if( 'offsetY' in value ) { this.offsetY = value.offsetY; }
+            else if( 'y' in value )  { this.offsetY = value.y; }
         } else if( Utils.isNumeric( value ) ) {
             this.offsetX = this.offsetY = value;
         } else {
@@ -190,16 +190,16 @@ Shape.prototype = Utils.extend( ShapeBase, {
         }
     },
 
-    get scale() { return new Point( this.scaleX, this.scaleY ); },
+    get scale() { return new Point( this.scaleWidth, this.scaleHeight ); },
     set scale( value ) {
 
         if( Utils.isObject( value ) ) {
-            if( 'x' in value ) { this.scaleX = value.x; }
-            else if( 'scaleX' in value ) { this.scaleX = value.scaleX; }
-            if( 'y' in value ) { this.scaleY = value.y; }
-            else if( 'scaleY' in value ) { this.scaleY = value.scaleY; }
+            if( 'scaleWidth' in value ) { this.scaleWidth = value.scaleWidth; }
+            else if( 'width' in value ) { this.scaleWidth = value.width; }
+            if( 'scaleHeight' in value ) { this.scaleHeight = value.scaleHeight; }
+            else if( 'height' in value ) { this.scaleHeight = value.height; }
         } else if( Utils.isNumeric( value ) ) {
-            this.scaleX = this.scaleY = value;
+            this.scaleWidth = this.scaleHeight = value;
         } else {
             throw "Invalid type of value for property Shape.scale: " + value;
         }
@@ -209,10 +209,10 @@ Shape.prototype = Utils.extend( ShapeBase, {
     set skew( value ) {
 
         if( Utils.isObject( value ) ) {
-            if( 'x' in value ) { this.skewX = value.x; }
-            else if( 'skewX' in value ) { this.skewX = value.skewX; }
-            if( 'y' in value ) { this.skewY = value.y; }
-            else if( 'skewY' in value ) { this.skewY = value.skewY; }
+            if( 'skewX' in value )  { this.skewX = value.skewX; }
+            else if( 'x' in value ) { this.skewX = value.x; }
+            if( 'skewY' in value )  { this.skewY = value.skewY; }
+            else if( 'y' in value ) { this.skewY = value.y; }
         } else if( Utils.isNumeric( value ) ) {
             this.skewX = this.skewY = value;
         } else {
@@ -221,6 +221,8 @@ Shape.prototype = Utils.extend( ShapeBase, {
     },
 
     get rect() { return new Rectangle( this.x, this.y, this.width, this.height ); },
+
+    get rectScaled() { return new Rectangle( this.x, this.y, this.width * this.scaleWidth, this.height * this.scaleHeight ); },
 
     get center() {
         return new Point( this.x + this.width / 2, this.y + this.height / 2 );
@@ -406,6 +408,10 @@ Shape.prototype = Utils.extend( ShapeBase, {
             this.x = x;
         }
 
+        if( Utils.isUndefined( y ) === false ) {
+            this.y = y;
+        }
+
         return this;
     },
 
@@ -414,13 +420,16 @@ Shape.prototype = Utils.extend( ShapeBase, {
         context = context || this.canvasContext;
 
         // Apply styles if needed (If no style selected, properties won't change for performance reasons)
-        if( this.offset instanceof Point && this.offset.isZero() === false ) {
-            context.translate( this.offset.x, this.offset.y );
+        if( this.offsetX !== 0 || this.offsetY !== 0 ) {
+            context.translate( this.offsetX, this.offsetY );
         }
 
-        if( this.scale instanceof Size && (this.scale.width !== 1 || this.scale.height !== 1) ) {
-            context.scale( this.scale.width, this.scale.height );
-        }
+        // @TODO: This scales also x and y.. wtfh?
+        //        We currently using scale only in Bitmap, so this is disabled until further testing
+        //        Bitmap now uses Shape.rectScaled for the drawn destination
+        //if( this.scaleWidth !== 1 || this.scaleHeight !== 1 ) {
+        //    context.scale( this.scaleWidth, this.scaleHeight );
+        //}
 
         if( this.angle !== 0 ) {
             context.rotate( this.angle );
@@ -442,12 +451,13 @@ Shape.prototype = Utils.extend( ShapeBase, {
             context.lineJoin = this.lineJoin;
         }
 
-        if( this.skew instanceof Point && this.skew.isZero() === false ) {
-            context.transform( 1, this.skew.x, this.skew.y, 1, 0, 0 );
+        if( this.skewX !== 0 || this.skewY !== 0 ) {
+            context.transform( 1, this.skewX, this.skewY, 1, 0, 0 );
         }
 
+        // Resolves to canvas' "fillStyle", "strokeStyle" and "clearStyle" (does not exist)
         var colorProp = this.drawStyle + 'Style';
-        // the color will only be re-set, if it changes
+        // The color will only be re-set, if it has been changed
         if( this.color !== context[ colorProp ] ) {
             context[ colorProp ] = this.color;
         }
@@ -640,11 +650,12 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 // @TODO: This causes an overlay problem..
                 //        We have to check if any child needs a redraw and, if so, we have to redraw everything
                 //        Only redrawing dirty childs will make them overlapping ther other not-yet-dirty childs
-                // @TODO: This is not always the case
                 //if( shape.collidesWith( this )/* && child.isDirty */) {
                     //console.log('Shape.draw() poke child for draw (dirty=', child.isDirty, '):', child);
-                    this.draw( context, forceChildDraw );
+                    //this.draw( context, forceChildDraw );
                 //}
+                // @FIX: This is not always the case, just draw the child
+                this.draw( context, forceChildDraw );
             } );
         }
 
@@ -679,6 +690,10 @@ Shape.prototype = Utils.extend( ShapeBase, {
         var thisHeight = this.height || (this.radius ? this.radius * 2 : 0);
         var thatHeight = context.height || (context.radius ? context.radius * 2 : 0);
 
+        // Read the alignment steps:
+        // - xType: (left|right|center)
+        // - yType: (top|bottom|center)
+        // - type:  (inner|outer|center)
         for ( var i = 0; i < position.length; i++ ) {
             switch ( position[i] ) {
 
@@ -721,11 +736,11 @@ Shape.prototype = Utils.extend( ShapeBase, {
             yType = 'center';
         }
 
-        //position
+        // Apply new position based on the detected alignment
         switch ( xType ) {
 
             case 'left':
-                //position inner first
+                // Default to type = inner
                 this.x = context.x;
 
                 switch ( type ) {
@@ -736,11 +751,12 @@ Shape.prototype = Utils.extend( ShapeBase, {
                     case 'outer':
 
                         this.x -= thisWidth;
+                        break;
                 }
                 break;
 
             case 'right':
-                //position outer first
+                // Default to type = outer
                 this.x = context.x + thatWidth;
 
                 switch ( type ) {
@@ -755,7 +771,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 break;
 
             case 'center':
-                //position center first
+
                 this.x = context.x + ( thatWidth / 2 ) - thisWidth / 2;
                 break;
         }
@@ -763,7 +779,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
         switch ( yType ) {
 
             case 'top':
-                //position inner first
+                // Default to type = inner
                 this.y = context.y;
 
                 switch ( type ) {
@@ -778,7 +794,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 break;
 
             case 'bottom':
-                //position outer first
+                // Default to type = outer
                 this.y = context.y + thatHeight;
 
                 switch ( type ) {
@@ -793,7 +809,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 break;
 
             case 'center':
-                //position center first
+
                 this.y = context.y + ( thatHeight / 2 ) - thisHeight / 2;
                 break;
         }

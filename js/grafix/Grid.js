@@ -248,7 +248,8 @@ Grid.prototype = Utils.extend( Rectangle, {
     _draw: function( context, forceDraw ) {
 
         // Clear rectangles on invalid state
-        this._rectangles = [];
+        // @EDIT: I thought this caused a bug, but it was on another place, so disabled it again
+        //this._rectangles = [];
         
         // @TODO: This is okay, but this will still apply the styles
         //        unnessecarily. Maybe need a third "applyStyles" parameter

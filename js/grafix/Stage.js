@@ -53,14 +53,12 @@ Stage.prototype = Utils.extend( Shape, {
         );
     },
     set attributeSize( value ) {
-        if ( value.width ) {
+        if ( value.width && this.prop( 'width', value.width ) !== false ) {
             this.canvas.setAttribute( 'width', value.width );
         }
-        if ( value.height ) {
+        if ( value.height && this.prop( 'height', value.height ) !== false ) {
             this.canvas.setAttribute( 'height', value.height );
         }
-        // Informs also parent
-        this.invalid = true;
     },
     
     get size() {
@@ -71,14 +69,12 @@ Stage.prototype = Utils.extend( Shape, {
     },
     set size( value ) {
         
-        if ( value.width ) {
-            this.canvas.style.width = value.width + 'px'
+        if ( value.width && this.prop( 'width', value.width ) !== false ) {
+            this.canvas.style.width = value.width + 'px';
         }
-        if ( value.height ) {
+        if ( value.height && this.prop( 'height', value.height ) !== false ) {
             this.canvas.style.height = value.height + 'px'
         }
-        // Informs also parent
-        this.invalid = true;
     },
 
     start: function ( force ) {

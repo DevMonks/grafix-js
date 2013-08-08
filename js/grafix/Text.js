@@ -11,7 +11,7 @@ var Text = function( string, x, y, width, height ) {
     this._fontStyle = Text.defaults.fontStyle;
     this._fontSize = Text.defaults.fontSize;
     
-    this.set( string, x, y );
+    this.set( string, x, y, width, height );
 };
 Text.defaults = {
     textAligns: [ 'left', 'center', 'right' ],
@@ -31,96 +31,36 @@ Text.defaults = {
 };
 
 Text.prototype = Utils.extend( Rectangle, {
-    get string() { return this._string; },
-    set string( value ) {
-        
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'string', this._string, value ) );
-        }
-        this._string = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-    get textAlign() { return this._textAlign; },
-    set textAlign( value ) {
-        
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'textAlign', this._textAlign, value ) );
-        }
-        this._textAlign = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-    get textBaseLine() { return this._textBaseLine; },
-    set textBaseLine( value ) {
-        
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'textBaseLine', this._textBaseLine, value ) );
-        }
-        this._textBaseLine = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-    get lineHeight() { return this._lineHeight; },
-    set lineHeight( value ) {
-        
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'lineHeight', this._lineHeight, value ) );
-        }
-        this._lineHeight = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-    get fontFamily() { return this._fontFamily; },
-    set fontFamily( value ) {
-        
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'fontFamily', this._fontFamily, value ) );
-        }
-        this._fontFamily = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-    get fontWeight() { return this._fontWeight; },
-    set fontWeight( value ) {
-        
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'fontWeight', this._fontWeight, value ) );
-        }
-        this._fontWeight = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-    get fontVariant() { return this._fontVariant; },
-    set fontVariant( value ) {
-        
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'fontVariant', this._fontVariant, value ) );
-        }
-        this._fontVariant = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-    get fontStyle() { return this._fontStyle; },
-    set fontStyle( value ) {
-        
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'fontStyle', this._fontStyle, value ) );
-        }
-        this._fontStyle = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-    get fontSize() { return this._fontSize; },
-    set fontSize( value ) {
-        
-        if( this._delegateChanged ) {
-            this.changed( this.prepareChanged( 'fontSize', this._fontSize, value ) );
-        }
-        this._fontSize = value;
-        // Informs also parent
-        this.invalid = true;
-    },
+    
+    get clone() { return new Text( this ); },
+    
+    get string() { return this.prop( 'string' ); },
+    set string( value ) { return this.prop( 'string', value ); },
+
+    get textAlign() { return this.prop( 'textAlign' ); },
+    set textAlign( value ) { return this.prop( 'textAlign', value ); },
+
+    get textBaseLine() { return this.prop( 'textBaseLine' ); },
+    set textBaseLine( value ) { return this.prop( 'textBaseLine', value ); },
+
+    get lineHeight() { return this.prop( 'lineHeight' ); },
+    set lineHeight( value ) { return this.prop( 'lineHeight', value ); },
+
+    get fontFamily() { return this.prop( 'fontFamily' ); },
+    set fontFamily( value ) { return this.prop( 'fontFamily', value ); },
+
+    get fontWeight() { return this.prop( 'fontWeight' ); },
+    set fontWeight( value ) { return this.prop( 'fontWeight', value ); },
+
+    get fontVariant() { return this.prop( 'fontVariant' ); },
+    set fontVariant( value ) { return this.prop( 'fontVariant', value ); },
+
+    get fontStyle() { return this.prop( 'fontStyle' ); },
+    set fontStyle( value ) { return this.prop( 'fontStyle', value ); },
+
+    get fontSize() { return this.prop( 'fontSize' ); },
+    set fontSize( value ) { return this.prop( 'fontSize', value ); },
+    
     set: function( string, x, y, width, height ) {
         
         if( Utils.isObject( string ) ) {
@@ -171,7 +111,10 @@ Text.prototype = Utils.extend( Rectangle, {
         
         return this;
     },
+
 	measure: function( canvasContext, string, applyStyles ) {
+
+        canvasContext = canvasContext || this.context;
 
 		if( applyStyles ) {
             
@@ -194,6 +137,7 @@ Text.prototype = Utils.extend( Rectangle, {
 
 		return bounds;
 	},
+
     applyStyles: function( canvasContext ) {
         
         if( !canvasContext )
@@ -224,6 +168,7 @@ Text.prototype = Utils.extend( Rectangle, {
         
         return Rectangle.prototype.applyStyles.call( this, canvasContext );
     },
+
     _drawText: function( canvasContext, string, style ) {
         
         string = string || this.string;
@@ -231,7 +176,7 @@ Text.prototype = Utils.extend( Rectangle, {
         canvasContext.save();
         this.applyStyles( canvasContext );
         
-		//calculate shit
+		// Draw each line
         var lines = ( string + '' ).split( '\n' );
         for( var i in lines ) {
             
@@ -247,23 +192,28 @@ Text.prototype = Utils.extend( Rectangle, {
             textRect.alignBy( lineRect, [ this.textAlign, this.textBaseLine, 'inner' ].join( ' ' )  );
                         
             canvasContext[ style + 'Text' ]( line, textRect.x, textRect.y );
+
+            console.log('drawText(', i, ') textRect:', textRect.toString(), ', lineRect:', lineRect.toString());
         }
         
         canvasContext.restore();
 
 		return this;
     },
+
     fill: function( canvasContext, string ) {
         
         return this._drawText( canvasContext, string, 'fill' );
     },
+
     stroke: function( canvasContext, string ) {
         
         return this._drawText( canvasContext, string, 'stroke' );
     },
+
     clear: function( canvasContext, string ) {
         
-        this.color = this.root ? this.root.color : this.color;
+        this.color = this.parent ? this.parent.color : this.color;
         
         return this._drawText( canvasContext, string, 'fill' );
     }

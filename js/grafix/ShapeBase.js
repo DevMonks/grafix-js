@@ -177,7 +177,7 @@ ShapeBase.prototype = Utils.extend( EventBase, {
      * Also ensures the correct {shape.parent} value.
      *
      * @param {ShapeBase|ShapeBase[]} shape
-     * @returns {self}
+     * @returns {ShapeBase}
      */
     addChild: function( shape ) {
 
@@ -191,6 +191,9 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
         if( !( shape instanceof ShapeBase ) ) {
             throw 'Can only add arrays or instances of ShapeBase as a children';
+        }
+        if( shape.name in this._childrenNameCache ) {
+            throw 'The name of a component needs to unique. This shape already have a child with his name.';
         }
 
         // Add as a children component
@@ -402,7 +405,7 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
         // Draw this shape
         if( this.invalid || forceDraw ) {
-            //console.log( 'Shape.draw() re-draw dirty shape:', this );
+
             // If parent is dirty, childs will need a re-draw too
             
             this._draw( context, /*forceDraw on child*/true );

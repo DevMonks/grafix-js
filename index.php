@@ -4,7 +4,7 @@
 
 <div style="width: 100%; padding: 20px; font-family: monospace; border: 1px dashed #fcc" id="frames"></div><br>
 <br>
-<canvas id="layer" width="500" height="500"></canvas><br>
+<canvas id="layer" width="500" height="500" style="border: 1px solid #FF00FF"></canvas><br>
 
 <script src="js/grafix.nocache.js"></script>
 <script>

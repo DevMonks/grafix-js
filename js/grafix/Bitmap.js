@@ -33,6 +33,18 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     },
 
 
+    get cropX() { return this.prop( 'cropX' ); },
+    set cropX( value ) { return this.prop( 'cropX', value ); },
+    
+    get cropY() { return this.prop( 'cropY' ); },
+    set cropY( value ) { return this.prop( 'cropY', value ); },
+
+    get cropWidth() { return this.prop( 'cropWidth' ); },
+    set cropWidth( value ) { return this.prop( 'cropWidth', value ); },
+    
+    get cropHeight() { return this.prop( 'cropHeight' ); },
+    set cropHeight( value ) { return this.prop( 'cropHeight', value ); },
+
     get crop() { return new Rectangle( this.cropX, this.cropY, this.cropWidth, this.cropHeight ); },
     set crop( value ) {
 
@@ -41,9 +53,9 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             else if( 'cropX' in value ) { this.cropX = value.cropX; }
             if( 'y' in value ) { this.cropY = value.y; }
             else if( 'cropY' in value ) { this.cropY = value.cropY; }
-            if( 'width' in value ) { this.width = value.width; }
+            if( 'width' in value ) { this.cropWidth = value.width; }
             else if( 'cropWidth' in value ) { this.cropWidth = value.cropWidth; }
-            if( 'height' in value ) { this.height = value.height; }
+            if( 'height' in value ) { this.cropHeight = value.height; }
             else if( 'dropHeight' in value ) { this.cropHeight = value.cropHeight; }
         } else {
             throw "Invalid type of value for property Bitmap.crop: " + value;
@@ -66,7 +78,7 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         // Add browser load event on element
         img.addEventListener( 'load', function( e ) {
 
-            // Trigger out 'loaded' event
+            // Trigger our 'loaded' event
             bmp.loaded( { bitmap: bmp, image: img } );
         } );
         img.src = value;
@@ -82,7 +94,6 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         var filters = this.prop( 'filters' );
         return filters.length < 1 ? null : filters[ 0 ];
     },
-
     set filter( value ) {
 
         this.filters = [ value ];
@@ -152,7 +163,7 @@ Bitmap.prototype = Utils.extend( Rectangle, {
                 width: this.image.width,
                 height: this.image.height
             } ),
-            destinationRect = this,
+            destinationRect = this.rectScaled,
             img = this.image;
 
 
@@ -191,6 +202,8 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             destinationRect.width,
             destinationRect.height
         );
+
+        console.log('draw bitmap from ', sourceRect.toString(), ' to ', destinationRect.toString(), ':', this.path);
 
         canvasContext.restore();
 

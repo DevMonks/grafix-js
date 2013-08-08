@@ -35,12 +35,12 @@
 
     muffinScaled.loaded( function( e ) {
         
-        e.bitmap.size.mul( 0.2 );
+        e.bitmap.scale = 0.2;
     } );
     
     muffinFilter.loaded( function( e ) {
         
-        e.bitmap.size.mul( 0.3 );
+        e.bitmap.scale = 0.9;
     } );
     
     stage.addChild( [ muffin, muffinCrop, muffinScaled, muffinFilter ] );
