@@ -1,11 +1,12 @@
 @@prioritize
 Polyfill.requestAnimationFrame
+Polyfill.addEventListener
 Utils
 Color
 Easing
 EventArgs
 EventHandler
-EventObject
+EventBase
 ShapeBase
 Shape
 Point
@@ -20,7 +21,10 @@ Keyboard
 Input
 Stage
 Group
-Picture
+Line
+Bitmap
+Text
+Animation
 @@
 @@before
 
@@ -34,19 +38,22 @@ var Grafix = (function( undefined ) {
 @@after
 
 	var Export = {
+        Animation: Animation,
         Color: Color,
         Circle: Circle,
         Easing: Easing,
-        EventObject: EventObject,
+        EventBase: EventBase,
         EventArgs: EventArgs,
         EventHandler: EventHandler,
+        Filter: Filter,
         Input: Input,
         InputBase: InputBase,
         Keyboard: Keyboard,
+        Line: Line,
         Mouse: Mouse,
         Grid: Grid,
         Group: Group,
-        Picture: Picture,
+        Bitmap: Bitmap,
         Point: Point,
         Point3D: Point3D,
         Random: Random,
@@ -55,6 +62,7 @@ var Grafix = (function( undefined ) {
         ShapeBase: ShapeBase,
         Shape: Shape,
         Size: Size,
+        Text: Text,
         Utils: Utils,
 		/*
 			You can call "import()" somewhere for a namespace (global namespace is default)

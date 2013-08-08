@@ -1,4 +1,5 @@
 var Rectangle = function( x, y, width, height ) {
+    Shape.call( this );
 
     Shape.call( this );
 
@@ -9,21 +10,110 @@ Rectangle.prototype = Utils.extend( Shape, {
 
     get clone() {
         
-        return new Rectangle( this );
+        return new Rectangle( this, false );
     },
 
-    set: function( x, y, width, height ) {
+    set: function( x, y, width, height, deep ) {
         
-        Shape.prototype.set.call( this, x, y );
+        Shape.prototype.set.call( this, x, y, deep );
         
-        if( typeof width !== 'undefined' )
+        if( Utils.isUndefined( width ) === false ) {
             this.width = width;
-        
-        if( typeof height !== 'undefined' )
+        }
+
+        if( Utils.isUndefined( height ) === false ) {
             this.height = height;
+        }
         
         return this;
+    },
+
+
+    /* Calculation operations */
+    add: function ( rect ) {
+        if ( Utils.isNumeric( rect ) ) {
+            rect = { x: rect, y: rect, width: rect, height: rect };
+        }
+
+        if ( rect.x ) {
+            this.x += rect.x;
+        }
+        if ( rect.y ) {
+            this.y += rect.y;
+        }
+        if ( rect.width ) {
+            this.width += rect.width;
+        }
+        if ( rect.height ) {
+            this.height += rect.height;
+        }
+
+        return this;
+    },
+
+    sub: function ( rect ) {
+        if ( Utils.isNumeric( rect ) ) {
+            rect = { x: rect, y: rect, width: rect, height: rect };
+        }
+
+        if ( rect.x ) {
+            this.x -= rect.x;
+        }
+        if ( rect.y ) {
+            this.y -= rect.y;
+        }
+        if ( rect.width ) {
+            this.width -= rect.width;
+        }
+        if ( rect.height ) {
+            this.height -= rect.height;
+        }
+
+        return this;
+    },
+
+    mul: function ( rect ) {
+        if ( Utils.isNumeric( rect ) ) {
+            rect = { x: rect, y: rect, width: rect, height: rect };
+        }
+
+        if ( rect.x ) {
+            this.x *= rect.x;
+        }
+        if ( rect.y ) {
+            this.y *= rect.y;
+        }
+        if ( rect.width ) {
+            this.width *= rect.width;
+        }
+        if ( rect.height ) {
+            this.height *= rect.height;
+        }
+
+        return this;
+    },
+
+    div: function ( rect ) {
+        if ( Utils.isNumeric( rect ) ) {
+            rect = { x: rect, y: rect, width: rect, height: rect };
+        }
+
+        if ( rect.x ) {
+            this.x /= rect.x;
+        }
+        if ( rect.y ) {
+            this.y /= rect.y;
+        }
+        if ( rect.width ) {
+            this.width /= rect.width;
+        }
+        if ( rect.height ) {
+            this.height /= rect.height;
+        }
+
+        return this;
     }
+
 } );
 
 /* Add ShortCut */

@@ -5,7 +5,7 @@
  * @constructor
  */
 var Input = function ( target ) {
-    EventObject.call( this );
+    EventBase.call( this );
 
     this._target = target || window;
     this._inputModules = [];
@@ -19,19 +19,19 @@ var Input = function ( target ) {
 };
 
 // @TODO: Dynamic registration using addModul, use modul's .export() array to merge into Input instance
-Input.prototype = Utils.extend( EventObject, {
+Input.prototype = Utils.extend( EventBase, {
 
     /**
      * Returns the target of this class.
      *
-     * @returns {EventObject}
+     * @returns {EventBase}
      */
     get target() { return this._target; },
     /**
      * Returns the target of this class.
      * Just an alias to {this.target}.
      *
-     * @returns {EventObject}
+     * @returns {EventBase}
      */
     get context() { return this.target; },
 
@@ -115,9 +115,16 @@ Input.prototype = Utils.extend( EventObject, {
         }
 
         // @TODO: I think this uses eval() internally.. maybe fnd a better way
+        // @FIXED: BUT, I don't think think this is nessecary anyways
+        //         This will give problems in Node.js I guess
+        
         var that = this;
         // Create the instance
-        this._inputModules[ moduleName ] = new Function("return new " + moduleName + "(this.target);").call( this );
+        
+        if( !( moduleName in Grafix ) )
+            throw 'Invalid input module ' + moduleName;
+        
+        this._inputModules[ moduleName ] = new Grafix[ moduleName ]( this.target );
 
         // Return the instance
         return this._inputModules[ moduleName ];

@@ -1,4 +1,4 @@
-var Shape = function ( x, y ) {
+var Shape = function( x, y ) {
     ShapeBase.call( this, x, y );
 
     // Some positions for click and drag & drop support
@@ -12,41 +12,44 @@ var Shape = function ( x, y ) {
     this._isMouseDragging = false;
 
 
-    // Shape position and style properties
-    this._position = new Point( { parent: this, delegateChanged: this._delegateChanged } );
-    if (this._delegateChanged) {
-        this._position.changed(this.changed, this);
-    }
-    this._size = new Size( { parent: this, delegateChanged: this._delegateChanged } );
-    if (this._delegateChanged) {
-        this._size.changed(this.changed, this);
-    }
+    // Shape position and size
+    this._x = 0;
+    this._y = 0;
+    this._width = 0;
+    this._height = 0;
 
-    /* Style Properties */
-    this._offset = new Point( { parent: this, delegateChanged: this._delegateChanged } );
-    if (this._delegateChanged) {
-        this._offset.changed(this.changed, this);
-    }
-    this._scale = new Point( { x: 1, y: 1, parent: this, delegateChanged: this._delegateChanged } );
-    if (this._delegateChanged) {
-        this._scale.changed(this.changed, this);
-    }
+    // Style properties
+    this._offsetX = 0;
+    this._offsetY = 0;
+    this._scaleWidth = 1;
+    this._scaleHeight = 1;
     this._angle = 0;
-    this._skew = new Point( { parent: this, delegateChanged: this._delegateChanged } );
-    if (this._delegateChanged) {
-        this._skew.changed(this.changed, this);
-    }
+    this._skewX = 0;
+    this._skewY = 0;
     this._color = Color.black;
-    this._drawStyle = 'fill';  //stroke, fill...
+    this._drawStyle = Shape.defaults.drawStyle;
     this._lineWidth = 1;
-    this._lineCap = 'bull'; //bull, round, square...
+    this._lineCap = Shape.defaults.lineCap;
     this._miterLimit = null;
-    this._lineJoin = 'miter'; //miter, bevel, round...
+    this._lineJoin = Shape.defaults.lineJoin;
     this._closePath = null;
-    this._alignContext = 'parent'; //parent, root, [object Shape]
-    this._align = 'top left'; //inner, outer, left, right, bottom, center, top, or all together...
+    this._alignContext = Shape.defaults.alignContext;
+    this._align = Shape.defaults.align;
 
     this.set( x, y );
+};
+
+Shape.defaults = {
+    drawStyles: [ 'fill', 'stroke', 'clear' ],
+    drawStyle: 'fill',
+    lineCaps: [ 'butt', 'round', 'square' ],
+    lineCap: 'butt',
+    lineJoins: [ 'miter', 'bevel', 'round' ],
+    lineJoin: 'miter',
+    alignContexts: [ 'parent', 'root' ],
+    alignContext: 'parent',
+    aligns: [ 'top', 'bottom', 'left', 'ritght', 'inner', 'outer' ],
+    align: 'top left'
 };
 
 Shape.prototype = Utils.extend( ShapeBase, {
@@ -54,33 +57,182 @@ Shape.prototype = Utils.extend( ShapeBase, {
         return new Shape( this );
     },
 
-    get position() { return this._position; },
-    set position( value ) { throw 'Cannot redeclare position, use Shape.position.set( x/Object, y ) instead';},
+    get x() { return this.prop( 'x' ); },
+    set x( value ) { this.prop( 'x', value ); },
 
-    get size() { return this._size; },
-    set size( value ) { throw 'Cannot redeclare size, use Shape.size.set( width/Object, height ) instead'; },
+    get y() { return this.prop( 'y' ); },
+    set y( value ) { this.prop( 'y', value ); },
 
-    get x() { return this.position.x; },
-    set x( value ) { this.position.x = value; },
+    get width() { return this.prop( 'width' ); },
+    set width( value ) { this.prop( 'width', value ); },
 
-    get y() { return this.position.y; },
-    set y( value ) { this.position.y = value; },
+    get height() { return this.prop( 'height' ); },
+    set height( value ) { this.prop( 'height', value ); },
 
-    get width() { return this.size.width; },
-    set width( value ) { this.size.width = value; },
+    get angle() { return this.prop( 'angle' ); },
+    set angle( value ) { this.prop( 'angle', value ); },
 
-    get height() { return this.size.height; },
-    set height( value ) { this.size.height = value; },
+    get skewX() { return this.prop( 'skewX' ); },
+    set skewX( value ) { this.prop( 'skewX', value ); },
+
+    get skewY() { return this.prop( 'skewY' ); },
+    set skewY( value ) { this.prop( 'skewY', value ); },
+
+    get offsetX() { return this.prop( 'offsetX' ); },
+    set offsetX( value ) { this.prop( 'offsetX', value ); },
+
+    get offsetY() { return this.prop( 'offsetY' ); },
+    set offsetY( value ) { this.prop( 'offsetY', value ); },
+
+    get scaleWidth() { return this.prop( 'scaleWidth' ); },
+    set scaleWidth( value ) { this.prop( 'scaleWidth', value ); },
+
+    get scaleHeight() { return this.prop( 'scaleHeight' ); },
+    set scaleHeight( value ) { this.prop( 'scaleHeight', value ); },
+
+    get color() { return this.prop( 'color' ); },
+    set color( value ) { return this.prop( 'color', value ); },
+
+    get drawStyle() { return this.prop( 'drawStyle' ); },
+    set drawStyle( value ) { return this.prop( 'drawStyle', value ); },
+
+    get lineWidth() { return this.prop( 'lineWidth' ); },
+    set lineWidth( value ) { return this.prop( 'lineWidth', value ); },
+
+    get lineCap() { return this.prop( 'lineCap' ); },
+    set lineCap( value ) { return this.prop( 'lineCap', value ); },
+
+    get miterLimit() { return this.prop( 'miterLimit' ); },
+    set miterLimit( value ) { return this.prop( 'miterLimit', value ); },
+
+    get lineJoin() { return this.prop( 'lineJoin' ); },
+    set lineJoin( value ) { return this.prop( 'lineJoin', value ); },
+
+    get closePath() { return this.prop( 'closePath' ); },
+    set closePath( value ) { return this.prop( 'closePath', value ); },
+
+    get align() { return this.prop( 'align' ); },
+    set align( value ) {
+        var alignContext = null;
+        // @TODO: Make this using Shape.defaults.alignContexts!
+        switch ( this.alignContext ) {
+            case 'parent':
+
+                alignContext = this.parent;
+                break;
+            case 'root':
+
+                alignContext = this.root;
+                break;
+            default:
+                alignContext = this.alignContext;
+                break;
+        }
+
+        if( alignContext ) {
+            // @TODO: Shouln'd this use Shape.defaults.align?
+            var align = Utils.isString( this.align ) ? this.align : 'center center center';
+            this.alignBy( alignContext, align );
+        }
+
+        if( this.prop( 'align', value ) !== false ) {
+            this.alignBy();
+        }
+    },
+
+    get alignContext() { return this.prop( 'alignContext' ); },
+    set alignContext( value ) {
+
+        this.alignBy( value, this.align );
+        if( this.prop( 'alignContext', value ) !== false ) {
+            this.alignBy();
+        }
+    },
+
+    get position() { return new Point( this.x, this.y ); },
+    set position( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'x' in value ) { this.x = value.x; }
+            if( 'y' in value ) { this.y = value.y; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.x = this.y = value;
+        } else {
+            throw "Invalid type of value for property Shape.position: " + value;
+        }
+    },
+
+    get size() { return new Size( this.width, this.height ); },
+    set size( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'width' in value ) { this.width = value.width; }
+            if( 'height' in value ) { this.height = value.height; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.width = this.height = value;
+        } else {
+            throw "Invalid type of value for property Shape.size: " + value;
+        }
+    },
+
+    get offset() { return new Point( this.offsetX, this.offsetY ); },
+    set offset( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'offsetX' in value ) { this.offsetX = value.offsetX; }
+            else if( 'x' in value )  { this.offsetX = value.x; }
+            if( 'offsetY' in value ) { this.offsetY = value.offsetY; }
+            else if( 'y' in value )  { this.offsetY = value.y; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.offsetX = this.offsetY = value;
+        } else {
+            throw "Invalid type of value for property Shape.offset: " + value;
+        }
+    },
+
+    get scale() { return new Point( this.scaleWidth, this.scaleHeight ); },
+    set scale( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'scaleWidth' in value ) { this.scaleWidth = value.scaleWidth; }
+            else if( 'width' in value ) { this.scaleWidth = value.width; }
+            if( 'scaleHeight' in value ) { this.scaleHeight = value.scaleHeight; }
+            else if( 'height' in value ) { this.scaleHeight = value.height; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.scaleWidth = this.scaleHeight = value;
+        } else {
+            throw "Invalid type of value for property Shape.scale: " + value;
+        }
+    },
+
+    get skew() { return new Point( this.skewX, this.skewY ); },
+    set skew( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'skewX' in value )  { this.skewX = value.skewX; }
+            else if( 'x' in value ) { this.skewX = value.x; }
+            if( 'skewY' in value )  { this.skewY = value.skewY; }
+            else if( 'y' in value ) { this.skewY = value.y; }
+        } else if( Utils.isNumeric( value ) ) {
+            this.skewX = this.skewY = value;
+        } else {
+            throw "Invalid type of value for property Shape.skew: " + value;
+        }
+    },
+
+    get rect() { return new Rectangle( this.x, this.y, this.width, this.height ); },
+
+    get rectScaled() { return new Rectangle( this.x, this.y, this.width * this.scaleWidth, this.height * this.scaleHeight ); },
 
     get center() {
         return new Point( this.x + this.width / 2, this.y + this.height / 2 );
     },
     set center( value ) {
-        if ( value.x ) {
+        if( value.x ) {
             this.x = value.x - this.width / 2;
         }
 
-        if ( value.y ) {
+        if( value.y ) {
             this.y = value.y - this.height / 2;
         }
     },
@@ -93,18 +245,12 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get right() { return this.width + this.x; },
     set right( value ) {
-        if ( Utils.isNumeric( value ) === false ) {
-            return;
-        }
 
         this.width = value - this.x;
     },
 
     get top() { return this.y; },
     set top( value ) {
-        if ( Utils.isNumeric( value ) === false ) {
-            return;
-        }
 
         this.height -= this.y - value;
         this.y = value;
@@ -112,9 +258,6 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get bottom() { return this.y + this.height; },
     set bottom( value ) {
-        if ( Utils.isNumeric( value ) === false ) {
-            return;
-        }
 
         this.height = value - this.y;
     },
@@ -143,216 +286,77 @@ Shape.prototype = Utils.extend( ShapeBase, {
         this.bottom = value.y;
     },
 
-    get offset() { return this._offset; },
-    set offset( value ) { throw 'Cannot redeclare offset, use Shape.offset.set( x/Object, y ) instead'; },
 
-    get scale() { return this._scale; },
-    set scale( value ) { throw 'Cannot redeclare scale, use Shape.scale.set( x/Object, y ) instead'; },
-
-    get angle() { return this._angle; },
-    set angle( value ) {
-        if ( Utils.isNumeric( value ) === false ) {
-            return;
-        }
-
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'angle', this._angle, value ) );
-        }
-        this._angle = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get skew() { return this._skew; },
-    set skew( value ) { throw 'Cannot redeclare skew, use Shape.skew.set( x/Object, y ) instead'; },
-
-    get color() { return this._color; },
-    set color( value ) {
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'color', this._color, value ) );
-        }
-        this._color = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get drawStyle() { return this._drawStyle; },
-    set drawStyle( value ) {
-        if ( !Utils.inArray( ['stroke', 'fill', 'clear'], value ) ) {
-            value = 'fill';
-        }
-
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'drawStyle', this._drawStyle, value ) );
-        }
-        this._drawStyle = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get lineWidth() { return this._lineWidth; },
-    set lineWidth( value ) {
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'lineWidth', this._lineWidth, value ) );
-        }
-        this._lineWidth = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get lineCap() { return this._lineCap; },
-    set lineCap( value ) {
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'lineCap', this._lineCap, value ) );
-        }
-        this._lineCap = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get miterLimit() { return this._miterLimit; },
-    set miterLimit( value ) {
-        if ( Utils.isNumeric( value ) === false ) {
-            return;
-        }
-
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'miterLimit', this._miterLimit, value ) );
-        }
-        this._miterLimit = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get lineJoin() { return this._lineJoin; },
-    set lineJoin( value ) {
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'lineJoin', this._lineJoin, value ) );
-        }
-        this._lineJoin = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get closePath() { return this._closePath; },
-    set closePath( value ) {
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'closePath', this._closePath, value ) );
-        }
-        this._closePath = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get align() { return this._align; },
-    set align( value ) {
-        var alignContext = null;
-        switch ( this.alignContext ) {
-            case 'parent':
-
-                alignContext = this.parent;
-                break;
-            case 'root':
-
-                alignContext = this.root;
-                break;
-            default:
-                alignContext = this.alignContext;
-                break;
-        }
-
-        if (alignContext) {
-            var align = Utils.isString( this.align ) ? this.align : 'center center center';
-            this.alignBy( alignContext, align );
-        }
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'align', this._align, value ) );
-        }
-        this._align = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get alignContext() { return this._alignContext; },
-    set alignContext( value ) {
-        this.alignBy( value, this.align );
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'alignContext', this._alignContext, value ) );
-        }
-        this._alignContext = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    set: function ( x, y, deep ) {
+    set: function( x, y, deep ) {
         deep = deep || true;
 
         ShapeBase.prototype.set.call(this, x, y);
 
-        this.position.set( x, y );
+        if( Utils.isObject( x ) ) {
 
-        if ( Utils.isObject( x ) ) {
-            
-            if ( 'width' in x ) {
-                this.width = x.width;
+            if( 'position' in x ) {
+                this.position = x.position;
             }
-            if ( 'height' in x ) {
-                this.height = x.height;
+            if( 'size' in x ) {
+                this.size = x.size;
             }
-            if ( 'parent' in x ) {
-                this.parent = x.parent;
-            }
-            if ( 'offset' in x ) {
-                this.offset.set( x.offset );
-            }
-            if ( 'scale' in x ) {
-                this.scale.set( x.scale );
-            }
-            if ( 'angle' in x ) {
-                this.angle = x.angle;
-            }
-            if ( 'skew' in x ) {
-                this.skew.set( x.skew );
-            }
-            if ( 'color' in x ) {
-                this.color = x.color;
-            }
-            if ( 'drawStyle' in x ) {
-                this.drawStyle = x.drawStyle;
-            }
-            if ( 'lineWidth' in x ) {
-                this.lineWidth = x.lineWidth;
-            }
-            if ( 'lineCap' in x ) {
-                this.lineCap = x.lineCap;
-            }
-            if ( 'miterLimit' in x ) {
-                this.miterLimit = x.miterLimit;
-            }
-            if ( 'lineJoin' in x ) {
-                this.lineJoin = x.lineJoin;
-            }
-            if ( 'closePath' in x ) {
-                this.closePath = x.closePath;
-            }
-            if ( 'alignContext' in x ) {
-                this._alignContext = x.alignContext;
-            }
-            if ( 'align' in x ) {
-                this.align = x.align;
-            }
-            if ( 'x' in x ) {
+            if( 'x' in x ) {
                 this.x = x.x;
             }
-            if ( 'y' in x ) {
+            if( 'y' in x ) {
                 this.y = x.y;
             }
-            if ( 'canvas' in x ) {
-                this.canvas = x.canvas;
-                this._canvasContext = this.canvas.getContext( '2d' );
+            if( 'width' in x ) {
+                this.width = x.width;
+            }
+            if( 'height' in x ) {
+                this.height = x.height;
+            }
+            if( 'offset' in x ) {
+                this.offset = x.offset;
+            }
+            if( 'scale' in x ) {
+                this.scale = x.scale;
+            }
+            if( 'angle' in x ) {
+                this.angle = x.angle;
+            }
+            if( 'skew' in x ) {
+                this.skew = x.skew;
+            }
+            if( 'color' in x ) {
+                this.color = x.color;
+            }
+            if( 'drawStyle' in x ) {
+                this.drawStyle = x.drawStyle;
+            }
+            if( 'lineWidth' in x ) {
+                this.lineWidth = x.lineWidth;
+            }
+            if( 'lineCap' in x ) {
+                this.lineCap = x.lineCap;
+            }
+            if( 'miterLimit' in x ) {
+                this.miterLimit = x.miterLimit;
+            }
+            if( 'lineJoin' in x ) {
+                this.lineJoin = x.lineJoin;
+            }
+            if( 'closePath' in x ) {
+                this.closePath = x.closePath;
+            }
+            if( 'alignContext' in x ) {
+                this._alignContext = x.alignContext;
+            }
+            if( 'align' in x ) {
+                this.align = x.align;
             }
             
             // Also clone child shapes!
+            // @TODO: ShapeBase.set have to take care of childrens
+            //        Also clone wont work as expected because we have to store a reference to the exact child
+            //        Clone would create a new instance instead
+            /*
             if( 'children' in x && x.children.length > 0 ) {
                 for( var i in x.children ) {
                     
@@ -362,54 +366,128 @@ Shape.prototype = Utils.extend( ShapeBase, {
                         this.addChild( child.clone );
                 }
             }
+            */
 
-            if ( deep ) {
+            if( deep ) {
 
-                //we allow those, too! they just dont make sense in a copy
-                //this extends our possibilities in animating later on
-                //They are not needed, because each of those properties
-                //just modify x and y and we already set these in a plain copy
-                //for a copy of an object, use either (new Shape).set( source ) or Shape.clone( source )
-                if ( 'size' in x ) {
-                    this.size.set( x.size );
-                }
-                if ( 'center' in x ) {
+                // We allow those, too! they just dont make sense in a copy
+                // this extends our possibilities in animating later on
+                // They are not needed, because each of those properties
+                // just modify x and y and we already set these in a plain copy
+                // for a copy of an object, use either (new Shape).set( source ) or Shape.clone( source )
+                if( 'center' in x ) {
                     this.center = x.center;
                 }
-                if ( 'left' in x ) {
+                if( 'left' in x ) {
                     this.left = x.left;
                 }
-                if ( 'right' in x ) {
+                if( 'right' in x ) {
                     this.right = x.right;
                 }
-                if ( 'top' in x ) {
+                if( 'top' in x ) {
                     this.top = x.top;
                 }
-                if ( 'bottom' in x ) {
+                if( 'bottom' in x ) {
                     this.bottom = x.bottom;
                 }
-                if ( 'leftTop' in x ) {
+                if( 'leftTop' in x ) {
                     this.leftTop = x.leftTop;
                 }
-                if ( 'rightTop' in x ) {
+                if( 'rightTop' in x ) {
                     this.rightTop = x.rightTop;
                 }
-                if ( 'leftBottom' in x ) {
+                if( 'leftBottom' in x ) {
                     this.leftBottom = x.leftBottom;
                 }
-                if ( 'rightBottom' in x ) {
+                if( 'rightBottom' in x ) {
                     this.rightBottom = x.rightBottom;
                 }
             }
 
-        } else if (x !== undefined) {
+        } else if( Utils.isUndefined( x ) === false ) {
             this.x = x;
+        }
+
+        if( Utils.isUndefined( y ) === false ) {
+            this.y = y;
         }
 
         return this;
     },
 
-    // Style is like set(), but only for style properties
+    applyStyles: function( context ) {
+
+        context = context || this.canvasContext;
+
+        // Apply styles if needed (If no style selected, properties won't change for performance reasons)
+        if( this.offsetX !== 0 || this.offsetY !== 0 ) {
+            context.translate( this.offsetX, this.offsetY );
+        }
+
+        // @TODO: This scales also x and y.. wtfh?
+        //        We currently using scale only in Bitmap, so this is disabled until further testing
+        //        Bitmap now uses Shape.rectScaled for the drawn destination
+        //if( this.scaleWidth !== 1 || this.scaleHeight !== 1 ) {
+        //    context.scale( this.scaleWidth, this.scaleHeight );
+        //}
+
+        if( this.angle !== 0 ) {
+            context.rotate( this.angle );
+        }
+
+        if( context.lineWidth !== this.lineWidth ) {
+            context.lineWidth = this.lineWidth;
+        }
+
+        if( context.lineCap !== this.lineCap ) {
+            context.lineCap = this.lineCap;
+        }
+
+        if( context.miterLimit !== this.miterLimit ) {
+            context.miterLimit = this.miterLimit;
+        }
+
+        if( context.lineJoin !== this.lineJoin ) {
+            context.lineJoin = this.lineJoin;
+        }
+
+        if( this.skewX !== 0 || this.skewY !== 0 ) {
+            context.transform( 1, this.skewX, this.skewY, 1, 0, 0 );
+        }
+
+        // Resolves to canvas' "fillStyle", "strokeStyle" and "clearStyle" (does not exist)
+        var colorProp = this.drawStyle + 'Style';
+        // The color will only be re-set, if it has been changed
+        if( this.color !== context[ colorProp ] ) {
+            context[ colorProp ] = this.color;
+        }
+
+        return this;
+    },
+
+    fill: function( context ) {
+
+        context = context || this.canvasContext;
+        context.fillRect( this.x, this.y, this.width, this.height );
+
+        return this;
+    },
+
+    stroke: function( context ) {
+
+        context = context || this.canvasContext;
+        context.strokeRect( this.x, this.y, this.width, this.height );
+
+        return this;
+    },
+
+    clear: function( context ) {
+
+        context = context || this.canvasContext;
+        context.clearRect( this.x, this.y, this.width, this.height );
+    },
+
+    // style is like set(), but only for style properties
     style: function( style ) {
 
         if( Utils.isString( style ) ) {
@@ -418,56 +496,44 @@ Shape.prototype = Utils.extend( ShapeBase, {
             for( var i in tokens ) {
 
                 var token = tokens[ i ];
-                switch( token ) {
-                    case 'fill':
-                    case 'clear':
-                    case 'stroke':
+                if( (token in Shape.defaults.drawStyles) ) {
 
-                        this.drawStyle = token;
-                        break;
-                    case 'bull':
-                    case 'round':
-                    case 'square':
-
-                        this.lineCap = token;
-                        break;
-                    case 'miter':
-                    case 'bevel':
-                    case 'round':
-
-                        this.miterLimit = token;
-                        break;
-                    case 'parent':
-                    case 'root':
-
-                        this.alignContext = token;
-                        break;
-                    case 'inner':
-                    case 'outer':
-                    case 'left':
-                    case 'right':
-                    case 'bottom':
-                        /*TODO: These would need to be collected
-                         * and passed as one string to this.align
-                         **/
-                        break;
-                    default:
-
-                        if( Utils.isNumeric( token ) )
-                        //lets take it as the lineWidth
-                            this.lineWidth = parseInt( token );
-                        else
-                        //it's probably the color, heh
-                            this.color = token;
+                    this.drawStyle = token;
                 }
+                else if( (token in Shape.defaults.lineCaps) ) {
+
+                    this.lineCap = token;
+                }
+                else if( (token in Shape.defaults.lineJoins) ) {
+
+                    this.lineJoin = token;
+                }
+                else if( (token in Shape.defaults.alignContexts) ) {
+
+                    this.alignContext = token;
+                }
+                else if( (token in Shape.defaults.aligns) ) {
+
+                    // @TODO: These would need to be collected and passed as one string to this.align
+                }
+                else {
+                    // @FIXME: Bad default suggestion..
+                    if( Utils.isNumeric( token ) )
+                    //lets take it as the lineWidth
+                        this.lineWidth = parseInt( token );
+                    else
+                    //it's probably the color, heh
+                        this.color = token;
+                }
+
             }
         } else if( Utils.isObject( style ) ) {
 
             //You can just pass a shape and copy its styles
-            if( style.offset ) this.offset.set( style.offset );
-            if( style.scale ) this.scale.set( style.scale );
+            if( style.offset ) this.offset = style.offset;
+            if( style.scale ) this.scale = style.scale;
             if( style.angle ) this.angle = style.angle;
-            if( style.skew ) this.skew.set( style.skew );
+            if( style.skew ) this.skew = style.skew;
             if( style.color ) this.color = style.color;
             if( style.drawStyle ) this.drawStyle = style.drawStyle;
             if( style.lineWidth ) this.lineWidth = style.lineWidth;
@@ -480,106 +546,9 @@ Shape.prototype = Utils.extend( ShapeBase, {
             if( style.align ) this.align = style.align;
         }
 
-        //make it chainable
         return this;
     },
 
-    applyStyles: function ( context ) {
-
-        if (!context) {
-            context = this.canvasContext;
-        }
-
-        //Apply styles if needed (If no style selected, properties won't change for performance reasons)
-        if ( this.offset instanceof Point && !this.offset.isZero() ) {
-            context.translate( this.offset.x, this.offset.y );
-        }
-
-        if ( this.scale instanceof Point && (this.scale.x !== 1 || this.scale.y !== 1) ) {
-            context.scale( this.scale.x, this.scale.y );
-        }
-
-        if ( this.angle !== 0 ) {
-            context.rotate( this.angle );
-        }
-
-        if ( context.lineWidth !== this.lineWidth ) {
-            context.lineWidth = this.lineWidth;
-        }
-
-        if ( context.lineCap !== this.lineCap ) {
-            context.lineCap = this.lineCap;
-        }
-
-        if ( context.miterLimit !== this.miterLimit ) {
-            context.miterLimit = this.miterLimit;
-        }
-
-        if ( context.lineJoin !== this.lineJoin ) {
-            context.lineJoin = this.lineJoin;
-        }
-
-        if ( this.skew instanceof Point && !this.skew.isZero() ) {
-            context.transform( 1, this.skew.x, this.skew.y, 1, 0, 0 );
-        }
-
-        var colorProp = this.drawStyle + 'Style';
-        // the color will only be re-set, if it changes
-        if ( this.color !== context[colorProp] ) {
-            context[colorProp] = this.color;
-        }
-
-        return this;
-    },
-
-    expand: function( shape ) {
-
-        if( this.left > shape.left )
-            this.left = shape.left;
-
-        if( this.right < shape.right )
-            this.right = shape.right;
-
-        if( this.top > shape.top )
-            this.top = shape.top;
-
-        if( this.bottom < shape.bottom )
-            this.bottom = shape.bottom;
-
-        return this;
-    },
-
-
-    fill: function ( context ) {
-
-        if (!context) {
-            context = this.canvasContext;
-        }
-
-        context.fillRect( this.x, this.y, this.width, this.height );
-
-        return this;
-    },
-
-    stroke: function ( context ) {
-
-        if (!context) {
-            context = this.canvasContext;
-        }
-
-        context.strokeRect( this.x, this.y, this.width, this.height );
-
-        return this;
-    },
-
-    clear: function ( context ) {
-
-        if (!context) {
-            context = this.canvasContext;
-        }
-
-        context.clearRect( this.x, this.y, this.width, this.height );
-    },
 
     /**
      * Executed before a draw() happens, should update inner properties and handle input states
@@ -591,46 +560,46 @@ Shape.prototype = Utils.extend( ShapeBase, {
         // Set some hover and drag states based on input
         var input = this.input;
 
-        if ( input ) {
+        if( input ) {
             // Only trigger new mouseMove() if the user moved
-            if ( this._lastPositions.mouse.equals(input.mouse.position) === false ) {
+            if( this._lastPositions.mouse.equals(input.mouse.position) === false ) {
                 // Store last used/seen position
                 this._lastPositions.mouse.set(input.mouse.position);
 
-                if ( this.contains( input.mouse.position ) ) {
+                if( this.contains( input.mouse.position ) ) {
 
                     this.mouseMove();
 
-                    if ( !this._mouseOnState ) {
+                    if( !this._mouseOnState ) {
 
                         this._mouseOnState = true;
                         this.mouseOn();
                     }
                 }
 
-                else if ( this._mouseOnState ) {
+                else if( this._mouseOnState ) {
 
                     this._mouseOnState = false;
                     this.mouseOff();
                 }
             }
 
-            if ( input.keyboard.isDown(Keyboard.KEY.MOUSE1) && this._isMouseDragging === false ) {
+            if( input.keyboard.isDown(Keyboard.KEY.MOUSE1) && this._isMouseDragging === false ) {
                 var dragLazyness = this._mouseDragLazyness || 1;
 
-                if ( this._lastPositions.mouseDown.distanceTo( input.mouse.position ) > dragLazyness ) {
+                if( this._lastPositions.mouseDown.distanceTo( input.mouse.position ) > dragLazyness ) {
                     this._isMouseDragging = true;
                     this.mouseDrag();
                 }
             }
 
-            else if ( this._isMouseDragging ) {
+            else if( this._isMouseDragging ) {
 
                 this.mouseDragMove();
             }
 
 
-            if ( input.mouse.isDown(Keyboard.KEY.MOUSE1) || input.mouse.isDown(Keyboard.KEY.MOUSE2) ) {
+            if( input.mouse.isDown(Keyboard.KEY.MOUSE1) || input.mouse.isDown(Keyboard.KEY.MOUSE2) ) {
 
                 if( this.contains( input.mouse.position ) ) {
                     // @TODO: Whats about other mouse buttons? This would handle everything as right button
@@ -642,19 +611,19 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 }
             }
 
-            else if ( input.mouse.isUp(Keyboard.KEY.MOUSE1) || input.mouse.isUp(Keyboard.KEY.MOUSE2) ) {
+            else if( input.mouse.isUp(Keyboard.KEY.MOUSE1) || input.mouse.isUp(Keyboard.KEY.MOUSE2) ) {
                 // @TODO: Whats about other mouse buttons? This would handle everything as right button
                 var btn = input.mouse.isUp(Keyboard.KEY.MOUSE1) ? Keyboard.KEY.MOUSE1 : Keyboard.KEY.MOUSE2;
 
                 this.mouseUp( btn );
                 this._lastPositions.mouseUp.set(input.mouse.position);
 
-                if ( this._isMouseDragging !== false ) {
+                if( this._isMouseDragging !== false ) {
                     this.mouseDrop( this._isMouseDragging );
                     this._isMouseDragging = false;
                 }
 
-                if ( this.contains( input.mouse.position ) ) {
+                if( this.contains( input.mouse.position ) ) {
 
                     this.mouseClick( btn );
 
@@ -666,7 +635,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
         return this;
     },
 
-    _draw: function ( context, forceChildDraw ) {
+    _draw: function( context, forceChildDraw ) {
 
         // Apply styles
         this.applyStyles( context );
@@ -674,33 +643,44 @@ Shape.prototype = Utils.extend( ShapeBase, {
         this[this.drawStyle].call( this, context );
 
         // Draw dirty children
-        if ( this.children.length ) {
-            for ( var i = 0; i < this.children.length; i++ ) {
-                var child = this.children[i];
+        if( this.children.length ) {
+            var shape = this;
+            this.eachChild( function( childIndex ) {
                 // Redraw shapes that are directly connected to this parent only
                 // @TODO: This causes an overlay problem..
                 //        We have to check if any child needs a redraw and, if so, we have to redraw everything
                 //        Only redrawing dirty childs will make them overlapping ther other not-yet-dirty childs
-                if ( this.collidesWith( child )/* && child.isDirty */) {
+                //if( shape.collidesWith( this )/* && child.isDirty */) {
                     //console.log('Shape.draw() poke child for draw (dirty=', child.isDirty, '):', child);
-                    child.draw( context, forceChildDraw );
-                }
-            }
+                    //this.draw( context, forceChildDraw );
+                //}
+                // @FIX: This is not always the case, just draw the child
+                this.draw( context, forceChildDraw );
+            } );
         }
 
         return this;
     },
 
-    alignBy:      function ( context, position ) {
+    alignBy: function( context, position ) {
 
-        if (!context) {
-            context = this.canvasContext;
-        } else if ( Utils.isString(context) ) {
-            position = context;
-            context = this.canvasContext;
+        context = context || this.alignContext;
+
+        switch ( context ) {
+            case 'parent':
+
+                context = this.parent;
+                break;
+            case 'root':
+
+                context = this.root;
+                break;
         }
+        
+        if( !context )
+            return this;
 
-        position = (position || '').split( ' ' );
+        position = ( position || this.align ).split( ' ' );
         var type = 'center';
         var xType = null;
         var yType = null;
@@ -710,15 +690,19 @@ Shape.prototype = Utils.extend( ShapeBase, {
         var thisHeight = this.height || (this.radius ? this.radius * 2 : 0);
         var thatHeight = context.height || (context.radius ? context.radius * 2 : 0);
 
+        // Read the alignment steps:
+        // - xType: (left|right|center)
+        // - yType: (top|bottom|center)
+        // - type:  (inner|outer|center)
         for ( var i = 0; i < position.length; i++ ) {
             switch ( position[i] ) {
 
                 case 'center':
 
-                    if ( xType !== null && yType !== null ) {
+                    if( xType !== null && yType !== null ) {
 
                         type = 'center';
-                    } else if ( xType !== null ) {
+                    } else if( xType !== null ) {
 
                         yType = 'center';
                     } else {
@@ -745,18 +729,18 @@ Shape.prototype = Utils.extend( ShapeBase, {
             }
         }
 
-        if ( !xType ) {
+        if( !xType ) {
             xType = 'center';
         }
-        if ( !yType ) {
+        if( !yType ) {
             yType = 'center';
         }
 
-        //position
+        // Apply new position based on the detected alignment
         switch ( xType ) {
 
             case 'left':
-                //position inner first
+                // Default to type = inner
                 this.x = context.x;
 
                 switch ( type ) {
@@ -767,11 +751,12 @@ Shape.prototype = Utils.extend( ShapeBase, {
                     case 'outer':
 
                         this.x -= thisWidth;
+                        break;
                 }
                 break;
 
             case 'right':
-                //position outer first
+                // Default to type = outer
                 this.x = context.x + thatWidth;
 
                 switch ( type ) {
@@ -786,7 +771,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 break;
 
             case 'center':
-                //position center first
+
                 this.x = context.x + ( thatWidth / 2 ) - thisWidth / 2;
                 break;
         }
@@ -794,7 +779,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
         switch ( yType ) {
 
             case 'top':
-                //position inner first
+                // Default to type = inner
                 this.y = context.y;
 
                 switch ( type ) {
@@ -809,7 +794,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 break;
 
             case 'bottom':
-                //position outer first
+                // Default to type = outer
                 this.y = context.y + thatHeight;
 
                 switch ( type ) {
@@ -824,7 +809,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 break;
 
             case 'center':
-                //position center first
+
                 this.y = context.y + ( thatHeight / 2 ) - thisHeight / 2;
                 break;
         }
@@ -833,7 +818,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
     },
 
     /* Collision stuff */
-    collidesWith: function ( rect ) {
+    collidesWith: function( rect ) {
         var left = rect.left ? rect.left : rect.x;
         var right = rect.right ? rect.right : rect.x + ( rect.width ? rect.width : 0 );
         var top = rect.top ? rect.top : rect.y;
@@ -842,7 +827,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
         return !( left > this.right || right < this.left || top > this.bottom || bottom < this.top );
     },
 
-    contains: function ( rect ) {
+    contains: function( rect ) {
         //the difference between collidesWith and contains is just that contains
         //checks if the WHOLE object is inside the shape while collidesWith checks,
         //if only a part of the shape touches the target shape
@@ -859,7 +844,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     handleMouseEvent: function( event, callback ) {
 
-        if ( callback ) {
+        if( callback ) {
             return this.on( event, callback );
         }
 
@@ -917,6 +902,47 @@ Shape.prototype = Utils.extend( ShapeBase, {
     mouseDrop: function( callback ) {
 
         return this.handleMouseEvent( 'mouseDrop', callback );
+    },
+            
+    expand: function( shape ) {
+
+        if( this.left > shape.left )
+            this.left = shape.left;
+        
+        if( this.right < shape.right )
+            this.right = shape.right;
+        
+        if( this.top > shape.top )
+            this.top = shape.top;
+        
+        if( this.bottom < shape.bottom )
+            this.bottom = shape.bottom;
+        
+        return this;
+    },
+
+    animate: function( props, duration, easing, callback ) {
+
+        //@TODO: Also allow the following variable orders
+//        Shape Shape.animate( properties, args );
+//        Shape Shape.animate( properties );
+//        Shape Shape.animate( properties, duration );
+//        Shape Shape.animate( properties, complete );
+//        Shape Shape.animate( properties, easing );
+//        Shape Shape.animate( properties, easing, complete );
+//        Shape Shape.animate( properties, duration, easing );
+//        Shape Shape.animate( properties, duration, complete );
+//        Shape Shape.animate( properties, duration, easing, complete );
+//        Shape Shape.animate( keyFrames );
+//        Shape Shape.animate( keyFrames, duration );
+//        Shape Shape.animate( keyFrames, complete );
+
+        return new Animation( this, props, {
+            duration: duration || Animation.defaults.duration,
+            completed: callback || function() {},
+            easing: easing || Animation.defaults.easing,
+            start: true
+        } );
     },
 
             

@@ -5,7 +5,7 @@
  * @constructor
  */
 var InputBase = function ( target ) {
-    EventObject.call(this);
+    EventBase.call(this);
 
     this._target = target;
     this._initialised = false;
@@ -15,7 +15,7 @@ var InputBase = function ( target ) {
     }
 };
 
-InputBase.prototype = Utils.extend( EventObject, {
+InputBase.prototype = Utils.extend( EventBase, {
 
     get target() { return this._target; },
     get context() { return this.target; },

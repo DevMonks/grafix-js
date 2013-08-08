@@ -5,19 +5,14 @@ var Point3D = function ( x, y, z ) {
 };
 
 Point3D.prototype = Utils.extend( Point, {
-    get z() { return this._z; },
-    set z( value ) {
-        if ( Utils.isNumeric( value ) == false ) {
-            return;
-        }
-
-        this.changed( this.prepareChanged( 'z', this._z, value ) );
-        this._z = value;
-    },
 
     get clone() {
         return new Point3D( this );
     },
+
+    get z() { return this.prop( 'z' ); },
+    set z( value ) { return this.prop( 'z', value ); },
+
 
     set: function ( x, y, z ) {
 
@@ -89,5 +84,5 @@ Point3D.prototype = Utils.extend( Point, {
 if( typeof ShortCuts !== 'undefined' )
     ShortCuts.point3D = function( x, y, z ) {
         
-        return new point3D( x, y, z );
+        return new Point3D( x, y, z );
     };

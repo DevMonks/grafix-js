@@ -8,12 +8,13 @@ var Group = function( shapes, virtual ) {
     
     if( shapes )
         this.addChild( shapes );
-}
+};
+
 Group.defaults = {
     virtual: true
 };
 
-Group.prototype = {
+Group.prototype = Utils.extend( Shape, {
     get virtual() { return this._virtual; },
     set virtual( value ) {
         
@@ -26,10 +27,10 @@ Group.prototype = {
     },
             
     set: function( virtual ) {
-        
+
+        Shape.prototype.set.call( this, virtual );
+
         if( Utils.isObject( virtual ) ) {
-            
-            Shape.prototype.set.call( this, virtual );
             
             if( 'virtual' in virtual ) this.virtual = virtual.virtual;
             
@@ -45,26 +46,30 @@ Group.prototype = {
 
         return new Group( this );
     },
+            
+    _drawGroup: function( canvasContext, style ) {
+        
+        if( this.virtual ) //virtual grids dont get drawn
+            return;
+        
+        Shape.prototype[ style ].call( this, canvasContext );
+    },
+            
+    fill: function( canvasContext ) {
+
+        this._drawGroup( canvasContext, 'fill' );
+    },
+            
+    stroke: function( canvasContext ) {
+
+        this._drawGroup( canvasContext, 'stroke' );
+    },
     
-    addChild: function( shape ) {
-        
-        if( Utils.isArray( shape ) )
-            for( var i in shape ) {
-                
-                this.addChild( shape[ i ] );
-                return this;
-            }
-        
-        if( this.children.length < 1 )
-            this.set( { size: shape.size, position: shape.position } );
-        else
-            this.expand( shape );
-        
-        Shape.prototype.addChild.call( this, shape );
-        
-        return this;
+    clear: function( canvasContext ) {
+
+        this._drawGroup( canvasContext, 'clear' );
     }
-};
+});
 
 /* Add ShortCut */
 if( typeof ShortCuts !== 'undefined' )

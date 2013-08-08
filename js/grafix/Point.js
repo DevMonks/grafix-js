@@ -1,9 +1,6 @@
 var Point = function ( x, y ) {
     ShapeBase.call( this );
 
-    // Will changes to own properties delegated to the changed() event?
-    this._delegateChanged = (Utils.isObject(x) && x.delegateChanged ? true : false);
-
     this._x = 0;
     this._y = 0;
 
@@ -11,39 +8,21 @@ var Point = function ( x, y ) {
 };
 
 Point.prototype = Utils.extend( ShapeBase, {
-    get x() { return this._x; },
-    set x( value ) {
-        if ( Utils.isNumeric( value ) === false || this._x === value ) {
-            return;
-        }
-
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'x', this._x, value ) );
-        }
-        this._x = value;
-        // Informs also parent
-        this.invalid = true;
-    },
-
-    get y() { return this._y; },
-    set y( value ) {
-        if ( Utils.isNumeric( value ) === false || this._y === value ) {
-            return;
-        }
-
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'y', this._y, value ) );
-        }
-        this._y = value;
-        // Informs also parent
-        this.invalid = true;
-    },
 
     get clone() {
         return new Point( this );
     },
 
+    get x() { return this.prop( 'x' ); },
+    set x( value ) { return this.prop( 'x', value ); },
+
+    get y() { return this.prop( 'y' ); },
+    set y( value ) { return this.prop( 'y', value ); },
+
+
     set: function( x, y ) {
+
+        ShapeBase.prototype.set.call( this );
 
         if ( Utils.isObject( x ) ) {
 
@@ -52,9 +31,6 @@ Point.prototype = Utils.extend( ShapeBase, {
             }
             if ( 'y' in x ) {
                 this.y = x.y;
-            }
-            if ( 'parent' in x ) {
-                this.parent = x.parent;
             }
         } else if( typeof x !== 'undefined' ) {
             
@@ -70,7 +46,11 @@ Point.prototype = Utils.extend( ShapeBase, {
     },
 
     isZero: function () {
-        return !( this.x || this.y );
+        return this.is( 0 );
+    },
+
+    is: function ( value ) {
+        return ( this.x === value && this.y === value );
     },
 
     equals: function ( point ) {
@@ -84,7 +64,7 @@ Point.prototype = Utils.extend( ShapeBase, {
     },
 
     /* Calculation operations */
-    add:        function ( point ) {
+    add: function ( point ) {
         if ( Utils.isNumeric( point ) ) {
             point = { x: point, y: point };
         }

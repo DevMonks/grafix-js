@@ -1,9 +1,12 @@
 var Utils = {
+    _currentId: 0,
+
     
     merge: function( target, source ) {
         
         for( var i in source ) {
             // @FIXME: Dirty fix - dont copy 'clone' getter because this will trigger a new clone .. and so on
+            // @TODO: We should skip the 'name' property too to prevent named dupes
             if (i === 'clone') {
                 continue;
             }
@@ -26,6 +29,17 @@ var Utils = {
         return instance;
     },
 
+
+    makeEnum: function( object, defaultmember ) {
+        var enumeration = Utils.merge( {}, object );
+        if( defaultmember ) {
+            enumeration.default = enumeration[ defaultmember ];
+        }
+
+        return enumeration;
+    },
+
+
     resolveClass: function ( classPath, scope ) {
         // Default to grafix-js as scope
         if ( !scope ) {
@@ -41,9 +55,19 @@ var Utils = {
     },
 
 
+    getUid: function() {
+        return ++Utils._currentId;
+    },
+
+
     isType: function( val, type ) {
 
         return typeof val === type;
+    },
+
+    isUndefined: function( val, type ) {
+
+        return Utils.isType( val, 'undefined' );
     },
 
     isString: function( val ) {
@@ -110,6 +134,11 @@ var Utils = {
 
     isTriggerable: function ( o ) {
         return ( (o instanceof EventArgs) || Utils.isType( o, 'EventArgs') || Utils.isObject(o) );
+    },
+
+
+    getDomElementById: function( selector ) {
+        return document.querySelector ? document.querySelector( selector ) : document.getElementById( selector );
     },
 
 

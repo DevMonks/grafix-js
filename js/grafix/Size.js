@@ -1,9 +1,6 @@
 var Size = function ( width, height ) {
     ShapeBase.call( this );
 
-    // Will changes to own properties delegated to the changed() event?
-    this._delegateChanged = (Utils.isObject(width) && width.delegateChanged ? true : false);
-
     this._width = 0;
     this._height = 0;
 
@@ -11,25 +8,11 @@ var Size = function ( width, height ) {
 };
 
 Size.prototype = Utils.extend( ShapeBase, {
-    get width() { return this._width; },
-    set width( value ) {
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'width', this._width, value ) );
-        }
-        this._width = value;
-        // Informs also parent
-        this.invalid = true;
-    },
+    get width() { return this.prop( 'width' ); },
+    set width( value ) { return this.prop( 'width', value ); },
 
-    get height() { return this._height; },
-    set height( value ) {
-        if (this._delegateChanged && this.has('changed')) {
-            this.changed( this.prepareChanged( 'height', this.height, value ) );
-        }
-        this._height = value;
-        // Informs also parent
-        this.invalid = true;
-    },
+    get height() { return this.prop( 'height' ); },
+    set height( value ) { return this.prop( 'height', value ); },
 
     get clone() {
         return new Size( this );
@@ -37,8 +20,6 @@ Size.prototype = Utils.extend( ShapeBase, {
 
 
     set: function( width, height ) {
-
-        ShapeBase.prototype.set.call(this, width);
 
         if ( Utils.isObject( width ) ) {
 
@@ -48,9 +29,10 @@ Size.prototype = Utils.extend( ShapeBase, {
             if ( 'height' in width ) {
                 this.height = width.height;
             }
-            if ( 'parent' in width ) {
-                this.parent = width.parent;
-            }
+        } else if ( Utils.isNumeric( width ) && typeof height === 'undefined' ) {
+
+            var fac = parseFloat( width );
+            this.width = this.height = fac;
         } else if ( typeof width !== 'undefined' ) {
 
             this.width = parseInt( width );

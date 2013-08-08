@@ -2,8 +2,6 @@ var Circle = function(x, y, radius, startAngle, endAngle, clockwise) {
 
     Shape.call( this );
 
-    this._x = 0;
-    this._y = 0;
     this._radius = 0;
     this._startAngle = 0;
     this._endAngle = 360;
@@ -19,29 +17,17 @@ Circle.prototype = Utils.extend( Shape, {
         return new Circle( this );
     },
 
-    get radius() { return this._radius; },
-    set radius( value ) {
-        this.changed( this.prepareChanged( 'radius', this._radius, value ) );
-        this._radius = value;
-    },
+    get radius() { return this.prop( 'radius' ); },
+    set radius( value ) { return this.prop( 'radius', value ); },
 
-    get startAngle() { return this._startAngle; },
-    set startAngle( value ) {
-        this.changed( this.prepareChanged( 'startAngle', this._startAngle, value ) );
-        this._startAngle = value;
-    },
+    get startAngle() { return this.prop( 'startAngle' ); },
+    set startAngle( value ) { return this.prop( 'startAngle', value ); },
 
-    get endAngle() { return this._endAngle; },
-    set endAngle( value ) {
-        this.changed( this.prepareChanged( 'endAngle', this._endAngle, value ) );
-        this._endAngle = value;
-    },
+    get endAngle() { return this.prop( 'endAngle' ); },
+    set endAngle( value ) { return this.prop( 'endAngle', value ); },
 
-    get clockwise() { return this._clockwise; },
-    set clockwise( value ) {
-        this.changed( this.prepareChanged( 'clockwise', this._clockwise, value ) );
-        this._clockwise = value;
-    },
+    get clockwise() { return this.prop( 'clockwise' ); },
+    set clockwise( value ) { return this.prop( 'clockwise', value ); },
 
 
     set: function(x, y, radius, startAngle, endAngle, clockwise) {
@@ -55,7 +41,8 @@ Circle.prototype = Utils.extend( Shape, {
             if ( x.endAngle ) this.endAngle = x.endAngle;
             if ( x.clockwise ) this.clockwise = x.clockwise;
 
-        } else {
+        } else if( Utils.isUndefined( x ) === false ) {
+
             this.x = x;
         }
 
@@ -78,6 +65,7 @@ Circle.prototype = Utils.extend( Shape, {
             if( x.endAngle ) this.endAngle += x.endAngle;
             if( x.clockwise ) this.clockwise += x.clockwise;
         } else {
+
             this.x += x;
         }
 
@@ -102,6 +90,7 @@ Circle.prototype = Utils.extend( Shape, {
             if( x.endAngle ) this.endAngle -= x.endAngle;
             if( x.clockwise ) this.clockwise -= x.clockwise;
         } else {
+
             this.x -= x;
         }
 
@@ -126,6 +115,7 @@ Circle.prototype = Utils.extend( Shape, {
             if( x.endAngle ) this.endAngle *= x.endAngle;
             if( x.clockwise ) this.clockwise *= x.clockwise;
         } else {
+
             this.x *= x;
         }
 
@@ -150,6 +140,7 @@ Circle.prototype = Utils.extend( Shape, {
             if( x.endAngle ) this.endAngle /= x.endAngle;
             if( x.clockwise ) this.clockwise /= x.clockwise;
         } else {
+
             this.x /= x;
         }
 
@@ -183,6 +174,7 @@ Circle.prototype = Utils.extend( Shape, {
 
     circle: function() {
 
+        // @TODO: Hi, clone?
         return new Circle( {x: this.x, y: this.y, radius: this.radius, startAngle: this.startAngle, endAngle: this.endAngle, clockwise: this.clockwise} );
     },
 
