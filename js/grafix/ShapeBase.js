@@ -18,6 +18,10 @@ var ShapeBase = function( args ) {
 
     /** @var Input */
     this._input = null;
+
+    // Silly hack until 'clone' has been revised - notes that we are in clone-mode and dont cover some properties
+    // I.e. 'name'
+    this._isCloning = false;
 };
 
 ShapeBase.defaults = {
@@ -323,15 +327,17 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
         if( Utils.isObject( args ) ) {
 
-            // 3 ways to set the name
-            if( 'id' in args ) {
-                this.name = args.id;
-            }
-            else if( 'uid' in args ) {
-                this.name = args.uid;
-            }
-            else if( 'name' in args ) {
-                this.name = args.name;
+            // 3 ways to set the name (not during cloning!)
+            if( Utils.isCloning === false ) {
+                if( 'id' in args ) {
+                    this.name = args.id;
+                }
+                else if( 'uid' in args ) {
+                    this.name = args.uid;
+                }
+                else if( 'name' in args ) {
+                    this.name = args.name;
+                }
             }
 
             if( 'children' in args ) {
@@ -423,6 +429,37 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
         // Should draw the shape on the given context
 
+    },
+
+    /**
+     * Returns an object containing all "simple" (no objects or functions ) and puplic properties of the given object.
+     *
+     * @returns {{}}
+     * @private
+     */
+    _debugProperties: function() {
+        var props = {};
+        for( var propName in this ) {
+
+            if( this.hasOwnProperty( propName ) === true ) {
+                continue;
+            }
+
+            // Skip private ones..
+            if( propName[0] === '_' ) {
+                continue;
+            }
+
+            // Only simple properties
+            var propValue = this[ propName ];
+            if( Utils.isFunction( propValue ) || Utils.isObject( propValue ) ) {
+                continue;
+            }
+
+            props[ propName ] = this[ propName ];
+        }
+
+        return props;
     }
 
 } );

@@ -10,6 +10,11 @@ var Line = function ( fromX, fromY, toX, toY ) {
 };
 
 Line.prototype = Utils.extend( ShapeBase, {
+
+    get clone() {
+        return Utils.clone( Line, this );
+    },
+
     get fromX() { return this.prop( 'fromX' ); },
     set fromX(value) { return this.prop( 'fromX', value ); },
 
@@ -46,10 +51,6 @@ Line.prototype = Utils.extend( ShapeBase, {
         } else {
             throw "Invalid type of data for virtual property Line.to: " + value;
         }
-    },
-
-    get clone() {
-        return new Line( this );
     },
 
     set: function( fromX, fromY, toX, toY ) {

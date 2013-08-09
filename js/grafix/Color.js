@@ -16,9 +16,9 @@ Color.prototype = {
     
     if( Utils.isString( color ) ) {
         
-        //@TODO: Maybe we should make a function that extracts
-        //all variables from the function name in a string
-        //e.g. xyz( xVal, yVal, zVal ) would set x, y and z to the fitting args
+        // @TODO: Maybe we should make a function that extracts
+        //        all variables from the function name in a string
+        //        e.g. xyz( xVal, yVal, zVal ) would set x, y and z to the fitting args
         
         if( Color.isHex( color ) )
             color = Color.hexToRgb( color );
@@ -281,12 +281,12 @@ Color.prototype = {
   
   inverse: function() {
       
-      //TODO: inverse the color
+      // @TODO: inverse the color
   },
   
   complement: function() {
       
-      //TODO: get the complementary color
+      // @TODO: get the complementary color
   },
   
   grayscale: function() {
@@ -298,7 +298,7 @@ Color.prototype = {
   
   mix: function( color ) {
     
-      //TODO: return the mixed color.
+      // @TODO: return the mixed color.
   },
   
   gradientTo: function( type, color, stops ) {
@@ -564,7 +564,7 @@ Utils.merge( Color, {
         stops = start;
         
       
-      //TODO: create a canvas gradient out of this
+      // @TODO: create a canvas gradient out of this
       
       
       return theGreatGradient;

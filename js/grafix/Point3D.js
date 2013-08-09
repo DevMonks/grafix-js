@@ -7,7 +7,7 @@ var Point3D = function ( x, y, z ) {
 Point3D.prototype = Utils.extend( Point, {
 
     get clone() {
-        return new Point3D( this );
+        return Utils.clone( Point3D, this );
     },
 
     get z() { return this.prop( 'z' ); },

@@ -10,7 +10,7 @@ var Point = function ( x, y ) {
 Point.prototype = Utils.extend( ShapeBase, {
 
     get clone() {
-        return new Point( this );
+        return Utils.clone( Point, this );
     },
 
     get x() { return this.prop( 'x' ); },

@@ -29,7 +29,8 @@ Bitmap.cache = {};
 Bitmap.prototype = Utils.extend( Rectangle, {
 
     get clone() {
-        return new Bitmap( this );
+
+        return Utils.clone( Bitmap, this );
     },
 
 
@@ -104,7 +105,7 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             
     get image() { return this.prop( 'image' ); },
 
-    get cropped() { return ( this.crop.x !== 0 || this.crop.y !== 0 || this.crop.width !== 0 || this.crop.height !== 0 ); },
+    get cropped() { return ( this.cropX !== 0 || this.cropY !== 0 || this.cropWidth !== 0 || this.cropHeight !== 0 ); },
 
     set: function( path, x, y, width, height ) {
 
@@ -117,8 +118,6 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             if( 'filters' in path ) this.filters = path.filters;
             if( 'filter' in path ) this.filter = path.filter;
 
-            // @FIXME: Why 2 times?
-            Rectangle.prototype.set.call( this, path );
         } else if( typeof path !== 'undefined' ) {
 
             this.path = path;

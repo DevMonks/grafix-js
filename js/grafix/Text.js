@@ -32,7 +32,9 @@ Text.defaults = {
 
 Text.prototype = Utils.extend( Rectangle, {
     
-    get clone() { return new Text( this ); },
+    get clone() {
+        return Utils.clone( Text, this );
+    },
     
     get string() { return this.prop( 'string' ); },
     set string( value ) { return this.prop( 'string', value ); },
@@ -212,8 +214,10 @@ Text.prototype = Utils.extend( Rectangle, {
     },
 
     clear: function( canvasContext, string ) {
-        
-        this.color = this.parent ? this.parent.color : this.color;
+
+        if( this.parent ) {
+            this.color = this.parent.color;
+        }
         
         return this._drawText( canvasContext, string, 'fill' );
     }

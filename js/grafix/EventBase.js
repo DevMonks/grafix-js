@@ -117,7 +117,7 @@ EventBase.prototype = {
 
         if ( this.has(event) === false ) {
 
-            // @TODO: If we hae to return the results back, but events has not been triggered..
+            // @TODO: If we have to return the results back, but event has not been triggered..
             //        Should we return null or undefined or anything to indicate this situation?
             return this;
         }
@@ -232,7 +232,7 @@ EventBase.prototype = {
             return this[ '_' + name ];
         }
 
-        // Nothing todo
+        // Only set if changed
         if( this[ '_' + name ] === value ) {
             return false;
         }

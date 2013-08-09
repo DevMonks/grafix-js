@@ -54,7 +54,7 @@ Shape.defaults = {
 
 Shape.prototype = Utils.extend( ShapeBase, {
     get clone() {
-        return new Shape( this );
+        return Utils.clone( Shape, this );
     },
 
     get x() { return this.prop( 'x' ); },
@@ -415,6 +415,206 @@ Shape.prototype = Utils.extend( ShapeBase, {
         return this;
     },
 
+
+    expand: function( shape ) {
+
+        if( this.left > shape.left )
+            this.left = shape.left;
+
+        if( this.right < shape.right )
+            this.right = shape.right;
+
+        if( this.top > shape.top )
+            this.top = shape.top;
+
+        if( this.bottom < shape.bottom )
+            this.bottom = shape.bottom;
+
+        return this;
+    },
+
+    alignBy: function( context, position ) {
+
+        context = context || this.alignContext;
+
+        switch ( context ) {
+            case 'parent':
+
+                context = this.parent;
+                break;
+            case 'root':
+
+                context = this.root;
+                break;
+        }
+
+        if( !context )
+            return this;
+
+        position = ( position || this.align ).split( ' ' );
+        var type = 'center';
+        var xType = null;
+        var yType = null;
+
+        var thisWidth = this.width || (this.radius ? this.radius * 2 : 0);
+        var thatWidth = context.width || (context.radius ? context.radius * 2 : 0);
+        var thisHeight = this.height || (this.radius ? this.radius * 2 : 0);
+        var thatHeight = context.height || (context.radius ? context.radius * 2 : 0);
+
+        // Read the alignment steps:
+        // - xType: (left|right|center)
+        // - yType: (top|bottom|center)
+        // - type:  (inner|outer|center)
+        for ( var i = 0; i < position.length; i++ ) {
+            switch ( position[i] ) {
+
+                case 'center':
+
+                    if( xType !== null && yType !== null ) {
+
+                        type = 'center';
+                    } else if( xType !== null ) {
+
+                        yType = 'center';
+                    } else {
+
+                        xType = 'center';
+                    }
+
+                    break;
+
+                case 'left':
+                case 'right':
+                    xType = position[i];
+                    break;
+
+                case 'top':
+                case 'bottom':
+                    yType = position[i];
+                    break;
+
+                case 'inner':
+                case 'outer':
+                    type = position[i];
+                    break;
+            }
+        }
+
+        if( !xType ) {
+            xType = 'center';
+        }
+        if( !yType ) {
+            yType = 'center';
+        }
+
+        // Apply new position based on the detected alignment
+        switch ( xType ) {
+
+            case 'left':
+                // Default to type = inner
+                this.x = context.x;
+
+                switch ( type ) {
+                    case 'center':
+
+                        this.x -= thisWidth / 2;
+                        break;
+                    case 'outer':
+
+                        this.x -= thisWidth;
+                        break;
+                }
+                break;
+
+            case 'right':
+                // Default to type = outer
+                this.x = context.x + thatWidth;
+
+                switch ( type ) {
+                    case 'center':
+
+                        this.x -= thisWidth / 2;
+                        break;
+                    case 'inner':
+
+                        this.x -= thisWidth;
+                }
+                break;
+
+            case 'center':
+
+                this.x = context.x + ( thatWidth / 2 ) - thisWidth / 2;
+                break;
+        }
+
+        switch ( yType ) {
+
+            case 'top':
+                // Default to type = inner
+                this.y = context.y;
+
+                switch ( type ) {
+                    case 'center':
+
+                        this.y -= thisHeight / 2;
+                        break;
+                    case 'outer':
+
+                        this.y -= thisHeight;
+                }
+                break;
+
+            case 'bottom':
+                // Default to type = outer
+                this.y = context.y + thatHeight;
+
+                switch ( type ) {
+                    case 'center':
+
+                        this.y -= thisHeight / 2;
+                        break;
+                    case 'inner':
+
+                        this.y -= thisHeight;
+                }
+                break;
+
+            case 'center':
+
+                this.y = context.y + ( thatHeight / 2 ) - thisHeight / 2;
+                break;
+        }
+
+        return this;
+    },
+
+    animate: function( props, duration, easing, callback ) {
+
+        //@ TODO: Also allow the following variable orders
+//        Shape Shape.animate( properties, args );
+//        Shape Shape.animate( properties );
+//        Shape Shape.animate( properties, duration );
+//        Shape Shape.animate( properties, complete );
+//        Shape Shape.animate( properties, easing );
+//        Shape Shape.animate( properties, easing, complete );
+//        Shape Shape.animate( properties, duration, easing );
+//        Shape Shape.animate( properties, duration, complete );
+//        Shape Shape.animate( properties, duration, easing, complete );
+//        Shape Shape.animate( keyFrames );
+//        Shape Shape.animate( keyFrames, duration );
+//        Shape Shape.animate( keyFrames, complete );
+
+        return new Animation( this, props, {
+            duration: duration || Animation.defaults.duration,
+            completed: callback || function() {},
+            easing: easing || Animation.defaults.easing,
+            start: true
+        } );
+    },
+
+
+    // Styling
+
     applyStyles: function( context ) {
 
         context = context || this.canvasContext;
@@ -463,28 +663,6 @@ Shape.prototype = Utils.extend( ShapeBase, {
         }
 
         return this;
-    },
-
-    fill: function( context ) {
-
-        context = context || this.canvasContext;
-        context.fillRect( this.x, this.y, this.width, this.height );
-
-        return this;
-    },
-
-    stroke: function( context ) {
-
-        context = context || this.canvasContext;
-        context.strokeRect( this.x, this.y, this.width, this.height );
-
-        return this;
-    },
-
-    clear: function( context ) {
-
-        context = context || this.canvasContext;
-        context.clearRect( this.x, this.y, this.width, this.height );
     },
 
     // style is like set(), but only for style properties
@@ -662,162 +840,31 @@ Shape.prototype = Utils.extend( ShapeBase, {
         return this;
     },
 
-    alignBy: function( context, position ) {
+    fill: function( context ) {
 
-        context = context || this.alignContext;
-
-        switch ( context ) {
-            case 'parent':
-
-                context = this.parent;
-                break;
-            case 'root':
-
-                context = this.root;
-                break;
-        }
-        
-        if( !context )
-            return this;
-
-        position = ( position || this.align ).split( ' ' );
-        var type = 'center';
-        var xType = null;
-        var yType = null;
-
-        var thisWidth = this.width || (this.radius ? this.radius * 2 : 0);
-        var thatWidth = context.width || (context.radius ? context.radius * 2 : 0);
-        var thisHeight = this.height || (this.radius ? this.radius * 2 : 0);
-        var thatHeight = context.height || (context.radius ? context.radius * 2 : 0);
-
-        // Read the alignment steps:
-        // - xType: (left|right|center)
-        // - yType: (top|bottom|center)
-        // - type:  (inner|outer|center)
-        for ( var i = 0; i < position.length; i++ ) {
-            switch ( position[i] ) {
-
-                case 'center':
-
-                    if( xType !== null && yType !== null ) {
-
-                        type = 'center';
-                    } else if( xType !== null ) {
-
-                        yType = 'center';
-                    } else {
-
-                        xType = 'center';
-                    }
-
-                    break;
-
-                case 'left':
-                case 'right':
-                    xType = position[i];
-                    break;
-
-                case 'top':
-                case 'bottom':
-                    yType = position[i];
-                    break;
-
-                case 'inner':
-                case 'outer':
-                    type = position[i];
-                    break;
-            }
-        }
-
-        if( !xType ) {
-            xType = 'center';
-        }
-        if( !yType ) {
-            yType = 'center';
-        }
-
-        // Apply new position based on the detected alignment
-        switch ( xType ) {
-
-            case 'left':
-                // Default to type = inner
-                this.x = context.x;
-
-                switch ( type ) {
-                    case 'center':
-
-                        this.x -= thisWidth / 2;
-                        break;
-                    case 'outer':
-
-                        this.x -= thisWidth;
-                        break;
-                }
-                break;
-
-            case 'right':
-                // Default to type = outer
-                this.x = context.x + thatWidth;
-
-                switch ( type ) {
-                    case 'center':
-
-                        this.x -= thisWidth / 2;
-                        break;
-                    case 'inner':
-
-                        this.x -= thisWidth;
-                }
-                break;
-
-            case 'center':
-
-                this.x = context.x + ( thatWidth / 2 ) - thisWidth / 2;
-                break;
-        }
-
-        switch ( yType ) {
-
-            case 'top':
-                // Default to type = inner
-                this.y = context.y;
-
-                switch ( type ) {
-                    case 'center':
-
-                        this.y -= thisHeight / 2;
-                        break;
-                    case 'outer':
-
-                        this.y -= thisHeight;
-                }
-                break;
-
-            case 'bottom':
-                // Default to type = outer
-                this.y = context.y + thatHeight;
-
-                switch ( type ) {
-                    case 'center':
-
-                        this.y -= thisHeight / 2;
-                        break;
-                    case 'inner':
-
-                        this.y -= thisHeight;
-                }
-                break;
-
-            case 'center':
-
-                this.y = context.y + ( thatHeight / 2 ) - thisHeight / 2;
-                break;
-        }
+        context = context || this.canvasContext;
+        context.fillRect( this.x, this.y, this.width, this.height );
 
         return this;
     },
 
-    /* Collision stuff */
+    stroke: function( context ) {
+
+        context = context || this.canvasContext;
+        context.strokeRect( this.x, this.y, this.width, this.height );
+
+        return this;
+    },
+
+    clear: function( context ) {
+
+        context = context || this.canvasContext;
+        context.clearRect( this.x, this.y, this.width, this.height );
+    },
+
+
+    // Collision stuff
+
     collidesWith: function( rect ) {
         var left = rect.left ? rect.left : rect.x;
         var right = rect.right ? rect.right : rect.x + ( rect.width ? rect.width : 0 );
@@ -903,53 +950,18 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
         return this.handleMouseEvent( 'mouseDrop', callback );
     },
-            
-    expand: function( shape ) {
-
-        if( this.left > shape.left )
-            this.left = shape.left;
-        
-        if( this.right < shape.right )
-            this.right = shape.right;
-        
-        if( this.top > shape.top )
-            this.top = shape.top;
-        
-        if( this.bottom < shape.bottom )
-            this.bottom = shape.bottom;
-        
-        return this;
-    },
-
-    animate: function( props, duration, easing, callback ) {
-
-        //@TODO: Also allow the following variable orders
-//        Shape Shape.animate( properties, args );
-//        Shape Shape.animate( properties );
-//        Shape Shape.animate( properties, duration );
-//        Shape Shape.animate( properties, complete );
-//        Shape Shape.animate( properties, easing );
-//        Shape Shape.animate( properties, easing, complete );
-//        Shape Shape.animate( properties, duration, easing );
-//        Shape Shape.animate( properties, duration, complete );
-//        Shape Shape.animate( properties, duration, easing, complete );
-//        Shape Shape.animate( keyFrames );
-//        Shape Shape.animate( keyFrames, duration );
-//        Shape Shape.animate( keyFrames, complete );
-
-        return new Animation( this, props, {
-            duration: duration || Animation.defaults.duration,
-            completed: callback || function() {},
-            easing: easing || Animation.defaults.easing,
-            start: true
-        } );
-    },
 
             
-    toString: function() {
-        
-        // @TODO: Output everything, but only if set
-        return '{color:' + this.color + ', x:' + this.x + ', y:' + this.y + ', width:' + this.width + ', height:' + this.height + '}';
+    toString: function(fullDebug) {
+
+        if( !fullDebug ) {
+            // @TODO: Output everything, but only if set
+            return '{color:' + this.color + ', x:' + this.x + ', y:' + this.y + ', width:' + this.width + ', height:' + this.height + '}';
+        }
+
+        // @TODO: Fallback? Or maybe just a polyfill
+        var properties = this._debugProperties();
+        return properties;
     }
 
 } );

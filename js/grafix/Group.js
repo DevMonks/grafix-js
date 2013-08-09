@@ -15,6 +15,12 @@ Group.defaults = {
 };
 
 Group.prototype = Utils.extend( Shape, {
+
+    get clone() {
+
+        return Utils.clone( Group, this );
+    },
+
     get virtual() { return this._virtual; },
     set virtual( value ) {
         
@@ -40,11 +46,6 @@ Group.prototype = Utils.extend( Shape, {
         }        
         
         return this;
-    },
-            
-    get clone() {
-
-        return new Group( this );
     },
             
     _drawGroup: function( canvasContext, style ) {

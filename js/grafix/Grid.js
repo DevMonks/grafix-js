@@ -19,6 +19,11 @@ Grid.defaults = {
 
 Grid.prototype = Utils.extend( Rectangle, {
 
+    get clone() {
+
+        return Utils.clone( Grid, this );
+    },
+
     get columns() { return this.prop( 'columns' ); },
     set columns( value ) { return this.prop( 'columns', value ); },
 
@@ -43,18 +48,13 @@ Grid.prototype = Utils.extend( Rectangle, {
             if( 'allowIndividualStyles' in x ) this.allowIndividualStyles = x.allowIndividualStyles;
         }
 
-        if( typeof columns !== 'undefined' ) 
+        if( Utils.isUndefined( columns ) === false )
             this.columns = columns;
-        
-        if( typeof rows !== 'undefined' ) 
+
+        if( Utils.isUndefined( rows ) === false )
             this.rows = rows;
         
         return this;
-    },
-
-    get clone() {
-
-        return new Grid( this );
     },
             
     _rectAt: function( x, y ) {
@@ -220,13 +220,12 @@ Grid.prototype = Utils.extend( Rectangle, {
         this.eachRect( function( x, y, i ) {
 
             // @TODO: IMO this may happen in _rectAt() including a cache strategy
-            if( !grid.allowIndividualStyles )
+            if( !grid.allowIndividualStyles ) {
                 this.style( grid );
+            }
 
-            // Calls 'fill', 'stroke', 'clear' or any other drawStyle on the Rectangle object
-            var drawFn = this[ style ];
-            
-            drawFn.call( this, canvasContext );
+            // Just call normal draw on this rectangle
+            this._draw( canvasContext );
         } );
     },
             

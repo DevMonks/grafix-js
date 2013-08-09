@@ -13,8 +13,9 @@ var Circle = function(x, y, radius, startAngle, endAngle, clockwise) {
 };
 
 Circle.prototype = Utils.extend( Shape, {
+
     get clone() {
-        return new Circle( this );
+        return Utils.clone( Circle, this );
     },
 
     get radius() { return this.prop( 'radius' ); },
@@ -172,12 +173,6 @@ Circle.prototype = Utils.extend( Shape, {
         return Shape.prototype.isEmpty.call( this ) && !this.radius && !this.startAngle && this.endAngle === 360 && this.clockwise;
     },
 
-    circle: function() {
-
-        // @TODO: Hi, clone?
-        return new Circle( {x: this.x, y: this.y, radius: this.radius, startAngle: this.startAngle, endAngle: this.endAngle, clockwise: this.clockwise} );
-    },
-
     rect: function() {
 
         if( !this._rectInstance ) {
@@ -226,7 +221,8 @@ Circle.prototype = Utils.extend( Shape, {
     contains: function( rect ) {
 
         //TODO: only checks the WHOLE circle currently, startAngle, endAngle and clockwise need to be used as well
-        var distance = rect.distanceTo ? rect.distanceTo( this.center() ) : rect.point().distanceTo( this.center() );
+        var center = this.center(),
+            distance = rect.distanceTo ? rect.distanceTo( center ) : rect.position.distanceTo( center );
 
         return distance <= this.radius;
     }

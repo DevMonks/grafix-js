@@ -8,15 +8,16 @@ var Size = function ( width, height ) {
 };
 
 Size.prototype = Utils.extend( ShapeBase, {
+
+    get clone() {
+        return Utils.clone( Size, this );
+    },
+
     get width() { return this.prop( 'width' ); },
     set width( value ) { return this.prop( 'width', value ); },
 
     get height() { return this.prop( 'height' ); },
     set height( value ) { return this.prop( 'height', value ); },
-
-    get clone() {
-        return new Size( this );
-    },
 
 
     set: function( width, height ) {

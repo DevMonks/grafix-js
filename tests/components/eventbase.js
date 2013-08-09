@@ -2,16 +2,11 @@ define(
     ['./../../js/grafix.nocache.js'],
     function() {
 
-        // Simple test object to test the scopre of events and ensure each instance has his own scopre
+        // Simple test object to test the scope of events and ensure each instance has his own scopre
         var SimpleEventedObject = function () {
             Grafix.EventBase.call(this);
 
             this._testFlag = 0;
-
-            this.changed( function() {
-                // Increment test flag
-                this._testFlag++;
-            } );
         };
 
         SimpleEventedObject.prototype = Grafix.Utils.extend(Grafix.EventBase, {
@@ -20,7 +15,7 @@ define(
         });
 
 
-        // More common object to test event delegation by children
+        // More advanced object to test event delegation by children in correct context
         var ChildrenEventedObject = function () {
             Grafix.EventBase.call(this);
 
@@ -69,6 +64,24 @@ define(
             // Unbind the event
             obj.unbind(eventName, simpleHandler);
             QUnit.equal(obj.has(eventName), false, 'Object\'s handler has been removed');
+        });
+
+        QUnit.test("EventBase reportsChanges detection tests", function() {
+            var obj = new Grafix.EventBase();
+
+            QUnit.equal(obj.reportsChanges, false, 'obj does not report changes');
+
+            // Bin a simple change event to enable reports-changes
+            obj.change(function() { });
+            QUnit.equal(obj.reportsChanges, false, 'obj does report changes');
+
+            // Bin a simple changed event
+            obj.changed(function() { });
+            QUnit.equal(obj.reportsChanges, true, 'obj still reports changes');
+
+            // Unbind everything
+            obj.unbind('change').unbind('changed');
+            QUnit.equal(obj.reportsChanges, false, 'obj does not reports changes after unbind');
         });
 
         QUnit.test("EventBase trigger affection scope", function() {

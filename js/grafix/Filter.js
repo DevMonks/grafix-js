@@ -105,9 +105,12 @@ Filter.create = function( name, type, callback ) {
 
 
 Filter.create( 'sepia', 'pixel', function( r, g, b, a ) {
-    
-    // @TODO: Make this a real sepia
-    return { a: a, r: r * 0.8, g: g * 0.7, b: b * 0.2 };
+
+    var sA = a,
+        sR = Math.min((r * .393) + (g *.769) + (b * .189), 255),
+        sG = Math.min((r * .349) + (g *.686) + (b * .168), 255),
+        sB = Math.min((r * .272) + (g *.534) + (b * .131), 255);
+    return { a: sA, r: sR, g: sG, b: sB };
 } );
 
 Filter.create( 'noRed', 'pixel', function( r, g, b, a ) {

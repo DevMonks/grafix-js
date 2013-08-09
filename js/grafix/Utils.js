@@ -1,7 +1,21 @@
+/**
+ * Common utilities widley used in all {Grafix} classes.
+ */
 var Utils = {
+    /**
+     * Holds the last used id, used for naming {Shape} objects
+     *
+     * @var int
+     */
     _currentId: 0,
+    /**
+     * True if {Utils.clone} is currently in a clone-operation.
+     *
+     * @var boolean
+     */
+    _isCloning: false,
 
-    
+
     merge: function( target, source ) {
         
         for( var i in source ) {
@@ -30,29 +44,15 @@ var Utils = {
     },
 
 
-    makeEnum: function( object, defaultmember ) {
-        var enumeration = Utils.merge( {}, object );
-        if( defaultmember ) {
-            enumeration.default = enumeration[ defaultmember ];
-        }
-
-        return enumeration;
+    clone: function( cloneableObject, cloneSource ) {
+        Utils._isCloning = true;
+        // @TODO: Think about ShapeBase.getCloneableProperties() or something like this
+        var clonedObject = new cloneableObject( cloneSource );
+        Utils._isCloning = false;
+        return clonedObject;
     },
 
-
-    resolveClass: function ( classPath, scope ) {
-        // Default to grafix-js as scope
-        if ( !scope ) {
-            scope = Grafix;
-        }
-
-        var scopes = classPath.split('.');
-        for ( var i = 0; i < scopes.length; i++ ) {
-            scope = scope[scopes[i]];
-        }
-
-        return scope;
-    },
+    get isCloning() { return Utils._isCloning; },
 
 
     getUid: function() {

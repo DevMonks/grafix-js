@@ -7,13 +7,14 @@ var Path = function( args ) {
 };
 
 Path.prototype = Utils.extend( ShapeBase, {
+
+    get clone() {
+        return Utils.clone( Path, this );
+    },
+
     get points() { return this._points; },
 
     get length() { return this.points.length; },
-
-    get clone() {
-        return new Path( this );
-    },
 
 
     set: function( args ) {

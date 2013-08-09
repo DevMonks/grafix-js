@@ -1,5 +1,4 @@
 var Rectangle = function( x, y, width, height ) {
-    Shape.call( this );
 
     Shape.call( this );
 
@@ -10,7 +9,7 @@ Rectangle.prototype = Utils.extend( Shape, {
 
     get clone() {
         
-        return new Rectangle( this, false );
+        return Utils.clone( Rectangle, this );
     },
 
     set: function( x, y, width, height, deep ) {
