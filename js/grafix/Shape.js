@@ -53,8 +53,39 @@ Shape.defaults = {
 };
 
 Shape.prototype = Utils.extend( ShapeBase, {
+
     get clone() {
+
         return Utils.clone( Shape, this );
+    },
+
+    /**
+     * Returns an array of clone-able property names, used in the {clone} and {equals} method.
+     * @return {Array}
+     */
+    get cloneableProperties() {
+        return ShapeBase.prototype.cloneableProperties.concat([
+            'x',
+            'y',
+            'width',
+            'height',
+            'angle',
+            'skewX',
+            'skewY',
+            'offsetX',
+            'offsetY',
+            'scaleWidth',
+            'scaleHeight',
+            'color',
+            'drawStyle',
+            'lineWidth',
+            'lineCap',
+            'miterLimit',
+            'lineJoin',
+            'closePath',
+            'align',
+            'alignContext'
+        ]);
     },
 
     get x() { return this.prop( 'x' ); },
@@ -813,12 +844,18 @@ Shape.prototype = Utils.extend( ShapeBase, {
         return this;
     },
 
-    _draw: function( context, forceChildDraw ) {
+    _draw: function( context, config ) {
+
+        var applyStyles = ( Utils.isObject( config ) ? config.styles !== false : true ),
+            applyFilter = ( Utils.isObject( config ) ? config.filter !== false : true );
 
         // Apply styles
-        this.applyStyles( context );
-        // Draw it using the current style (stroke, fill or clear)
-        this[this.drawStyle].call( this, context );
+        if( applyStyles ) {
+            this.applyStyles( context );
+        }
+
+        // Draw it using the current {drawStyle} (stroke, fill or clear)
+        this[this.drawStyle].call( this, context, applyFilter );
 
         // Draw dirty children
         if( this.children.length ) {
@@ -833,31 +870,52 @@ Shape.prototype = Utils.extend( ShapeBase, {
                     //this.draw( context, forceChildDraw );
                 //}
                 // @FIX: This is not always the case, just draw the child
-                this.draw( context, forceChildDraw );
+                this.draw( context, true, { styles: applyStyles, filter: applyFilter } );
             } );
         }
 
         return this;
     },
 
-    fill: function( context ) {
+    fill: function( context, applyFilter ) {
 
         context = context || this.canvasContext;
+        // Handle filtered data as image data
+        if( applyFilter && this.hasFilter() ) {
+
+            var tmpCanvas = Utils.getTempCanvas( this ),
+                tmpCtx = tmpCanvas.getContext('2d');
+            tmpCtx.putImageData( this.filteredData, 0, 0 );
+            context.drawImage( tmpCanvas, this.x, this.y );
+            return this;
+        }
+
         context.fillRect( this.x, this.y, this.width, this.height );
 
         return this;
     },
 
-    stroke: function( context ) {
+    stroke: function( context, applyFilter ) {
 
         context = context || this.canvasContext;
+        // Handle filtered data as image data
+        if( applyFilter && this.hasFilter() ) {
+
+            var tmpCanvas = Utils.getTempCanvas( this ),
+                tmpCtx = tmpCanvas.getContext('2d');
+            tmpCtx.putImageData( this.filteredData, 0, 0 );
+            context.drawImage( tmpCanvas, this.x, this.y );
+            return this;
+        }
+
         context.strokeRect( this.x, this.y, this.width, this.height );
 
         return this;
     },
 
-    clear: function( context ) {
+    clear: function( context, applyFilter ) {
 
+        // @TODO: No use-case for filtered draw here?
         context = context || this.canvasContext;
         context.clearRect( this.x, this.y, this.width, this.height );
     },
@@ -959,7 +1017,6 @@ Shape.prototype = Utils.extend( ShapeBase, {
             return '{color:' + this.color + ', x:' + this.x + ', y:' + this.y + ', width:' + this.width + ', height:' + this.height + '}';
         }
 
-        // @TODO: Fallback? Or maybe just a polyfill
         var properties = this._debugProperties();
         return properties;
     }

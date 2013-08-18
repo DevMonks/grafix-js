@@ -13,6 +13,17 @@ Size.prototype = Utils.extend( ShapeBase, {
         return Utils.clone( Size, this );
     },
 
+    /**
+     * Returns an array of clone-able property names, used in the {clone} and {equals} method.
+     * @return {Array}
+     */
+    get cloneableProperties() {
+        return ShapeBase.prototype.cloneableProperties.concat([
+            'width',
+            'height'
+        ]);
+    },
+
     get width() { return this.prop( 'width' ); },
     set width( value ) { return this.prop( 'width', value ); },
 

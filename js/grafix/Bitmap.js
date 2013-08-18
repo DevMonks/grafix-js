@@ -6,7 +6,6 @@ var Bitmap = function( path, x, y, width, height ) {
 
     this._path = null;
     this._image = null;
-    this._filters = [];
 
     this._cropX = 0;
     this._cropY = 0;
@@ -31,6 +30,21 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     get clone() {
 
         return Utils.clone( Bitmap, this );
+    },
+
+    /**
+     * Returns an array of clone-able property names, used in the {clone} and {equals} method.
+     * @return {Array}
+     */
+    get cloneableProperties() {
+        return Rectangle.prototype.cloneableProperties.concat([
+            'cropX',
+            'cropY',
+            'cropWidth',
+            'cropHeight',
+            'path',
+            'image',
+        ]);
     },
 
 
@@ -89,23 +103,31 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             this.invalid = true;
         }
     },
-
-    get filter() {
-
-        var filters = this.prop( 'filters' );
-        return filters.length < 1 ? null : filters[ 0 ];
-    },
-    set filter( value ) {
-
-        this.filters = [ value ];
-    },
-            
-    get filters() { return this.prop( 'filters' ); },
-    set filters( value ) { return this.prop( 'filters', value ); },
             
     get image() { return this.prop( 'image' ); },
 
     get cropped() { return ( this.cropX !== 0 || this.cropY !== 0 || this.cropWidth !== 0 || this.cropHeight !== 0 ); },
+
+    /**
+     * Overwrites default getter to use image's width and height.
+     * @returns {ImageData}
+     */
+    get rawData() {
+        if( this._rawData !== null && this.invalid === false ) {
+
+            return this._rawData;
+        }
+
+        var width = this.image.width,
+            height = this.image.height,
+            ctx = Utils.getTempCanvasContext( width, height);
+
+        // The object's raw data will be stored without filters
+        ctx.drawImage( this.image, 0, 0, width, height );
+
+        return this._rawData = ctx.getImageData( 0, 0, width, height );
+    },
+
 
     set: function( path, x, y, width, height ) {
 
@@ -115,8 +137,6 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             
             if( 'path' in path ) this.path = path.path;
             if( 'crop' in path ) this.crop = path.crop;
-            if( 'filters' in path ) this.filters = path.filters;
-            if( 'filter' in path ) this.filter = path.filter;
 
         } else if( typeof path !== 'undefined' ) {
 
@@ -126,13 +146,6 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         return this;
     },
 
-
-    addFilter: function( filter ) {
-
-        this.filters.push( filter );
-
-        return this;
-    },
 
     load: function( args ) {
 
@@ -145,7 +158,7 @@ Bitmap.prototype = Utils.extend( Rectangle, {
     },
 
 
-    _draw: function( canvasContext ) {
+    _draw: function( canvasContext, config ) {
 
         if( !this.image.complete ) { //come back when it is please!
 
@@ -157,39 +170,35 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             return this;
         }
 
+        var applyStyles = ( Utils.isObject( config ) ? config.styles !== false : true ),
+            applyFilter = ( Utils.isObject( config ) ? config.filter !== false : true );
+
         // Get source and destination bounds
         var sourceRect = this.cropped ? this.crop : new Rectangle( {
                 width: this.image.width,
                 height: this.image.height
             } ),
             destinationRect = this.rectScaled,
-            img = this.image;
+            drawObject = this.image;
 
+        // Draw filtered data?
+        if( applyFilter ) {
 
-        //Apply filters
-        if( this.filters.length > 0 ) {
-
-            img = document.createElement( 'canvas' );
-            img.width = this.image.width;
-            img.height = this.image.height;
-            var ctx = img.getContext( '2d' );
-            ctx.drawImage( this.image, 0, 0, this.image.width, this.image.height );
-
-            var imageData = ctx.getImageData( 0, 0, this.image.width, this.image.height );
-
-            //apply filters
-            for( var i in this.filters )
-                this.filters[ i ].process( imageData );
-
-            ctx.putImageData( imageData, 0, 0 );
+            // {cavas.drawImage} is able to draw a image or canvas object, so just overwrite the object
+            drawObject = Utils.getTempCanvas( this.image );
+            drawObject.getContext('2d').putImageData( this.filteredData, 0, 0 );
         }
 
         canvasContext.save();
-        this.applyStyles( canvasContext );
+
+        // Apply styles on given context
+        if( applyStyles ) {
+            this.applyStyles( canvasContext );
+        }
 
         // Draw it
         canvasContext.drawImage(
-            img,
+            drawObject,
             // The source rectangle
             sourceRect.x,
             sourceRect.y,
@@ -202,7 +211,7 @@ Bitmap.prototype = Utils.extend( Rectangle, {
             destinationRect.height
         );
 
-        console.log('draw bitmap from ', sourceRect.toString(), ' to ', destinationRect.toString(), ':', this.path);
+        //console.log('[Bitmap] draw [', this.path, '] from[', sourceRect.toString(), '] to [', destinationRect.toString(), '] data:', drawObject);
 
         canvasContext.restore();
 

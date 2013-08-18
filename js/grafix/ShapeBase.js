@@ -1,3 +1,15 @@
+/**
+ * Creates a new instance of a shape-base class.
+ * Current features (or lazy loaded):
+ *  - parent property
+ *  - array of children
+ *  - canvas and context per instance (fetched from parent)
+ *  - input controler per instance (fetched from parent)
+ *  - filter processing
+ *
+ * @param {*} [args]
+ * @constructor
+ */
 var ShapeBase = function( args ) {
     EventBase.call( this );
 
@@ -19,9 +31,11 @@ var ShapeBase = function( args ) {
     /** @var Input */
     this._input = null;
 
-    // Silly hack until 'clone' has been revised - notes that we are in clone-mode and dont cover some properties
-    // I.e. 'name'
-    this._isCloning = false;
+    // ARGB array, lazy loaded
+    this._rawData = null;
+
+    // Enables to store and apply some filter on our {rawData}
+    this._filters = [];
 };
 
 ShapeBase.defaults = {
@@ -32,6 +46,22 @@ ShapeBase.prototype = Utils.extend( EventBase, {
     
     get clone() { 
         throw 'Cannot clone ShapeBase, please use any of the derived classes instead'; 
+    },
+
+    /**
+     * Returns an array of clone-able property names, used in the {clone} and {equals} method.
+     * @return {Array}
+     */
+    get cloneableProperties() {
+        return [
+            'invalid',
+            'parent',
+            'children',
+            'input',
+            'canvas',
+            'canvasContext',
+            'filters'
+        ];
     },
 
     get invalid() { return this.prop( 'invalid' ); },
@@ -152,6 +182,76 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         return this._canvasContext;
     },
     set canvasContext( value ) { return this.prop( 'canvasContext', value ); },
+
+    /**
+     * Returns the first stored filter, if any.
+     * @returns {null|Filter}
+     */
+    get filter() {
+
+        var filters = this.filters;
+        return filters.length < 1 ? null : filters[ 0 ];
+    },
+    /**
+     * Overwrites the currently stored filters with the given one
+     * @param {Filter} value
+     */
+    set filter( value ) {
+
+        this.filters = [ value ];
+    },
+
+    /**
+     * Gets the stored arry of filters.
+     * @returns {null|Filter[]}
+     */
+    get filters() { return this.prop( 'filters' ); },
+    /**
+     * Sets the stored array of filters
+     * @param {Filter} value
+     * @returns {self|boolean}
+     */
+    set filters( value ) { return this.prop( 'filters', value ); },
+
+    /**
+     * Returns the raw un-filtered {ImageData}, pulled from a canvas, of this object.
+     * @returns {ImageData}
+     */
+    get rawData() {
+        if( this._rawData !== null && this.invalid === false ) {
+
+            return this._rawData;
+        }
+
+        var width = this.width,
+            height = this.height,
+            ctx = Utils.getTempCanvasContext( width, height );
+
+        // The object's raw data will be stored without filters
+        var drawConfig = { filter: false };
+        this._draw( ctx, drawConfig );
+
+        return this._rawData = ctx.getImageData( 0, 0, width, height );
+    },
+
+    /**
+     * Returns the raw filtered {ImageData} of this object.
+     * @returns {ImageData}
+     */
+    get filteredData() {
+
+        var data = this.rawData;
+
+        if( this.filters.length > 0 ) {
+
+            for( var i = 0; i < this.filters.length; i++ ) {
+                this.filters[ i ].process( data );
+            }
+        }
+
+        return data;
+    },
+
 
     /**
      * Returns true, if we have the given shape (or name) as a children component.
@@ -296,13 +396,29 @@ ShapeBase.prototype = Utils.extend( EventBase, {
     },
 
 
+    addFilter: function( filter ) {
+
+        // Ensure to have an array
+        if( !this._filters ) {
+            this._filters = [];
+        }
+        this.filters.push( filter );
+
+        return this;
+    },
+
+    hasFilter: function() {
+        return this._filters && this._filters.length > 0;
+    },
+
+
     /**
      * Gets or sets the value of a private property, named _{name}.
      * If this object reports changes, the change event will be called before update.
      * If the event returns {false} no update will be done.
      *
      * @param {string} name
-     * @param {*} value
+     * @param {*} [value]
      * @returns {self|boolean|*}
      */
     prop: function( name, value ) {
@@ -327,30 +443,19 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
         if( Utils.isObject( args ) ) {
 
-            // 3 ways to set the name (not during cloning!)
-            if( Utils.isCloning === false ) {
-                if( 'id' in args ) {
-                    this.name = args.id;
-                }
-                else if( 'uid' in args ) {
-                    this.name = args.uid;
-                }
-                else if( 'name' in args ) {
-                    this.name = args.name;
-                }
-            }
-
+            // 3 ways to set the name
+            if( 'id' in args ) { this.name = args.id; }
+            else if( 'uid' in args ) { this.name = args.uid; }
+            else if( 'name' in args ) { this.name = args.name; }
             if( 'children' in args ) {
                 // @TODO: Shouldn't we clone all children?
                 //        They will get removed in the original object on-clone right now - I guess
                 this.addChild( args.children );
             }
-            if( 'canvas' in args ) {
-                this.canvas = args.canvas;
-            }
-            if( ('parent' in args) ) {
-                this.parent = args.parent;
-            }
+            if( 'canvas' in args ) { this.canvas = args.canvas; }
+            if( ('parent' in args) ) { this.parent = args.parent; }
+            if( 'filters' in args ) { this.filters = args.filters; }
+            if( 'filter' in args ) { this.filter = args.filter; }
         }
 
         return this;
@@ -393,16 +498,10 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
     },
 
-    draw: function( context, forceDraw ) {
+    draw: function( context, forceDraw, config ) {
 
         // Update my states, will also update childrens, if I'm not invalid
         this.update();
-
-        // Assume first parameter to be "force draw"
-        if( Utils.isType( context, 'boolean' ) ) {
-            forceDraw = context;
-            context = null;
-        }
 
         // If we got no context to draw, get our own
         context = context || this.canvasContext;
@@ -413,8 +512,7 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         if( this.invalid || forceDraw ) {
 
             // If parent is dirty, childs will need a re-draw too
-            
-            this._draw( context, /*forceDraw on child*/true );
+            this._draw( context, config );
         }
 
         context.restore();
@@ -425,7 +523,7 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         return this;
     },
 
-    _draw: function( context, forceChildDraw ) {
+    _draw: function( context, config ) {
 
         // Should draw the shape on the given context
 

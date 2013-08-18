@@ -1,5 +1,5 @@
 
-var Filter = function( name, type, callback ) {
+var Filter = function( name, type, callback, args ) {
     
     if( Utils.isFunction( type ) ) {
         
@@ -11,8 +11,9 @@ var Filter = function( name, type, callback ) {
     this._name = null;
     this._type = Filter.defaults.type;
     this._callback = null;
-    
-    this.set( name, type, callback );
+    this._customArgs = [];
+
+    this.set( name, type, callback, args );
 };
 Filter.defaults = {
     types: [ 'pixel', 'raw' ],
@@ -22,16 +23,7 @@ Filter.defaults = {
 Filter.prototype = {
     
     get name() { return this._name; },
-    set name( value ) {
-
-        if( this._name === value )
-            return;
-
-        Filter[ this._name ] = null;
-        Filter[ value ] = this;
-        
-        this._name = value;
-    },
+    set name( value ) { this._name = value; },
             
     get type() { return this._type; },
     set type( value ) { this._type = value; },
@@ -39,77 +31,100 @@ Filter.prototype = {
     get callback() { return this._callback; },
     set callback( value ) { this._callback = value; },
       
-    set: function( name, type, callback ) {
+    set: function( name, type, callback, customArgs ) {
 
         if( Utils.isObject( name ) ) {
             
-            if( 'name' in name )
-                this.name = name.name;
+            if( 'name' in name ) { this.name = name.name; }
+            if( 'type' in name ) { this.type = name.type; }
+            if( 'callback' in name ) { this.callback = name.callback; }
             
-            if( 'type' in name )
-                this.type = name.type;
-            
-            if( 'callback' in name )
-                this.callback = name.callback;
-            
-        } else if( typeof name !== 'undefined' )
+        } else if( Utils.isUndefined( name ) === false ) {
+
             this.name = name;
+        }
+
+        if( Utils.isUndefined( customArgs ) === false ) { this._customArgs = customArgs; }
         
         var args = { type: type, callback: callback };
-        for( var i in args )
-            if( Utils.isFunction( args[ i ] ) )
-                this.callback = args[ i ];
-            else if( Utils.isString( args[ i ] ) )
-                this.type = args[ i ]
-            else if( typeof args[ i ] !== 'undefined' )
-                this[ i ] = args[ i ];
-        
+        for( var i in args ) {
+            if( Utils.isFunction( args[ i ] ) ) { this.callback = args[ i ]; }
+            else if( Utils.isString( args[ i ] ) ) { this.type = args[ i ]; }
+            // Allows a direct modification of this instance
+            else if( Utils.isUndefined( args[ i ] ) ) { this[ i ] = args[ i ]; }
+        }
         
         return this;
     },
-    
+
+    args: function() {
+
+        var args = [].slice.apply( arguments );
+        return new Filter( this.name, this.type, this.callback, args );
+    },
+
+    /**
+     *
+     * @param {ImageData} imageData
+     * @returns {*}
+     */
     process: function( imageData ) {
-        
-        switch( this._type ) {
-            case 'raw':
-                
-                this._callback( imageData.data );
-                break;
-            case 'pixel':
-                
-                for( var i = 0; i < imageData.data.length; i += 4 ) {
-                    
-                    var pixel = this._callback( 
-                        imageData.data[ i ], 
-                        imageData.data[ i + 1 ], 
-                        imageData.data[ i + 2 ], 
-                        imageData.data[ i + 3 ]
-                    );
-                    
-                    imageData.data[ i ] = pixel.r;
-                    imageData.data[ i + 1 ] = pixel.g;
-                    imageData.data[ i + 2 ] = pixel.b;
-                    imageData.data[ i + 3 ] = pixel.a;
-                }
-                
+
+        // Process the full data block
+        if( this._type == 'raw' ) {
+
+            this._callback.apply( this, [ imageData.data ].concat( this._customArgs || [] ) );
+            return this;
         }
+
+        // Default to pixels
+        var length = imageData.data.length,
+            mesureLabel = 'Mesure filter ' + this.name + ' on ' + (length / 4) + ' RGBA pixel';
+        console.time(mesureLabel);
+        for( var i = 0; i < length; i += 4 ) {
+
+            var args = [
+                    imageData.data[ i ],
+                    imageData.data[ i + 1 ],
+                    imageData.data[ i + 2 ],
+                    imageData.data[ i + 3 ]
+                ].concat( this._customArgs || []),
+                pixel = this._callback.apply( this, args );
+
+            imageData.data[ i ] = pixel.r;
+            imageData.data[ i + 1 ] = pixel.g;
+            imageData.data[ i + 2 ] = pixel.b;
+            imageData.data[ i + 3 ] = pixel.a;
+        }
+
+        console.timeEnd(mesureLabel);
         
         return this;
     }
 };
 
+/**
+ * Creates a new permanent filter and returns the instance.
+ *
+ * @param {String} name
+ * @param {"pixel"|"raw"} type
+ * @param {Function} callback
+ * @returns {Filter}
+ */
 Filter.create = function( name, type, callback ) {
-    
-    return new Filter( name, type, callback );
+
+    return Filter[ name ] = new Filter( name, type, callback );
 };
 
 
-Filter.create( 'sepia', 'pixel', function( r, g, b, a ) {
+Filter.create( 'sepia', 'pixel', function( r, g, b, a, adjust ) {
+
+    adjust = adjust || 1.0;
 
     var sA = a,
-        sR = Math.min((r * .393) + (g *.769) + (b * .189), 255),
-        sG = Math.min((r * .349) + (g *.686) + (b * .168), 255),
-        sB = Math.min((r * .272) + (g *.534) + (b * .131), 255);
+        sR = Math.min(255, (r * (1 - (0.607 * adjust))) + (g * (0.769 * adjust)) + (b * (0.189 * adjust))),
+        sG = Math.min(255, (r * (0.349 * adjust)) + (g * (1 - (0.314 * adjust))) + (b * (0.168 * adjust))),
+        sB = Math.min(255, (r * (0.272 * adjust)) + (g * (0.534 * adjust)) + (b * (1 - (0.869 * adjust))));
     return { a: sA, r: sR, g: sG, b: sB };
 } );
 
@@ -158,9 +173,11 @@ Filter.create( 'contrast', 'pixel', function( r, g, b, a ) {
     return { a: a, r: value, g: value, b: value };
 } );
 
-Filter.create( 'inverse', 'pixel', function( r, g, b, a ) {
-    
-    return { a: a, r: 255 - r, g: 255 - g, b: 255 - b };
+Filter.create( 'inverse', 'pixel', function( r, g, b, a, perc ) {
+
+    // Allow to set the amount of inverse in percentage
+    var inverseFac = 255 * Math.min(1, Math.max(0, perc || 1));
+    return { a: a, r: inverseFac - r, g: inverseFac - g, b: inverseFac - b };
 } );
 
 if( typeof ShortCuts !== 'undefined' )

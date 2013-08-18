@@ -35,6 +35,24 @@ Text.prototype = Utils.extend( Rectangle, {
     get clone() {
         return Utils.clone( Text, this );
     },
+
+    /**
+     * Returns an array of clone-able property names, used in the {clone} and {equals} method.
+     * @return {Array}
+     */
+    get cloneableProperties() {
+        return Rectangle.prototype.cloneableProperties.concat([
+            'string',
+            'textAlign',
+            'textBaseLine',
+            'lineHeight',
+            'fontFamily',
+            'fontWeight',
+            'fontVariant',
+            'fontStyle',
+            'fontSize'
+        ]);
+    },
     
     get string() { return this.prop( 'string' ); },
     set string( value ) { return this.prop( 'string', value ); },
@@ -203,17 +221,17 @@ Text.prototype = Utils.extend( Rectangle, {
 		return this;
     },
 
-    fill: function( canvasContext, string ) {
+    fill: function( canvasContext, applyFilter, string ) {
         
         return this._drawText( canvasContext, string, 'fill' );
     },
 
-    stroke: function( canvasContext, string ) {
+    stroke: function( canvasContext, applyFilter, string ) {
         
         return this._drawText( canvasContext, string, 'stroke' );
     },
 
-    clear: function( canvasContext, string ) {
+    clear: function( canvasContext, applyFilter, string ) {
 
         if( this.parent ) {
             this.color = this.parent.color;

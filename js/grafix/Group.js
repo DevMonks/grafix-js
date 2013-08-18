@@ -31,7 +31,7 @@ Group.prototype = Utils.extend( Shape, {
         
         this.invalid = true;
     },
-            
+
     set: function( virtual ) {
 
         Shape.prototype.set.call( this, virtual );
@@ -47,20 +47,20 @@ Group.prototype = Utils.extend( Shape, {
         
         return this;
     },
-            
+
     _drawGroup: function( canvasContext, style ) {
         
-        if( this.virtual ) //virtual grids dont get drawn
+        if( this.virtual ) // Virtual groups dont get drawn
             return;
         
         Shape.prototype[ style ].call( this, canvasContext );
     },
-            
+
     fill: function( canvasContext ) {
 
         this._drawGroup( canvasContext, 'fill' );
     },
-            
+
     stroke: function( canvasContext ) {
 
         this._drawGroup( canvasContext, 'stroke' );

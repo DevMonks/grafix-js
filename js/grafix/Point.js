@@ -13,6 +13,17 @@ Point.prototype = Utils.extend( ShapeBase, {
         return Utils.clone( Point, this );
     },
 
+    /**
+     * Returns an array of clone-able property names, used in the {clone} and {equals} method.
+     * @return {Array}
+     */
+    get cloneableProperties() {
+        return ShapeBase.prototype.cloneableProperties.concat([
+            'x',
+            'y'
+        ]);
+    },
+
     get x() { return this.prop( 'x' ); },
     set x( value ) { return this.prop( 'x', value ); },
 

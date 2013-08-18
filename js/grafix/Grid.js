@@ -24,6 +24,19 @@ Grid.prototype = Utils.extend( Rectangle, {
         return Utils.clone( Grid, this );
     },
 
+    /**
+     * Returns an array of clone-able property names, used in the {clone} and {equals} method.
+     * @return {Array}
+     */
+    get cloneableProperties() {
+        return Rectangle.prototype.cloneableProperties.concat([
+            'columns',
+            'rows',
+            'virtual',
+            'allowIndividualStyles'
+        ]);
+    },
+
     get columns() { return this.prop( 'columns' ); },
     set columns( value ) { return this.prop( 'columns', value ); },
 
@@ -207,8 +220,15 @@ Grid.prototype = Utils.extend( Rectangle, {
         
         return this;
     },
-            
-    _drawGrid: function( canvasContext, style ) {
+
+    /**
+     * Draw all {Rectangle}'s using {this.drawStyle} or, if {allowIndividualStyles} is true, using {Rectangle]'s
+     * {drawStyle}.
+     *
+     * @param canvasContext
+     * @private
+     */
+    _drawGrid: function( canvasContext ) {
         
         if( this.virtual ) //virtual grids dont get drawn
             return;
@@ -219,41 +239,37 @@ Grid.prototype = Utils.extend( Rectangle, {
         var grid = this;
         this.eachRect( function( x, y, i ) {
 
-            // @TODO: IMO this may happen in _rectAt() including a cache strategy
+            // Note: {this} is an instance of {Rectangle}
+
+            // @TODO: Apply styles in _rectAt()
             if( !grid.allowIndividualStyles ) {
                 this.style( grid );
             }
 
-            // Just call normal draw on this rectangle
+            // Just call normal draw on the rectangle
             this._draw( canvasContext );
         } );
     },
             
     fill: function( canvasContext ) {
 
-        this._drawGrid( canvasContext, 'fill' );
+        this._drawGrid( canvasContext );
     },
             
     stroke: function( canvasContext ) {
 
-        this._drawGrid( canvasContext, 'stroke' );
+        this._drawGrid( canvasContext );
     },
     
     clear: function( canvasContext ) {
 
-        this._drawGrid( canvasContext, 'clear' );
+        this._drawGrid( canvasContext );
     },
             
-    _draw: function( context, forceDraw ) {
+    _draw: function( context, config ) {
 
-        // Clear rectangles on invalid state
-        // @EDIT: I thought this caused a bug, but it was on another place, so disabled it again
-        //this._rectangles = [];
-        
-        // @TODO: This is okay, but this will still apply the styles
-        //        unnessecarily. Maybe need a third "applyStyles" parameter
-        //        in Shape? This function exists to pass "FALSE" to it then later.
-        Shape.prototype._draw.call( this, context, forceDraw );
+        // Let the base class do its magic
+        Shape.prototype._draw.call( this, context, config );
     },
    
             

@@ -32,9 +32,7 @@
         ] ),
         group2 = Grafix.group().addChild( [
             rect5, rect6, rect7
-        ] );    
-        
-    console.log( Group, group1, group2 );
+        ] );
     
     stage.addChild( [ group1, group2 ]);
 

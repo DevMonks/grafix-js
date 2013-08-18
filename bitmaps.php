@@ -6,7 +6,7 @@
 <br>
 
 <canvas id="stage" width="900" height="500"></canvas><br>
-<select onchange="muffinFilter.filter=Filter[this.value]">
+<select onchange="muffinFilter.filter = Filter[ this.value ].args( 0.8 );">
     <option value="sepia">sepia</option>
     <option value="inverse">inverse</option>
     <option value="noRed">noRed</option>

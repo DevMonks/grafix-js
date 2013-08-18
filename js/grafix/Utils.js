@@ -8,12 +8,8 @@ var Utils = {
      * @var int
      */
     _currentId: 0,
-    /**
-     * True if {Utils.clone} is currently in a clone-operation.
-     *
-     * @var boolean
-     */
-    _isCloning: false,
+
+    _tempCanvas: null,
 
 
     merge: function( target, source ) {
@@ -45,18 +41,55 @@ var Utils = {
 
 
     clone: function( cloneableObject, cloneSource ) {
-        Utils._isCloning = true;
-        // @TODO: Think about ShapeBase.getCloneableProperties() or something like this
+        // ShapeBase objects have a method for getting all cloneable properties
+        if( Utils.isObject( cloneSource ) && ( 'cloneableProperties' in cloneSource ) ) {
+
+            var propNames = cloneSource.cloneableProperties,
+                values = {};
+            for( var propName in propNames ) {
+                values[ propName ] = cloneSource[ propName ];
+            }
+            cloneSource = values;
+        }
+
         var clonedObject = new cloneableObject( cloneSource );
-        Utils._isCloning = false;
+        console.log( 'created clone:', clonedObject );
+
         return clonedObject;
     },
-
-    get isCloning() { return Utils._isCloning; },
 
 
     getUid: function() {
         return ++Utils._currentId;
+    },
+
+    getTempCanvas: function( width, height ) {
+        height = ( Utils.isObject( width ) ? width.height : height );
+        width = ( Utils.isObject( width ) ? width.width : width );
+
+        /*
+        if( Utils._tempCanvas === null ) {
+            Utils._tempCanvas = document.createElement( 'canvas' );
+            Utils._tempCanvas.width = width;
+            Utils._tempCanvas.height = height;
+        }
+
+        Utils._tempCanvas.width = width;
+        Utils._tempCanvas.height = height;
+        */
+        // @TODO: IMO we need a unique canvas for each request or have to clear the canvas on each request
+        //        Also width/height modifies the cache so a 100/100 canvas is unique and 200/100 too
+        Utils._tempCanvas = document.createElement( 'canvas' );
+        Utils._tempCanvas.width = width;
+        Utils._tempCanvas.height = height;
+
+        return Utils._tempCanvas;
+    },
+
+    getTempCanvasContext: function( width, height ) {
+        var canvas = Utils.getTempCanvas( width, height );
+        // Browser uses his own cache strategy for this
+        return canvas.getContext( '2d' );
     },
 
 
