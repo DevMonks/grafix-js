@@ -245,7 +245,17 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         if( this.filters.length > 0 ) {
 
             for( var i = 0; i < this.filters.length; i++ ) {
-                this.filters[ i ].process( data );
+
+                var filter = this.filters[ i ];
+                // Function or {Filter} object
+                if( Utils.isFunction( filter ) ) {
+
+                    // The function will return our {Filter}
+                    filter = filter();
+                }
+
+                // Instance of {Filter}
+                filter.process( data );
             }
         }
 

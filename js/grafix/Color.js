@@ -1,5 +1,5 @@
 var Color = function ( color ) {
-    // Something WILL be done with this!
+
     this._r = 0;
     this._g = 0;
     this._b = 0;
@@ -9,332 +9,250 @@ var Color = function ( color ) {
 };
 
 Color.prototype = {
-    
-  set: function( color, deep ) {
 
-    deep = deep !== false;    
-    
-    if( Utils.isString( color ) ) {
-        
-        // @TODO: Maybe we should make a function that extracts
-        //        all variables from the function name in a string
-        //        e.g. xyz( xVal, yVal, zVal ) would set x, y and z to the fitting args
-        
-        if( Color.isHex( color ) )
-            color = Color.hexToRgb( color );
-        else if( Color.isHsl( color ) )
-            this.hsl = Color.extractHslString( color );
-        else if( Color.isRgba( color ) )
-            this.rgba = Color.extractRgbaString( color );
-        else if( Color.isCymk( color ) )
-            this.cymk = Color.extractCymkString( color );
-        else if( color in Color )
-            color = Color.hexToRgb( Color[ color ] );
-    }
-    
-    if( Utils.isArray( color ) ) {
-        
-        switch( color.length ) {
-            case 4:
-                this.a = color[ 3 ];
-            case 3:
-                this.b = color[ 2 ];
-            case 2:
-                this.g = color[ 1 ];
-            case 1:
-                this.r = color[ 0 ];
+    get r() { return this._r; },
+    set r( r ) { this._r = r; },
+
+    get g() { return this._g; },
+    set g( g ) { this._g = g; },
+
+    get b() { return this._g; },
+    set b( b ) { this._b = b; },
+
+    get a() { return this._a; },
+    set a( a ) { this._a = a; },
+
+    get rgb() { return { r: this.r, g: this.g, b: this.b }; },
+    set rgb( rgb ) { this.rgba = rgb; },
+
+    get rgba() { return { r: this.r, g: this.g, b: this.b, a: this.a }; },
+    set rgba( rgba ) { this.set( rgba ); },
+
+    // HSL Getters/Setters
+    get h() { return this.hsl.h; },
+    set h( h ) {
+
+        var hsl = this.hsl;
+        hsl.h = h;
+        this.hsl = hsl;
+    },
+
+    get s() { return this.hsl.s; },
+    set s( s ) {
+
+        var hsl = this.hsl;
+        hsl.s = s;
+        this.hsl = hsl;
+    },
+
+    get l() { return this.hsl.l; },
+    set l( l ) {
+
+        var hsl = this.hsl;
+        hsl.l = l;
+        this.hsl = hsl;
+    },
+
+    get hsl() {  return Color.rgbToHsl( this.r, this.g, this.b ); },
+    set hsl( hsl ) { this.set( Color.hslToRgb( hsl.h, hsl.s, hsl.l ) ); },
+
+
+    // CYMK Getters/Setters
+    get c() { return this.cymk.c; },
+    set c( c ) {
+
+        var cymk = this.cymk;
+        cymk.c = c;
+        this.cymk = cymk;
+    },
+
+    get y() { return this.cymk.y; },
+    set y( y ) {
+
+        var cymk = this.cymk;
+        cymk.y = y;
+        this.cymk = cymk;
+    },
+
+    get m() { return this.cymk.m; },
+    set m( m ) {
+
+        var cymk = this.cymk;
+        cymk.m = m;
+        this.cymk = cymk;
+    },
+
+    get k() { return this.cymk.k; },
+    set k( k ) {
+
+        var cymk = this.cymk;
+        cymk.k = k;
+        this.cymk = cymk;
+    },
+
+    get cymk() { return Color.rgbToCymk( this.r, this.g, this.b ); },
+    set cymk( cymk ) { this.set( Color.cymkToRgb( cymk.c, cymk.y, cymk.m, cymk.k ) ); },
+
+    get hex() { return Color.rgbToHex( this.r, this.g, this.b ); },
+    set hex( hex ) { this.set( Color.hexToRgb( hex ) ); },
+
+
+    set: function( color, deep ) {
+
+        deep = deep !== false;
+
+        if( Utils.isString( color ) ) {
+
+            // @TODO: Maybe we should make a function that extracts
+            //        all variables from the function name in a string
+            //        e.g. xyz( xVal, yVal, zVal ) would set x, y and z to the fitting args
+
+            if( Color.isHex( color ) ) { color = Color.hexToRgb( color ); }
+            else if( Color.isHsl( color ) ) { this.hsl = Color.extractHslString( color ); }
+            else if( Color.isRgba( color ) ) { this.rgba = Color.extractRgbaString( color ); }
+            else if( Color.isCymk( color ) ) { this.cymk = Color.extractCymkString( color ); }
+            else if( color in Color ) { color = Color.hexToRgb( Color[ color ] ); }
         }
-    } else if( Utils.isObject( color ) ) {
-        
-        if( 'r' in color ) this.r = color.r;
-        if( 'g' in color ) this.g = color.g;
-        if( 'b' in color ) this.b = color.b;
-        if( 'a' in color ) this.a = color.a;
-        
-        if( deep ) {
-            
-            if( 'h' in color && 's' in color && 'l' in color ) {
-                
-                this.hsl = { h: color.h, s: color.s, l: color.l };
-            } else {
 
-                if( 'h' in color ) this.h = color.h;
-                if( 's' in color ) this.s = color.s;
-                if( 'l' in color ) this.l = color.l;
-            }
-            
-            if( 'c' in color && 'y' in color && 'm' in color && 'k' in color ) {
-                
-                this.cymk = { c: color.c, y: color.y, m: color.m, k: color.k };
-            } else {
+        if( Utils.isArray( color ) ) {
 
-                if( 'c' in color ) this.c = color.c;
-                if( 'y' in color ) this.y = color.y;
-                if( 'm' in color ) this.m = color.m;
-                if( 'k' in color ) this.k = color.k;
+            switch( color.length ) {
+                case 4:
+                    this.a = color[ 3 ];
+                case 3:
+                    this.b = color[ 2 ];
+                case 2:
+                    this.g = color[ 1 ];
+                case 1:
+                    this.r = color[ 0 ];
             }
-                    
-            if( 'rgba' in color ) this.rgba = color.rgba;
-            if( 'rgb' in color ) this.rgb = color.rgb;
-            
-            if( 'hsl' in color ) this.hsl = color.hsl;
-            
-            if( 'cymk' in color ) this.cymk = color.cymk;
-            
         }
+        else if( Utils.isObject( color ) ) {
+
+            if( 'r' in color ) { this.r = color.r; }
+            if( 'g' in color ) { this.g = color.g; }
+            if( 'b' in color ) { this.b = color.b; }
+            if( 'a' in color ) { this.a = color.a; }
+
+            if( deep ) {
+
+                if( 'h' in color && 's' in color && 'l' in color ) {
+
+                    this.hsl = { h: color.h, s: color.s, l: color.l };
+                } else {
+
+                    if( 'h' in color ) this.h = color.h;
+                    if( 's' in color ) this.s = color.s;
+                    if( 'l' in color ) this.l = color.l;
+                }
+
+                if( 'c' in color && 'y' in color && 'm' in color && 'k' in color ) {
+
+                    this.cymk = { c: color.c, y: color.y, m: color.m, k: color.k };
+                } else {
+
+                    if( 'c' in color ) this.c = color.c;
+                    if( 'y' in color ) this.y = color.y;
+                    if( 'm' in color ) this.m = color.m;
+                    if( 'k' in color ) this.k = color.k;
+                }
+
+                if( 'rgba' in color ) this.rgba = color.rgba;
+                if( 'rgb' in color ) this.rgb = color.rgb;
+
+                if( 'hsl' in color ) this.hsl = color.hsl;
+
+                if( 'cymk' in color ) this.cymk = color.cymk;
+
+            }
+        }
+
+        return this;
+    },
+
+
+    // HSL operations
+    hue: function( deg ) {
+
+        this.h = deg;
+        return this;
+    },
+    saturate: function( factor ) {
+
+        this.s *= factor;
+        return this;
+    },
+    desaturate: function( factor ) {
+
+        this.s /= factor;
+        return this;
+    },
+    darken: function( factor ) {
+
+        this.l *= factor;
+        return this;
+    },
+    lighten: function( factor ) {
+
+        this.l /= factor;
+        return this;
+    },
+
+    inverse: function() {
+
+        // @TODO: inverse the color
+    },
+
+    complement: function() {
+
+        // @TODO: get the complementary color
+    },
+
+    grayscale: function() {
+
+        this.s = 0;
+        return this;
+    },
+
+    mix: function( color ) {
+
+        // @TODO: return the mixed color.
+    },
+
+    gradientTo: function( type, color, stops ) {
+
+        return Color.gradient( type, this, color, stops );
+    },
+    gradientFrom: function( type, color, stops ) {
+
+        return Color.gradient( type, color, this, stops );
+    },
+    linearGradientTo: function( color, stops ) {
+
+        return this.gradientTo( 'linear', color, stops );
+    },
+    radialGradientTo: function( color, stops ) {
+
+        return this.gradientTo( 'radial', color, stops );
+    },
+    linearGradientFrom: function( color, stops ) {
+
+        return this.gradientFrom( 'linear', color, stops );
+    },
+    radialGradientFrom: function( color, stops ) {
+
+        return this.gradientFrom( 'radial', color, stops );
+    },
+
+    toString: function() {
+
+        return JSON.stringify( {
+            r: this.r,
+            g: this.g,
+            b: this.b,
+            a: this.a
+        } );
     }
-    
-    return this;
-  },
-          
-  get r() {
-      
-      return this._r;
-  },
-          
-  set r( r ) {
-      
-      this._r = r;
-  },
-          
-  get g() {
-      
-      return this._g;
-  },
-          
-  set g( g ) {
-      
-      this._g = g;
-  },
-          
-  get b() {
-      
-      return this._g;
-  },
-          
-  set b( b ) {
-      
-      this._b = b;
-  },
-          
-  get a() {
-      
-      return this._a;
-  },
-          
-  set a( a ) {
-      
-      this._a = a;
-  },
-          
-         
-  get rgb() {
-  
-      return { r: this.r, g: this.g, b: this.b };
-  },
-  set rgb( rgb ) {
-      
-      this.rgba = rgb;
-  },
-  get rgba() {
-      
-      return { r: this.r, g: this.g, b: this.b, a: this.a };
-  },
-  set rgba( rgba ) {
-    
-      this.set( rgba );
-  },
-  
-  //HSL Getters/Setters
-  get h() {
-      
-      return this.hsl.h;
-  },
-  set h( h ) {
-      
-      var hsl = this.hsl;
-      hsl.h = h;
-      this.hsl = hsl;
-  },
-  get s() {
-      
-      return this.hsl.s;
-  },
-  set s( s ) {
-      
-      var hsl = this.hsl;
-      hsl.s = s;
-      this.hsl = hsl;
-  },
-  get l() {
-      
-      return this.hsl.l;
-  },
-  set l( l ) {
-      
-      var hsl = this.hsl;
-      hsl.l = l;
-      this.hsl = hsl;
-  },
-    
-  get hsl() { 
-      
-      return Color.rgbToHsl( this.r, this.g, this.b );
-  },
-  set hsl( hsl ) {
-      
-      this.set( Color.hslToRgb( hsl.h, hsl.s, hsl.l ) );
-  },
-          
-  
-  //CYMK Getters/Setters
-  get c() {
-      
-      return this.cymk.c;
-  },
-  set c( c ) {
-      
-      var cymk = this.cymk;
-      cymk.c = c;
-      this.cymk = cymk;
-  },
-  get y() {
-      
-      return this.cymk.y;
-  },
-  set y( y ) {
-      
-      var cymk = this.cymk;
-      cymk.y = y;
-      this.cymk = cymk;
-  },
-  get m() {
-      
-      return this.cymk.m;
-  },
-  set m( m ) {
-      
-      var cymk = this.cymk;
-      cymk.m = m;
-      this.cymk = cymk;
-  },
-  get k() {
-      
-      return this.cymk.k;
-  },
-  set k( k ) {
-      
-      var cymk = this.cymk;
-      cymk.k = k;
-      this.cymk = cymk;
-  },
-    
-  get cymk() {       
-      
-      return Color.rgbToCymk( this.r, this.g, this.b );
-  },
-  set cymk( cymk ) {
-      
-      this.set( Color.cymkToRgb( cymk.c, cymk.y, cymk.m, cymk.k ) );
-  },
- 
-  get hex() {
-      
-      return Color.rgbToHex( this.r, this.g, this.b );
-  },
-  set hex( hex ) {
-      
-      this.set( Color.hexToRgb( hex ) );
-  },
-  
-  //HSL operations
-  hue: function( deg ) {
-      
-      this.h = deg;
-      
-      return this;
-  },
-  saturate: function( factor ) {
-      
-      this.s *= factor;
-      
-      return this;
-  },
-  desaturate: function( factor ) {
-      
-      this.s /= factor;
-      
-      return this;
-  },
-  darken: function( factor ) {
-      
-      this.l *= factor;
-      
-      return this;
-  },
-  lighten: function( factor ) {
-      
-      this.l /= factor;
-      
-      return this;
-  },
-  
-  inverse: function() {
-      
-      // @TODO: inverse the color
-  },
-  
-  complement: function() {
-      
-      // @TODO: get the complementary color
-  },
-  
-  grayscale: function() {
-    
-      this.s = 0;
-      
-      return this;
-  },
-  
-  mix: function( color ) {
-    
-      // @TODO: return the mixed color.
-  },
-  
-  gradientTo: function( type, color, stops ) {
-      
-      return Color.gradient( type, this, color, stops );
-  },
-  gradientFrom: function( type, color, stops ) {
-      
-      return Color.gradient( type, color, this, stops );
-  },
-  linearGradientTo: function( color, stops ) {
-      
-      return this.gradientTo( 'linear', color, stops );
-  },
-  radialGradientTo: function( color, stops ) {
-      
-      return this.gradientTo( 'radial', color, stops );
-  },
-  linearGradientFrom: function( color, stops ) {
-      
-      return this.gradientFrom( 'linear', color, stops );
-  },
-  radialGradientFrom: function( color, stops ) {
-      
-      return this.gradientFrom( 'radial', color, stops );
-  },
-          
-  toString: function() {
-      
-      return JSON.stringify( {
-        r: this.r,
-        g: this.g,
-        b: this.b,
-        a: this.a
-      } );
-  }
 };
 
 Utils.merge( Color, {

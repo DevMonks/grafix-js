@@ -14,7 +14,7 @@
             stage.color = Color.black;
 
             var redRect = new Rectangle( { width: 400, height: 400, color: 'red' } ),
-                blueRect = new Rectangle( { width: 250, height: 250, color: 'blue', filter: Filter.inverse.args(0.3) } ),
+                blueRect = new Rectangle( { width: 250, height: 250, color: 'blue', filter: Filter.inverse(0.3) } ),
                 greenRect = new Rectangle( { width: 100, height: 100, color: 'green' } );
 
             redRect.align = 'center center center';
