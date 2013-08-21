@@ -16,7 +16,6 @@ var Utils = {
         
         for( var i in source ) {
             // @FIXME: Dirty fix - dont copy 'clone' getter because this will trigger a new clone .. and so on
-            // @TODO: We should skip the 'name' property too to prevent named dupes
             if (i === 'clone') {
                 continue;
             }

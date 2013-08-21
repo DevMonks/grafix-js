@@ -21,7 +21,7 @@ var Stage = function( canvas, maxFps ) {
         throw 'Specified element was not a selector of a canvas or a canvas dom element';
     }
 
-    if( !this._canvas.getContext ) {
+    if( !( 'getContext' in this._canvas ) ) {
         throw 'Unsupported browser or specified element was not a canvas';
     }
 
@@ -34,11 +34,7 @@ var Stage = function( canvas, maxFps ) {
     //We can't use the set() method here, since the setter wouldn't be called
     this.size = this.attributeSize;
 
-    // High pixel-density display optimization (e.g. Retina)
-    if ( ('devicePixelRatio' in window) && window.devicePixelRatio !== 1 ) {
-        this.attributeSize = this.attributeSize.mul( new Size( window.devicePixelRatio, window.devicePixelRatio ) );
-        this._canvasContext.scale( window.devicePixelRatio, window.devicePixelRatio );
-    }
+    this._initializeCanvas();
 
     if ( this._autoStart ) {
         this.start();
@@ -46,36 +42,6 @@ var Stage = function( canvas, maxFps ) {
 };
 
 Stage.prototype = Utils.extend( Shape, {
-    get attributeSize() {
-        return new Size(
-            parseInt( this.canvas.getAttribute( 'width' ) ),
-            parseInt( this.canvas.getAttribute( 'height' ) )
-        );
-    },
-    set attributeSize( value ) {
-        if ( value.width && this.prop( 'width', value.width ) !== false ) {
-            this.canvas.setAttribute( 'width', value.width );
-        }
-        if ( value.height && this.prop( 'height', value.height ) !== false ) {
-            this.canvas.setAttribute( 'height', value.height );
-        }
-    },
-    
-    get size() {
-        return new Size(
-            this.canvas.style.width !== '' ? parseInt( this.canvas.style.width ) : this.attributeSize.width,
-            this.canvas.style.height !== '' ? parseInt( this.canvas.style.height ) : this.attributeSize.height
-        );
-    },
-    set size( value ) {
-        
-        if ( value.width && this.prop( 'width', value.width ) !== false ) {
-            this.canvas.style.width = value.width + 'px';
-        }
-        if ( value.height && this.prop( 'height', value.height ) !== false ) {
-            this.canvas.style.height = value.height + 'px'
-        }
-    },
 
     start: function ( force ) {
         if ( this._isUpdating && !force ) {

@@ -151,10 +151,9 @@ ShapeBase.prototype = Utils.extend( EventBase, {
             this._canvas = this.parent.canvas;
         
         if( !this._canvas ) {
-            
-            this._canvas = document.createElement( 'canvas' );
-            this._canvas.setAttribute( 'width', 'width' in this ? this.width : 0 );
-            this._canvas.setAttribute( 'height', 'height' in this ? this.height : 0 );
+
+            // Will create a new canvas and apply attributes
+            this._initializeCanvas();
         }
 
         return this._canvas;
@@ -260,6 +259,37 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         }
 
         return data;
+    },
+
+    get attributeSize() {
+        return new Size(
+            parseInt( this.canvas.getAttribute( 'width' ) ),
+            parseInt( this.canvas.getAttribute( 'height' ) )
+        );
+    },
+    set attributeSize( value ) {
+        if ( value.width && this.prop( 'width', value.width ) !== false ) {
+            this.canvas.setAttribute( 'width', value.width );
+        }
+        if ( value.height && this.prop( 'height', value.height ) !== false ) {
+            this.canvas.setAttribute( 'height', value.height );
+        }
+    },
+
+    get size() {
+        return new Size(
+            this.canvas.style.width !== '' ? parseInt( this.canvas.style.width ) : this.attributeSize.width,
+            this.canvas.style.height !== '' ? parseInt( this.canvas.style.height ) : this.attributeSize.height
+        );
+    },
+    set size( value ) {
+
+        if ( value.width && this.prop( 'width', value.width ) !== false ) {
+            this.canvas.style.width = value.width + 'px';
+        }
+        if ( value.height && this.prop( 'height', value.height ) !== false ) {
+            this.canvas.style.height = value.height + 'px'
+        }
     },
 
 
@@ -469,6 +499,24 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         }
 
         return this;
+    },
+
+
+    _initializeCanvas: function() {
+
+        // Create a new canvas
+        if( !this.canvas ) {
+            this.canvas = document.createElement( 'canvas' );
+            this.canvas.setAttribute( 'width', 'width' in this ? this.width : 0 );
+            this.canvas.setAttribute( 'height', 'height' in this ? this.height : 0 );
+        }
+
+        // High pixel-density display optimization (e.g. Retina)
+        if ( ('devicePixelRatio' in window) && window.devicePixelRatio !== 1 ) {
+            this.attributeSize = this.attributeSize.mul( new Size( window.devicePixelRatio, window.devicePixelRatio ) );
+            this.canvasContext.scale( window.devicePixelRatio, window.devicePixelRatio );
+        }
+
     },
 
 
