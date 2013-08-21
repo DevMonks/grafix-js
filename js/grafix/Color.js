@@ -3,6 +3,20 @@ var Color = function ( color ) {
     this._r = 0;
     this._g = 0;
     this._b = 0;
+    this._rgbChanged = false;
+    
+    this._h = 0;
+    this._s = 0;
+    this._l = 0;
+    this._hslChanged = false;
+    
+    this._c = 0;
+    this._y = 0;
+    this._m = 0;
+    this._k = 0;
+    this._cymkChanged = false;
+    
+    //rgbA, hslA
     this._a = 0;
     
     this.set( color );
@@ -10,91 +24,61 @@ var Color = function ( color ) {
 
 Color.prototype = {
 
-    get r() { return this._r; },
-    set r( r ) { this._r = r; },
+    get r() { this._refresh(); return this._r; },
+    set r( r ) { this._r = r; this._rgbChanged = true; },
 
-    get g() { return this._g; },
-    set g( g ) { this._g = g; },
+    get g() { this._refresh(); return this._g; },
+    set g( g ) { this._g = g; this._rgbChanged = true; },
 
-    get b() { return this._g; },
-    set b( b ) { this._b = b; },
+    get b() { this._refresh(); return this._b; },
+    set b( b ) { this._b = b; this._rgbChanged = true; },
 
+    
+    get h() { this._refresh(); return this._h; },
+    set h( h ) { this._h = h; this._hslChanged = true; },
+
+    get s() { this._refresh(); return this._s; },
+    set s( s ) { this._s = s; this._hslChanged = true; },
+
+    get l() { this._refresh(); return this._l; },
+    set l( l ) { this._l = l; this._hslChanged = true; },
+    
+    
+    get c() { this._refresh(); return this._c; },
+    set c( c ) { this._c = c; this._cymkChanged = true; },
+
+    get y() { this._refresh(); return this._y; },
+    set y( y ) { this._y = y; this._cymkChanged = true; },
+
+    get m() { this._refresh(); return this._m; },
+    set m( l ) { this._m = l; this._cymkChanged = true; },
+    
+    get k() { this._refresh(); return this._k; },
+    set k( k ) { this._k = l; this._cymkChanged = true; },
+    
+    
     get a() { return this._a; },
     set a( a ) { this._a = a; },
 
+    
     get rgb() { return { r: this.r, g: this.g, b: this.b }; },
     set rgb( rgb ) { this.rgba = rgb; },
 
     get rgba() { return { r: this.r, g: this.g, b: this.b, a: this.a }; },
     set rgba( rgba ) { this.set( rgba ); },
 
-    // HSL Getters/Setters
-    get h() { return this.hsl.h; },
-    set h( h ) {
-
-        var hsl = this.hsl;
-        hsl.h = h;
-        this.hsl = hsl;
-    },
-
-    get s() { return this.hsl.s; },
-    set s( s ) {
-
-        var hsl = this.hsl;
-        hsl.s = s;
-        this.hsl = hsl;
-    },
-
-    get l() { return this.hsl.l; },
-    set l( l ) {
-
-        var hsl = this.hsl;
-        hsl.l = l;
-        this.hsl = hsl;
-    },
-
-    get hsl() {  return Color.rgbToHsl( this.r, this.g, this.b ); },
-    set hsl( hsl ) { this.set( Color.hslToRgb( hsl.h, hsl.s, hsl.l ) ); },
-
-
-    // CYMK Getters/Setters
-    get c() { return this.cymk.c; },
-    set c( c ) {
-
-        var cymk = this.cymk;
-        cymk.c = c;
-        this.cymk = cymk;
-    },
-
-    get y() { return this.cymk.y; },
-    set y( y ) {
-
-        var cymk = this.cymk;
-        cymk.y = y;
-        this.cymk = cymk;
-    },
-
-    get m() { return this.cymk.m; },
-    set m( m ) {
-
-        var cymk = this.cymk;
-        cymk.m = m;
-        this.cymk = cymk;
-    },
-
-    get k() { return this.cymk.k; },
-    set k( k ) {
-
-        var cymk = this.cymk;
-        cymk.k = k;
-        this.cymk = cymk;
-    },
-
-    get cymk() { return Color.rgbToCymk( this.r, this.g, this.b ); },
-    set cymk( cymk ) { this.set( Color.cymkToRgb( cymk.c, cymk.y, cymk.m, cymk.k ) ); },
+    
+    get hsl() {  return { h: this.h, s: this.s, l: this.l }; },
+    set hsl( hsl ) { this.hsla = hsl; },
+        
+    get hsla() {  return { h: this.h, s: this.s, l: this.l, a: this.a }; },
+    set hsla( hsla ) { this.set( hsla ); },
+        
+    get cymk() {  return { c: this.c, y: this.y, m: this.m, k: this.k }; },
+    set cymk( cymk ) { this.set( cymk ); },
 
     get hex() { return Color.rgbToHex( this.r, this.g, this.b ); },
-    set hex( hex ) { this.set( Color.hexToRgb( hex ) ); },
+    set hex( hex ) { this.set( hex ); },
 
 
     set: function( color, deep ) {
@@ -107,11 +91,13 @@ Color.prototype = {
             //        all variables from the function name in a string
             //        e.g. xyz( xVal, yVal, zVal ) would set x, y and z to the fitting args
 
-            if( Color.isHex( color ) ) { color = Color.hexToRgb( color ); }
-            else if( Color.isHsl( color ) ) { this.hsl = Color.extractHslString( color ); }
-            else if( Color.isRgba( color ) ) { this.rgba = Color.extractRgbaString( color ); }
-            else if( Color.isCymk( color ) ) { this.cymk = Color.extractCymkString( color ); }
-            else if( color in Color ) { color = Color.hexToRgb( Color[ color ] ); }
+            if( Color.isHex( color ) ) { this.set( Color.hexToRgb( color ) ); }
+            else if( Color.isHsla( color ) ) { this.set( Color.extractHslaString( color ) ); }
+            else if( Color.isRgba( color ) ) { this.set( Color.extractRgbaString( color ) ); }
+            else if( Color.isCymk( color ) ) { this.set( Color.extractCymkString( color ) ); }
+            else if( color in Color ) { this.set( Color.hexToRgb( Color[ color ] ) ); }
+            
+            return this;
         }
 
         if( Utils.isArray( color ) ) {
@@ -126,44 +112,34 @@ Color.prototype = {
                 case 1:
                     this.r = color[ 0 ];
             }
+            
+            return this;
         }
-        else if( Utils.isObject( color ) ) {
+        
+        if( Utils.isObject( color ) ) {
 
             if( 'r' in color ) { this.r = color.r; }
             if( 'g' in color ) { this.g = color.g; }
             if( 'b' in color ) { this.b = color.b; }
+            
             if( 'a' in color ) { this.a = color.a; }
 
             if( deep ) {
 
-                if( 'h' in color && 's' in color && 'l' in color ) {
+                if( 'h' in color ) this.h = color.h;
+                if( 's' in color ) this.s = color.s;
+                if( 'l' in color ) this.l = color.l;
 
-                    this.hsl = { h: color.h, s: color.s, l: color.l };
-                } else {
-
-                    if( 'h' in color ) this.h = color.h;
-                    if( 's' in color ) this.s = color.s;
-                    if( 'l' in color ) this.l = color.l;
-                }
-
-                if( 'c' in color && 'y' in color && 'm' in color && 'k' in color ) {
-
-                    this.cymk = { c: color.c, y: color.y, m: color.m, k: color.k };
-                } else {
-
-                    if( 'c' in color ) this.c = color.c;
-                    if( 'y' in color ) this.y = color.y;
-                    if( 'm' in color ) this.m = color.m;
-                    if( 'k' in color ) this.k = color.k;
-                }
+                if( 'c' in color ) this.c = color.c;
+                if( 'y' in color ) this.y = color.y;
+                if( 'm' in color ) this.m = color.m;
+                if( 'k' in color ) this.k = color.k;
 
                 if( 'rgba' in color ) this.rgba = color.rgba;
                 if( 'rgb' in color ) this.rgb = color.rgb;
-
                 if( 'hsl' in color ) this.hsl = color.hsl;
-
+                if( 'hsla' in color ) this.hsla = color.hsla;
                 if( 'cymk' in color ) this.cymk = color.cymk;
-
             }
         }
 
@@ -174,7 +150,7 @@ Color.prototype = {
     // HSL operations
     hue: function( deg ) {
 
-        this.h = deg;
+        this.h = deg / 360;
         return this;
     },
     saturate: function( factor ) {
@@ -263,9 +239,9 @@ Utils.merge( Color, {
 
     rgbaPattern: /rgb[a]?\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)(?:\s*,\s*([0-9]+))?\s*\)/i,
 
-    hslPattern: /hsl\(\s*([0-9]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*\)/i,
+    hslaPattern: /hsl[a]\(\s*([0-9]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)(?:\s*,\s*([0-9]+))?\s*\)/i,
 
-    cymkPattern: /cymk\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*\)/i,
+    cmykPattern: /cmyk\(\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*,\s*([0-9.]+)\s*\)/i,
     
     isShortHex: function( val ) { return !!this.shortHexPattern.test( val ); },
     
@@ -273,9 +249,9 @@ Utils.merge( Color, {
     
     isRgba: function( val ) { return !!this.rgbaPattern.test( val ); },
     
-    isHsl: function( val ) { return !!this.hslPattern.test( val ); },
+    isHsla: function( val ) { return !!this.hslaPattern.test( val ); },
     
-    isCymk: function( val ) { return !!this.cymkPattern.test( val ); },
+    isCmyk: function( val ) { return !!this.cmykPattern.test( val ); },
     
     extractRgbaString: function( str ) {
 
@@ -289,18 +265,19 @@ Utils.merge( Color, {
         };
     },
             
-    extractHslString: function( str ) {
+    extractHslaString: function( str ) {
         
-        var result = this.hslPattern.exec( str );
+        var result = this.hslaPattern.exec( str );
         
         return { 
             h: parseInt( result[ 1 ] ), 
             s: parseFloat( result[ 2 ] ), 
-            l: parseFloat( result[ 3 ] )
+            l: parseFloat( result[ 3 ] ),
+            a: typeof result[ 4 ] !== 'undefined' ? parseInt( result[ 4 ] ) : 0 
         };
     },
             
-    extractCymkString: function( str ) {
+    extractCmykString: function( str ) {
 
         var result = this.cymkPattern.exec( str );
         
@@ -337,59 +314,67 @@ Utils.merge( Color, {
 
         return '#' + ( ( 1 << 24 ) + ( r << 16 ) + ( g << 8 ) + b ).toString( 16 ).slice( 1 );
     },
+    
+    _shiftValue: function( value, max ) {
+        
+        max = max || 1;
+        
+        if( value < 0 )
+            value += max;
+        else if( value > max )
+            value -= max;
+        
+        return value;
+    },
+    
+    _hueToRgb: function( v1, v2, vH ) {
+        
+        hue = this._shiftValue( vH );
+        
+        
+       if ( ( 6 * vH ) < 1 ) 
+           return v1 + ( v2 - v1 ) * 6 * vH;
+        
+       if ( ( 2 * vH ) < 1 ) 
+           return v2;
+        
+       if ( ( 3 * vH ) < 2 )
+           return v1 + ( v2 - v1 ) * ( ( 2 / 3 ) - vH ) * 6;
+        
+       return v1;
+    },
 
     hslToRgb: function( h, s, l ){
         
-        var hue = 6 - ( -h % 6 ) / 60,
-            saturation = s,
-            lightness = l,
-            
-            c = ( 1 - Math.abs( ( 2 * lightness ) - 1 ) ) * saturation,
-            x = c * ( 1 - Math.abs( ( h % 2 ) - 1 ) ),
-            m = l - c / 2,
-            
-            r = 0,
+        var r = 0,
             g = 0,
-            b = 0;
+            b = 0,
             
-        if( hue < 0 ) 
-            hue = 6 - ( -hue % 6 );
-        
-        hue %= 6;
-
-        if( hue < 1 ) {
-            r = c;
-            g = x;
-            b = 0;
-        } else if( hue < 2 ) {
-            r = x;
-            g = c;
-            b = 0;
-        } else if( hue < 3 ) {
-            r = 0;
-            g = c;
-            b = x;
-        } else if( hue < 4 ) {
-            r = 0;
-            g = x;
-            b = c;
-        } else if( hue < 5 ) {
-            r = x;
-            g = 0;
-            b = c;
+            v1 = 0,
+            v2 = 0;
+            
+        if( s === 0 ) {
+            
+           r = l * 255;
+           g = l * 255;
+           b = l * 255;
         } else {
-            r = c;
-            g = 0;
-            b = x;
+            
+           if ( l < 0.5 ) 
+               v1 = l * ( 1 + s );
+           else
+               v2 = ( l + s ) - ( s * l );
+        
+           v1 = 2 * l - v2;
+        
+           r = 255 * this._hueToRgb( v1, v2, h + ( 1 / 3 ) );
+           g = 255 * this._hueToRgb( v1, v2, h );
+           b = 255 * this._hueToRgb( v1, v2, h - ( 1 / 3 ) );
         }
-
-        r = Math.round( ( r + m ) * 255 );
-        g = Math.round( ( g + m ) * 255 );
-        b = Math.round( ( b + m ) * 255 );
-
+        
         return { r: r, g: g, b: b };
     },
-    
+        
     rgbToHsl: function( r, g, b ) {
         
         var red = r / 255,
@@ -398,6 +383,7 @@ Utils.merge( Color, {
             max = Math.max( r, g, b ),
             min = Math.min( r, g, b ),
             diff = max - min,
+            halfDiff = ( diff / 2 )
             h = 0,
             s = 0,
             l = ( max + min ) / 2;
@@ -406,23 +392,26 @@ Utils.merge( Color, {
             
             s = l > 0.5 ? diff / ( 2 - max - min ) : diff / ( max + min );
             
+            var diffRed = ( ( ( max - red ) / 6 ) + halfDiff ) / diff,
+                diffGreen = ( ( ( max - green ) / 6 ) + halfDiff ) / diff,
+                diffBlue = ( ( ( max - blue ) / 6 ) + halfDiff ) / diff;
+            
             switch( max ) {
                 case red:
                     
-                    h = ( green - blue ) / diff + ( green < blue ? 6 : 0 );
+                    h = diffBlue - diffGreen;
                     break
                 case green:
                     
-                    h = ( blue - red ) / diff + 2;
+                    h = ( 1 / 3 ) + diffRed - diffBlue;
                     break
                 case blue:
                     
-                    h = ( red - green ) / diff + 4;
+                    h = ( 2 / 3 ) + diffGreen - diffRed;
                     break
             }
             
-            h /= 6;
-            h = Math.floor( h * 360 );
+            h = this._shiftValue( h );
         }
         
         
