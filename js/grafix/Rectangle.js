@@ -12,6 +12,12 @@ Rectangle.prototype = Utils.extend( Shape, {
         return Utils.clone( Rectangle, this );
     },
 
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Rectangle'; },
+
     set: function( x, y, width, height, deep ) {
         
         Shape.prototype.set.call( this, x, y, deep );

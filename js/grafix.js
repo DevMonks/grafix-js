@@ -21,6 +21,7 @@ Keyboard
 Input
 Stage
 Group
+Path
 Line
 Bitmap
 Text
@@ -39,6 +40,7 @@ var Grafix = (function( undefined ) {
 
     var Export = {
         Animation: Animation,
+        Bitmap: Bitmap,
         Color: Color,
         Circle: Circle,
         Easing: Easing,
@@ -46,14 +48,14 @@ var Grafix = (function( undefined ) {
         EventArgs: EventArgs,
         EventHandler: EventHandler,
         Filter: Filter,
+        Grid: Grid,
+        Group: Group,
         Input: Input,
         InputBase: InputBase,
         Keyboard: Keyboard,
         Line: Line,
         Mouse: Mouse,
-        Grid: Grid,
-        Group: Group,
-        Bitmap: Bitmap,
+        Path: Path,
         Point: Point,
         Point3D: Point3D,
         Random: Random,

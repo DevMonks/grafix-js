@@ -31,8 +31,7 @@ var Stage = function( canvas, maxFps ) {
     this._input = new Input( this._canvas );
 
     // Set css size
-    //We can't use the set() method here, since the setter wouldn't be called
-    this.size = this.attributeSize;
+    this.cssSize = this.attributeSize;
 
     this._initializeCanvas();
 
@@ -42,6 +41,12 @@ var Stage = function( canvas, maxFps ) {
 };
 
 Stage.prototype = Utils.extend( Shape, {
+
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Stage'; },
 
     start: function ( force ) {
         if ( this._isUpdating && !force ) {

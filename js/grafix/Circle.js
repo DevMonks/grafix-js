@@ -31,6 +31,12 @@ Circle.prototype = Utils.extend( Shape, {
         ]);
     },
 
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Circle'; },
+
     get radius() { return this.prop( 'radius' ); },
     set radius( value ) { return this.prop( 'radius', value ); },
 
@@ -48,7 +54,7 @@ Circle.prototype = Utils.extend( Shape, {
 
         if ( Utils.isObject( x ) ) {
 
-            Shape.prototype.set.call( this, x );
+            Shape.prototype.set.call( this, x, y );
 
             if ( x.radius ) this.radius = x.radius;
             if ( x.startAngle ) this.startAngle = x.startAngle;

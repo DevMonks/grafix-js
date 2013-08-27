@@ -53,6 +53,12 @@ Text.prototype = Utils.extend( Rectangle, {
             'fontSize'
         ]);
     },
+
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Stage'; },
     
     get string() { return this.prop( 'string' ); },
     set string( value ) { return this.prop( 'string', value ); },
@@ -213,8 +219,10 @@ Text.prototype = Utils.extend( Rectangle, {
                         
             canvasContext[ style + 'Text' ]( line, textRect.x, textRect.y );
 
-            console.log('drawText(', i, ') textRect:', textRect.toString(), ', lineRect:', lineRect.toString());
+            //console.log('drawText(', i, ') textRect:', textRect.toString(), ', lineRect:', lineRect.toString());
         }
+
+        this._invalid = false;
         
         canvasContext.restore();
 

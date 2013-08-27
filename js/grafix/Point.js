@@ -24,6 +24,12 @@ Point.prototype = Utils.extend( ShapeBase, {
         ]);
     },
 
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Point'; },
+
     get x() { return this.prop( 'x' ); },
     set x( value ) { return this.prop( 'x', value ); },
 

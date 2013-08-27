@@ -37,6 +37,12 @@ Grid.prototype = Utils.extend( Rectangle, {
         ]);
     },
 
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Grid'; },
+
     get columns() { return this.prop( 'columns' ); },
     set columns( value ) { return this.prop( 'columns', value ); },
 
@@ -264,12 +270,6 @@ Grid.prototype = Utils.extend( Rectangle, {
     clear: function( canvasContext ) {
 
         this._drawGrid( canvasContext );
-    },
-            
-    _draw: function( context, config ) {
-
-        // Let the base class do its magic
-        Shape.prototype._draw.call( this, context, config );
     },
    
             

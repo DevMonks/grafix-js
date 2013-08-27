@@ -19,6 +19,12 @@ Animation.defaults = {
 };
 
 Animation.prototype = Utils.extend( EventBase, {
+
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Animation'; },
     
     set: function( context, keyFrames, duration, easing ) {
         

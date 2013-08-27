@@ -29,6 +29,12 @@ Filter.defaults = {
 Filter._static = {};
 
 Filter.prototype = {
+
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Filter'; },
     
     get name() { return this._name; },
     set name( value ) { this._name = value; },

@@ -94,7 +94,17 @@ var Utils = {
 
     isType: function( val, type ) {
 
-        return typeof val === type;
+        var typeName = typeof val;
+        if( typeName === type ) {
+            return true;
+        }
+        else if( typeName === 'function' ) {
+            return val instanceof type;
+        }
+        else if( typeName === 'object' && val !== null && ( 'className' in val ) ) {
+            return val.className === type;
+        }
+        return false;
     },
 
     isUndefined: function( val, type ) {

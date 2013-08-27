@@ -20,6 +20,12 @@ Point3D.prototype = Utils.extend( Point, {
         ]);
     },
 
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Point3D'; },
+
     get z() { return this.prop( 'z' ); },
     set z( value ) { return this.prop( 'z', value ); },
 

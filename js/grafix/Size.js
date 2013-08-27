@@ -41,11 +41,11 @@ Size.prototype = Utils.extend( ShapeBase, {
             if ( 'height' in width ) {
                 this.height = width.height;
             }
-        } else if ( Utils.isNumeric( width ) && typeof height === 'undefined' ) {
+        } else if ( Utils.isNumeric( width ) && Utils.isUndefined( height ) ) {
 
             var fac = parseFloat( width );
             this.width = this.height = fac;
-        } else if ( typeof width !== 'undefined' ) {
+        } else if ( Utils.isUndefined( width ) === false ) {
 
             this.width = parseInt( width );
         }

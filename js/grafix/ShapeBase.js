@@ -64,6 +64,12 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         ];
     },
 
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'ShapeBase'; },
+
     get invalid() { return this.prop( 'invalid' ); },
     set invalid( value ) {
 
@@ -195,10 +201,7 @@ ShapeBase.prototype = Utils.extend( EventBase, {
      * Overwrites the currently stored filters with the given one
      * @param {Filter} value
      */
-    set filter( value ) {
-
-        this.filters = [ value ];
-    },
+    set filter( value ) { if( value ) { this.filters = [ value ]; } },
 
     /**
      * Gets the stored arry of filters.
@@ -223,11 +226,16 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         }
 
         var width = this.width,
-            height = this.height,
-            ctx = Utils.getTempCanvasContext( width, height );
+            height = this.height;
 
-        // The object's raw data will be stored without filters
-        var drawConfig = { filter: false };
+        if( width <= 0 || height <= 0 ) {
+            return [];
+        }
+
+        var ctx = Utils.getTempCanvasContext( width, height),
+            // The object's raw data will be stored without filters
+            drawConfig = { filter: false };
+
         this._draw( ctx, drawConfig );
 
         return this._rawData = ctx.getImageData( 0, 0, width, height );
@@ -248,10 +256,13 @@ ShapeBase.prototype = Utils.extend( EventBase, {
                 var filter = this.filters[ i ];
                 // Function or {Filter} object
                 if( Utils.isFunction( filter ) ) {
-
-                    // The function will return our {Filter}
+                    // The function will return the {Filter} object
                     filter = filter();
                 }
+                if( !filter || !( 'process' in filter ) ) {
+                    continue;
+                }
+
 
                 // Instance of {Filter}
                 filter.process( data );
@@ -262,27 +273,25 @@ ShapeBase.prototype = Utils.extend( EventBase, {
     },
 
     get attributeSize() {
-        return new Size(
-            parseInt( this.canvas.getAttribute( 'width' ) ),
-            parseInt( this.canvas.getAttribute( 'height' ) )
-        );
+        return new Size( parseInt( this.canvas.getAttribute( 'width' ) ), parseInt( this.canvas.getAttribute( 'height' ) ) );
     },
     set attributeSize( value ) {
-        if ( value.width && this.prop( 'width', value.width ) !== false ) {
+        if ( ( 'width' in value ) && this.prop( 'width', value.width ) !== false ) {
             this.canvas.setAttribute( 'width', value.width );
         }
-        if ( value.height && this.prop( 'height', value.height ) !== false ) {
+        if ( ( 'height' in value ) && this.prop( 'height', value.height ) !== false ) {
             this.canvas.setAttribute( 'height', value.height );
         }
     },
 
-    get size() {
-        return new Size(
-            this.canvas.style.width !== '' ? parseInt( this.canvas.style.width ) : this.attributeSize.width,
-            this.canvas.style.height !== '' ? parseInt( this.canvas.style.height ) : this.attributeSize.height
-        );
+    get cssSize() {
+
+        // @TODO: Fallback to attribute size, good idea?
+        var width = this.canvas.style.width !== '' ? parseInt( this.canvas.style.width ) : this.attributeSize.width,
+            height = this.canvas.style.height !== '' ? parseInt( this.canvas.style.height ) : this.attributeSize.height;
+        return new Size( width, height );
     },
-    set size( value ) {
+    set cssSize( value ) {
 
         if ( value.width && this.prop( 'width', value.width ) !== false ) {
             this.canvas.style.width = value.width + 'px';
@@ -442,7 +451,9 @@ ShapeBase.prototype = Utils.extend( EventBase, {
         if( !this._filters ) {
             this._filters = [];
         }
-        this.filters.push( filter );
+        if( filter != null ) {
+            this.filters.push( filter );
+        }
 
         return this;
     },
@@ -492,8 +503,12 @@ ShapeBase.prototype = Utils.extend( EventBase, {
                 //        They will get removed in the original object on-clone right now - I guess
                 this.addChild( args.children );
             }
-            if( 'canvas' in args ) { this.canvas = args.canvas; }
-            if( ('parent' in args) ) { this.parent = args.parent; }
+            // @TODO/@FIX: This is strange - shape.set( new Rectangle() )
+            //             The temp rectangle HAS a 'canvas' property
+            //             The access to the property leads to create a new canvas
+            //             (due our auto-create-canvas-if-not-present _initializeCanvas)
+            //if( 'canvas' in args ) { this.canvas = args.canvas; }
+            if( 'parent' in args ) { this.parent = args.parent; }
             if( 'filters' in args ) { this.filters = args.filters; }
             if( 'filter' in args ) { this.filter = args.filter; }
         }
@@ -505,16 +520,35 @@ ShapeBase.prototype = Utils.extend( EventBase, {
     _initializeCanvas: function() {
 
         // Create a new canvas
-        if( !this.canvas ) {
-            this.canvas = document.createElement( 'canvas' );
-            this.canvas.setAttribute( 'width', 'width' in this ? this.width : 0 );
-            this.canvas.setAttribute( 'height', 'height' in this ? this.height : 0 );
+        // Note: We access the lazy-load getter which will also take the canvas from its parent, if present
+        if( !this._canvas ) {
+            this._canvas = document.createElement( 'canvas' );
+            this.attributeSize = new Size( 'width' in this ? this.width : 0, 'height' in this ? this.height : 0 );
         }
 
         // High pixel-density display optimization (e.g. Retina)
-        if ( ('devicePixelRatio' in window) && window.devicePixelRatio !== 1 ) {
-            this.attributeSize = this.attributeSize.mul( new Size( window.devicePixelRatio, window.devicePixelRatio ) );
-            this.canvasContext.scale( window.devicePixelRatio, window.devicePixelRatio );
+        // @See: http://www.html5rocks.com/en/tutorials/canvas/hidpi/
+        // @TODO: Fallback for window, rework in node-js structure step
+        var context = this.canvasContext,
+            devicePixelRatio = window.devicePixelRatio || 1,
+            backingStoreRatio =
+                context.webkitBackingStorePixelRatio ||
+                context.mozBackingStorePixelRatio ||
+                context.msBackingStorePixelRatio ||
+                context.oBackingStorePixelRatio ||
+                context.backingStorePixelRatio || 1,
+            scaleRatio = devicePixelRatio / backingStoreRatio;
+
+        console.log( 'devicePixelRatio:', devicePixelRatio, 'backingStoreRatio:', backingStoreRatio );
+
+        if ( devicePixelRatio !== backingStoreRatio ) {
+            var oldAttributeSize = this.attributeSize;
+
+            // Note: Since attributeSize is a virtual property, we have to set it that way
+            this.attributeSize = this.attributeSize.mul( scaleRatio );
+            this.cssSize = oldAttributeSize;
+
+            this.canvasContext.scale( scaleRatio, scaleRatio );
         }
 
     },

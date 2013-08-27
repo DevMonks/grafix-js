@@ -7,9 +7,18 @@ var EventBase = function () {
 };
 
 EventBase.prototype = {
+
     get eventCallbacks() { return this.prop( 'eventCallbacks' ); },
 
     get reportsChanges() { return this.prop( 'reportsChanges' ); },
+
+    /**
+     * Returns the name of this class, usefull for type checks.
+     *
+     * @TODO: This is more a hack because either typeof or instanceof works on our object-classes
+     * @returns {string}
+     */
+    get className() { return 'EventBase'; },
 
     /**
      *
@@ -222,7 +231,7 @@ EventBase.prototype = {
      * If the event returns {false} no update will be done.
      *
      * @param {string} name
-     * @param {*} value
+     * @param {*} [value]
      * @returns {self|boolean|*}
      */
     prop: function( name, value ) {

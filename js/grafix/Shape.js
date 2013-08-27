@@ -88,6 +88,12 @@ Shape.prototype = Utils.extend( ShapeBase, {
         ]);
     },
 
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Shape'; },
+
     get x() { return this.prop( 'x' ); },
     set x( value ) { this.prop( 'x', value ); },
 
@@ -252,6 +258,17 @@ Shape.prototype = Utils.extend( ShapeBase, {
     },
 
     get rect() { return new Rectangle( this.x, this.y, this.width, this.height ); },
+    set rect( value ) {
+
+        if( Utils.isObject( value ) ) {
+            if( 'x' in value ) { this.x = value.x; }
+            if( 'y' in value ) { this.y = value.y; }
+            if( 'width' in value ) { this.width = value.width; }
+            if( 'height' in value ) { this.height = value.height; }
+        } else {
+            throw "Invalid type of value for property Shape.rect: " + value;
+        }
+    },
 
     get rectScaled() { return new Rectangle( this.x, this.y, this.width * this.scaleWidth, this.height * this.scaleHeight ); },
 
@@ -330,6 +347,9 @@ Shape.prototype = Utils.extend( ShapeBase, {
             }
             if( 'size' in x ) {
                 this.size = x.size;
+            }
+            if( 'rect' in x ) {
+                this.rect = x.rect;
             }
             if( 'x' in x ) {
                 this.x = x.x;
@@ -890,6 +910,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
             return this;
         }
 
+        //console.log(this.className + '::fill @ ', this.color, this.x, this.y, this.width, this.height );
         context.fillRect( this.x, this.y, this.width, this.height );
 
         return this;
@@ -908,6 +929,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
             return this;
         }
 
+        //console.log(this.className + '::stroke @ ', this.color, this.x, this.y, this.width, this.height );
         context.strokeRect( this.x, this.y, this.width, this.height );
 
         return this;
@@ -917,6 +939,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
         // @TODO: No use-case for filtered draw here?
         context = context || this.canvasContext;
+        //console.log(this.className + '::clear @ ', this.color, this.x, this.y, this.width, this.height );
         context.clearRect( this.x, this.y, this.width, this.height );
     },
 

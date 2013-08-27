@@ -47,6 +47,12 @@ Bitmap.prototype = Utils.extend( Rectangle, {
         ]);
     },
 
+    /**
+     * Returns the name of this class, usefull for type checks.
+     * @returns {string}
+     */
+    get className() { return 'Bitmap'; },
+
 
     get cropX() { return this.prop( 'cropX' ); },
     set cropX( value ) { return this.prop( 'cropX', value ); },

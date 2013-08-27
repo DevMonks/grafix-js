@@ -28,7 +28,7 @@
                 align: 'center center',
                 drawStyle: 'stroke',
                 color: Grafix.colors.blue
-            } ).set( { size: stage.size } );
+            } ).set( { size: stage.cssSize } );
 
             stage = Grafix.stage( '#stage' ).set( { color: Grafix.colors.limegreen } );
 
@@ -37,7 +37,7 @@
                 align: 'center center',
                 drawStyle: 'stroke',
                 color: Grafix.colors.blue
-            } ).set( stage.size );
+            } ).set( stage.cssSize );
 
             stage
                 .addChild( grid )
