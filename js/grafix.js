@@ -85,6 +85,8 @@ var Grafix = (function( undefined ) {
             namespace = namespace || window;
 
             Utils.merge( namespace, Export );
+            
+            return Export;
         }
     };
     
