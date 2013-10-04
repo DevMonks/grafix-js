@@ -119,36 +119,39 @@ Keyboard.prototype = Utils.extend( InputBase, {
 
 
     init: function ( target ) {
-        var keyboard = this;
 
-        target.addEventListener( 'keydown', function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-
-            var code = e.type == 'keydown' ? e.keyCode : (e.button == 2 ? Keyboard.KEY.MOUSE2 : Keyboard.KEY.MOUSE1);
-            keyboard.keyStates[code] = true;
-            keyboard.locked[code] = true;
-
-            // Trigger callbacks
-            if ( keyboard.has('down') ) {
-                keyboard.trigger( 'down', { key: code } );
-            }
-        }, false );
-
-        target.addEventListener( 'keyup', function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-
-            var code = e.type == 'keyup' ? e.keyCode : (e.button == 2 ? Keyboard.KEY.MOUSE2 : Keyboard.KEY.MOUSE1);
-            keyboard.keyStates[code] = false;
-            keyboard.locked[code] = false;
-
-            // Trigger callbacks
-            if ( keyboard.has('up') ) {
-                keyboard.trigger( 'up', { key: code } );
-            }
-        }, false );
+        target.addEventListener( 'keydown', this._handleKeydown.bind( this ), false );
+        target.addEventListener( 'keyup', this._handleKeyup.bind( this ), false );
+        // Handle also clicks from mouse as a key press
+        target.addEventListener( 'mousedown', this._handleKeydown.bind( this ), false );
+        target.addEventListener( 'mouseup', this._handleKeyup.bind( this ), false );
     },
+
+
+    _handleKeydown: function( e ) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        var code = this.getKeyFromEvent( e );
+        this.keyStates[ code ] = true;
+        this.locked[ code ] = true;
+
+        // Trigger callbacks
+        this.trigger( 'down', { key: code } );
+    },
+
+    _handleKeyup: function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        var code = this.getKeyFromEvent( e );
+        this.keyStates[ code ] = false;
+        this.locked[ code ] = false;
+
+        // Trigger callbacks
+        this.trigger( 'up', { key: code } );
+    },
+
 
     clear: function () {
         // Store last pressed
@@ -233,6 +236,17 @@ Keyboard.prototype = Utils.extend( InputBase, {
      */
     onUp: function ( callback ) {
         return this.handleKeyEvent( 'up', { key: callback } );
+    },
+
+
+    getKeyFromEvent: function( e ) {
+
+        // Non-mouse click event
+        if( e.type == 'keydown' ) {
+           return e.keyCode;
+        }
+
+        return (e.button == 2 ? Keyboard.KEY.MOUSE2 : Keyboard.KEY.MOUSE1);
     }
 
 } );

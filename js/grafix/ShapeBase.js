@@ -592,22 +592,26 @@ ShapeBase.prototype = Utils.extend( EventBase, {
 
     draw: function( context, forceDraw, config ) {
 
-        // Update my states, will also update childrens, if I'm not invalid
+        // Update my states, will also update childrens, if this shape is still valid
         this.update();
 
-        // If we got no context to draw, get our own
-        context = context || this.canvasContext;
+        // Not visible = no draw
+        if( this.visible ) {
 
-        context.save();
+            // If we got no context to draw, get our own
+            context = context || this.canvasContext;
 
-        // Draw this shape
-        if( this.invalid || forceDraw ) {
+            context.save();
 
-            // If parent is dirty, childs will need a re-draw too
-            this._draw( context, config );
+            // Draw this shape
+            if( this.invalid || forceDraw ) {
+
+                // If parent is dirty, childs will need a re-draw too
+                this._draw( context, config );
+            }
+
+            context.restore();
         }
-
-        context.restore();
 
         // Note: We dont want to set our parent too, so set the property directly
         this._invalid = false;

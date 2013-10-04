@@ -58,7 +58,7 @@ Mouse.prototype = Utils.extend( InputBase, {
             } );
 
             // Trigger callbacks
-            mouse.on( 'move' );
+            mouse.trigger( 'move' );
         } );
 
         this._target.addEventListener( 'mouseout', function ( e ) {
@@ -66,9 +66,11 @@ Mouse.prototype = Utils.extend( InputBase, {
             e.preventDefault();
 
             // @TODO: Shouldnt this DOM event trigger 'mousemove' anyways? Test this!
-            mouse.on( 'move' );
+            mouse.trigger( 'move' );
         } );
 
+        // Experimental: Handled also in Keyboard
+        /*
         this._target.addEventListener( 'mousedown', function ( e ) {
             e.stopPropagation();
             e.preventDefault();
@@ -77,7 +79,7 @@ Mouse.prototype = Utils.extend( InputBase, {
             mouse.locked[ e.which ] = true;
 
             // Trigger callbacks
-            mouse.on( 'down', { button: e.which } );
+            mouse.trigger( 'down', { button: e.which } );
         } );
 
         this._target.addEventListener( 'mouseup', function ( e ) {
@@ -88,8 +90,9 @@ Mouse.prototype = Utils.extend( InputBase, {
             mouse.locked[ e.which ] = false;
 
             // Trigger callbacks
-            mouse.on( 'up', { button: e.which } );
+            mouse.trigger( 'up', { button: e.which } );
         } );
+        */
 
         this._target.addEventListener( 'click', function ( e ) {
             e.stopPropagation();
@@ -98,7 +101,7 @@ Mouse.prototype = Utils.extend( InputBase, {
             mouse.clickStates[ e.which ] = true;
 
             // Trigger callbacks
-            mouse.on( 'click', { button: e.which } );
+            mouse.trigger( 'click', { button: e.which } );
         } );
 
         this._target.addEventListener( 'mousewheel', function ( e ) {
@@ -110,7 +113,7 @@ Mouse.prototype = Utils.extend( InputBase, {
             mouse.buttonStates[ code ] = true;
 
             // Trigger callbacks
-            mouse.on( 'wheel' + codeName, { wheel: e.wheel || e.wheelDelta } );
+            mouse.trigger( 'wheel' + codeName, { wheel: e.wheel || e.wheelDelta } );
         });
 
         return this;

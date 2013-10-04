@@ -18,6 +18,8 @@ var Shape = function( x, y ) {
     this._width = 0;
     this._height = 0;
 
+    this._visible = true;
+
     // Style properties
     this._offsetX = 0;
     this._offsetY = 0;
@@ -69,6 +71,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
             'y',
             'width',
             'height',
+            'visible',
             'angle',
             'skewX',
             'skewY',
@@ -105,6 +108,9 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
     get height() { return this.prop( 'height' ); },
     set height( value ) { this.prop( 'height', value ); },
+
+    get visible() { return this.prop( 'visible' ); },
+    set visible( value ) { this.prop( 'visible', value ); },
 
     get angle() { return this.prop( 'angle' ); },
     set angle( value ) { this.prop( 'angle', value ); },
@@ -362,6 +368,9 @@ Shape.prototype = Utils.extend( ShapeBase, {
             }
             if( 'height' in x ) {
                 this.height = x.height;
+            }
+            if( 'visible' in x ) {
+                this.visible = x.visible;
             }
             if( 'offset' in x ) {
                 this.offset = x.offset;
@@ -658,9 +667,8 @@ Shape.prototype = Utils.extend( ShapeBase, {
         return new Animation( this, props, {
             duration: duration || Animation.defaults.duration,
             completed: callback || function() {},
-            easing: easing || Animation.defaults.easing,
-            start: true
-        } );
+            easing: easing || Animation.defaults.easing
+        }).start();
     },
 
 
@@ -779,6 +787,21 @@ Shape.prototype = Utils.extend( ShapeBase, {
     },
 
 
+    show: function() {
+
+        //console.log( this.className + '::show() on #', this.name );
+        this.visible = true;
+        return this;
+    },
+
+    hide: function() {
+
+        //console.log( this.className + '::hide() on #', this.name );
+        this.visible = false;
+        return this;
+    },
+
+
     /**
      * Executed before a draw() happens, should update inner properties and handle input states
      *
@@ -791,9 +814,9 @@ Shape.prototype = Utils.extend( ShapeBase, {
 
         if( input ) {
             // Only trigger new mouseMove() if the user moved
-            if( this._lastPositions.mouse.equals(input.mouse.position) === false ) {
+            if( this._lastPositions.mouse.equals( input.mouse.position ) === false ) {
                 // Store last used/seen position
-                this._lastPositions.mouse.set(input.mouse.position);
+                this._lastPositions.mouse.set( input.mouse.position );
 
                 if( this.contains( input.mouse.position ) ) {
 
@@ -813,7 +836,7 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 }
             }
 
-            if( input.keyboard.isDown(Keyboard.KEY.MOUSE1) && this._isMouseDragging === false ) {
+            if( input.keyboard.isDown( Keyboard.KEY.MOUSE1 ) && this._isMouseDragging === false ) {
                 var dragLazyness = this._mouseDragLazyness || 1;
 
                 if( this._lastPositions.mouseDown.distanceTo( input.mouse.position ) > dragLazyness ) {
@@ -828,24 +851,25 @@ Shape.prototype = Utils.extend( ShapeBase, {
             }
 
 
-            if( input.mouse.isDown(Keyboard.KEY.MOUSE1) || input.mouse.isDown(Keyboard.KEY.MOUSE2) ) {
+            if( input.keyboard.isDown( Keyboard.KEY.MOUSE1 ) || input.keyboard.isDown( Keyboard.KEY.MOUSE2 ) ) {
 
                 if( this.contains( input.mouse.position ) ) {
+
                     // @TODO: Whats about other mouse buttons? This would handle everything as right button
-                    var btn = input.mouse.isDown(Keyboard.KEY.MOUSE1) ? Keyboard.KEY.MOUSE1 : Keyboard.KEY.MOUSE2;
+                    var btn = input.keyboard.isDown(Keyboard.KEY.MOUSE1) ? Keyboard.KEY.MOUSE1 : Keyboard.KEY.MOUSE2;
 
                     this.mouseDown( btn );
-                    this._lastPositions.mouseDown.set(input.mouse.position);
-
+                    this._lastPositions.mouseDown.set( input.mouse.position );
                 }
             }
 
-            else if( input.mouse.isUp(Keyboard.KEY.MOUSE1) || input.mouse.isUp(Keyboard.KEY.MOUSE2) ) {
+            else if( input.keyboard.isUp( Keyboard.KEY.MOUSE1 ) || input.keyboard.isUp( Keyboard.KEY.MOUSE2 ) ) {
+
                 // @TODO: Whats about other mouse buttons? This would handle everything as right button
-                var btn = input.mouse.isUp(Keyboard.KEY.MOUSE1) ? Keyboard.KEY.MOUSE1 : Keyboard.KEY.MOUSE2;
+                var btn = input.keyboard.isUp(Keyboard.KEY.MOUSE1) ? Keyboard.KEY.MOUSE1 : Keyboard.KEY.MOUSE2;
 
                 this.mouseUp( btn );
-                this._lastPositions.mouseUp.set(input.mouse.position);
+                this._lastPositions.mouseUp.set( input.mouse.position );
 
                 if( this._isMouseDragging !== false ) {
                     this.mouseDrop( this._isMouseDragging );
@@ -855,7 +879,6 @@ Shape.prototype = Utils.extend( ShapeBase, {
                 if( this.contains( input.mouse.position ) ) {
 
                     this.mouseClick( btn );
-
                 }
             }
 
@@ -976,7 +999,8 @@ Shape.prototype = Utils.extend( ShapeBase, {
             return this.on( event, callback );
         }
 
-        return this.on( event, { eventName: event, context: this, mouse: this._input } );
+        //console.log( this.className + ': triggermouse event ', event );
+        return this.on( event, { eventName: event, context: this, input: this._input, mouse: this._input.mouse } );
     },
 
     mouseMove: function( callback ) {

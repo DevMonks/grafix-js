@@ -7,4 +7,4 @@
 <a href="bitmaps.php">Bitmaps</a>&nbsp;|&nbsp;
 <a href="animations.php">Animations</a>&nbsp;|&nbsp;
 <a href="easings.php">Easings</a>&nbsp;|&nbsp;
-<a href="ultrapong.html">U-u-ultrapong</a>
+<a href="ultrapong.php">U-u-ultrapong</a>

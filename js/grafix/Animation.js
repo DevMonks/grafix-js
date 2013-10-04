@@ -70,7 +70,7 @@ Animation.prototype = Utils.extend( EventBase, {
                 this._easing = duration.easing;
 
             if( 'parent' in duration )
-                this.easing = duration.parent;
+                this.parent = duration.parent;
             
             if( 'start' in duration )
                 this.start( duration.start );
@@ -95,7 +95,7 @@ Animation.prototype = Utils.extend( EventBase, {
             
             if( 'resumed' in duration )
                 this.resumed( duration.resumed );
-            
+
             if( 'completed' in duration )
                 this.completed( duration.completed );
             
@@ -222,10 +222,10 @@ Animation.prototype = Utils.extend( EventBase, {
         if( this._iv )
             return this;
         
-        this.on( 'resume', { animation: this, context: this._context } );
+        this.trigger( 'resume', { animation: this, context: this._context } );
         this._loop();
         
-        this.on( 'resumed', { animation: this, context: this._context } );
+        this.trigger( 'resumed', { animation: this, context: this._context } );
         
         return this;
     },
@@ -237,6 +237,7 @@ Animation.prototype = Utils.extend( EventBase, {
             
     completed: function( args ) {
 
+        //console.log( 'Animation::completed: trigger callbacks:', this._eventCallbacks[ 'completed' ] );
         return this.on( 'completed', args );
     }
 

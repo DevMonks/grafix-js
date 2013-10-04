@@ -192,7 +192,7 @@ Circle.prototype = Utils.extend( Shape, {
         return Shape.prototype.isEmpty.call( this ) && !this.radius && !this.startAngle && this.endAngle === 360 && this.clockwise;
     },
 
-    rect: function() {
+    bounds: function() {
 
         if( !this._rectInstance ) {
             this._rectInstance = new Rectangle( this.x, this.y, this.radius * 2, this.radius * 2 );
