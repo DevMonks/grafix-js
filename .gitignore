@@ -1,3 +1,6 @@
 /nbproject
 .DS_Store
 Thumbs.db
+.idea
+/js/*.min.js
+/js/*.cached.js

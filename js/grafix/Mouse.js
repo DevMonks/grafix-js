@@ -1,115 +1,201 @@
+var Mouse = function ( target ) {
 
-var Mouse = function( context ) {
+    // Will store current mouse position
+    this._position = new Point;
+    // Will store currently pressed mouse buttons since last clear()
+    this._buttonStates = [];
+    this._lastButtonStates = [];
+    // Will store clicked mouse buttons since last clear()
+    this._clickStates = [];
+    this._lastClickStates = [];
+    this._locked = [];
 
-	this.context = context || window;
-	this.position = new Point;
-	this.moveEvent = new Event( 'mouse-move', this );
-	this.downEvent = new Event( 'mouse-button-down', this );
-	this.upEvent = new Event( 'mouse-button-up', this );
-	this.clickEvent = new Event( 'mouse-button-click', this );
-	this.buttonStates = [];
+    InputBase.call( this, target );
+};
 
-	var mouse = this;
-	this.context.addEventListener( 'mousemove', function( e ) {
+Utils.merge( Mouse, {
+    KEY: {
+        ANY:         -1,
 
-		var offsetX = mouse.context.offsetLeft;
-        var offsetY = mouse.context.offsetTop;
-        /*if( mouse.context.parentNode && ( mouse.context.parentNode.offsetLeft > 0 || mouse.context.parentNode.offsetTop > 0 ) ) {
-            
-            offsetX += mouse.context.parentNode.offsetLeft;
-            offsetY += mouse.context.parentNode.offsetTop;
-        }*/
-        
-        mouse.position.set( { 
-        	x: e.pageX - offsetX, 
-        	y: e.pageY - offsetY 
+        MOUSE1:      -2,
+        MOUSE2:      -3,
+        MOUSE3:      -4,
+        MWHEEL_UP:   -5,
+        MWHEEL_DOWN: -6
+    },
+
+    moduleName: 'Mouse'
+});
+
+Mouse.prototype = Utils.extend( InputBase, {
+
+    get position() { return this._position; },
+    get buttonStates() { return this._buttonStates; },
+    get lastButtonStates() { return this._lastButtonStates; },
+    get clickStates() { return this._clickStates; },
+    get lastClickStates() { return this._lastClickStates; },
+    get locked() { return this._locked; },
+
+
+    init: function (target)  {
+        if (this._initialised) {
+            return this;
+        }
+
+        this._initialised = true;
+
+        var mouse = this;
+        this._target.addEventListener( 'mousemove', function ( e ) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            var offsetX = mouse.target.offsetLeft || 0,
+                offsetY = mouse.target.offsetTop || 0;
+
+            mouse.position.set( {
+                x: e.pageX - offsetX,
+                y: e.pageY - offsetY
+            } );
+
+            // Trigger callbacks
+            mouse.trigger( 'move' );
         } );
 
-        mouse.move();
-	} );
+        this._target.addEventListener( 'mouseout', function ( e ) {
+            e.stopPropagation();
+            e.preventDefault();
 
-	this.context.addEventListener( 'mouseout', function( e ) {
+            // @TODO: Shouldnt this DOM event trigger 'mousemove' anyways? Test this!
+            mouse.trigger( 'move' );
+        } );
 
-		mouse.move();
-	} );
+        // Experimental: Handled also in Keyboard
+        /*
+        this._target.addEventListener( 'mousedown', function ( e ) {
+            e.stopPropagation();
+            e.preventDefault();
 
-	this.context.addEventListener( 'mousedown', function( e ) {
+            mouse.buttonStates[ e.which ] = true;
+            mouse.locked[ e.which ] = true;
 
-		mouse.buttonStates[ e.which ] = true;
+            // Trigger callbacks
+            mouse.trigger( 'down', { button: e.which } );
+        } );
 
-		mouse.down( e.which );
-	} );
+        this._target.addEventListener( 'mouseup', function ( e ) {
+            e.stopPropagation();
+            e.preventDefault();
 
-	this.context.addEventListener( 'mouseup', function( e ) {
+            mouse.buttonStates[ e.which ] = false;
+            mouse.locked[ e.which ] = false;
 
-		mouse.buttonStates[ e.which ] = false;
+            // Trigger callbacks
+            mouse.trigger( 'up', { button: e.which } );
+        } );
+        */
 
-		mouse.up( e.which );
-	} );
+        this._target.addEventListener( 'click', function ( e ) {
+            e.stopPropagation();
+            e.preventDefault();
 
-	this.context.addEventListener( 'click', function( e ) {
+            mouse.clickStates[ e.which ] = true;
 
-		mouse.click( e.which );
-	} );
-};
+            // Trigger callbacks
+            mouse.trigger( 'click', { button: e.which } );
+        } );
 
-Mouse.prototype = {
-	move: function( callback ) {
+        this._target.addEventListener( 'mousewheel', function ( e ) {
+            e.stopPropagation();
 
-		if( Utils.isFunction( callback ) )
-			this.moveEvent.bind( callback );
-		else
-			this.moveEvent.trigger( { 
-            	mouse: this, 
-            	context: this.context,
-            	position: this.position
-            } );
+            var code = (e.wheel > 0 || e.wheelDelta > 0 ? Mouse.KEY.MWHEEL_UP : Mouse.KEY.MWHEEL_DOWN),
+                codeName = (code == Mouse.KEY.MWHEEL_UP ? 'up' : 'down');
 
-		return this;
-	},
-	down: function( callback ) {
+            mouse.buttonStates[ code ] = true;
 
-		if( Utils.isFunction( callback ) )
-			this.downEvent.bind( callback );
-		else
-			this.downEvent.trigger( { 
-            	mouse: this, 
-            	context: this.context,
-            	position: this.position,
-            	buttonStates: this.buttonStates,
-            	button: callback
-            } );
+            // Trigger callbacks
+            mouse.trigger( 'wheel' + codeName, { wheel: e.wheel || e.wheelDelta } );
+        });
 
-		return this;
-	},
-	up: function( callback ) {
+        return this;
+    },
 
-		if( Utils.isFunction( callback ) )
-			this.upEvent.bind( callback );
-		else
-			this.upEvent.trigger( { 
-            	mouse: this, 
-            	context: this.context,
-            	position: this.position,
-            	buttonStates: this.buttonStates,
-            	button: callback
-            } );
+    clear: function () {
+        // Store last pressed
+        this._lastButtonStates = this._buttonStates;
+        this._lastClickStates = this._clickStates;
+        // Free current pressed
+        this._buttonStates = [];
+        this._clickStates = [];
 
-		return this;
-	},
-	click: function( callback ) {
+        return this;
+    },
 
-		if( Utils.isFunction( callback ) )
-			this.clickEvent.bind( callback );
-		else
-			this.clickEvent.trigger( {
-				mouse: this, 
-            	context: this.context,
-            	position: this.position,
-            	buttonStates: this.buttonStates,
-            	button: callback
-			} );
-        
-		return this;
-	}
-};
+    export: function () {
+        return [];
+    },
+
+    /**
+     * Returns true, if the given button was released (mouseup) since last clear()
+     *
+     * @param btn
+     * @returns {boolean}
+     */
+    isUp: function( btn ) {
+        return (btn in this._buttonStates) && this._buttonStates[ btn ] === false;
+    },
+
+    /**
+     * Returns true, if the given button was pressed (mousedown) since last clear()
+     *
+     * @param btn
+     * @returns {boolean}
+     */
+    isDown: function( btn ) {
+        return (
+                ((btn in this._buttonStates) && this._buttonStates[ btn ] === true) ||
+                ((btn in this._locked) && this._locked[ btn ] === true)
+            );
+    },
+
+    /**
+     * Returns true, if the given button was clicked (click) since last clear()
+     *
+     * @param btn
+     * @returns {boolean}
+     */
+    isClicked: function( btn ) {
+        return (btn in this._clickStates) && this._clickStates[ btn ] === true;
+    },
+
+
+    handleMouseEvent: function ( event, callback ) {
+        if ( Utils.isBindable(callback) ) {
+            return this.on( event, callback );
+        }
+
+        var args = Utils.merge( {
+            eventName:    event,
+            mouse:        this
+        }, callback || {} );
+
+        return this.on( event, args );
+    },
+
+    onMove: function ( callback ) {
+        return this.handleMouseEvent( 'move', callback );
+    },
+
+    onDown: function ( callback ) {
+        return this.handleMouseEvent( 'down', { button: callback } );
+    },
+
+    onUp: function ( callback ) {
+        return this.handleMouseEvent( 'up', { button: callback } );
+    },
+
+    onClick: function ( callback ) {
+        return this.handleMouseEvent( 'click', { button: callback } );
+    }
+
+} );
+
