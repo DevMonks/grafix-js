@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-
-var Utils = {
-    
-    merge: function( target, source ) {
-        
-        for( var i in source )
-            target[ i ] = source[ i ];
-
-        return target;
-    },
-
-=======
 /**
  * Common utilities widley used in all {Grafix} classes.
  */
@@ -39,7 +26,6 @@ var Utils = {
         return target;
     },
 
->>>>>>> dev
     extend: function( parent, childMethods ) {
 
         var instance = new parent();
@@ -51,36 +37,6 @@ var Utils = {
         
         return instance;
     },
-<<<<<<< HEAD
-
-    isType: function( val, type ) {
-
-        return typeof val === type;
-    },
-
-    isString: function( val ) {
-
-        return this.isType( val, 'string' );
-    },
-
-    isArray: function( val ) {
-
-        return Array.isArray( val );
-    },
-
-    isObject: function( val ) {
-
-        return this.isType( val, 'object' );
-    },
-
-    isNumber: function( val ) {
-
-        return this.isType( val, 'number' );
-    },
-
-    isNumeric: function( val ) {
-
-=======
 
 
     clone: function( cloneableObject, cloneSource ) {
@@ -178,7 +134,6 @@ var Utils = {
 
     isNumeric: function( val ) {
 
->>>>>>> dev
         return !isNaN( parseFloat( val ) ) && isFinite( val );
     },
 
@@ -191,15 +146,6 @@ var Utils = {
 
         if( array.indexOf )
             return array.indexOf( value ) !== -1;
-<<<<<<< HEAD
-
-        for( var i in array )
-            if( array[ i ] === value )
-                return true;
-
-        return false;
-    },
-=======
 
         for( var i in array )
             if( array[ i ] === value )
@@ -237,7 +183,6 @@ var Utils = {
         return document.querySelector ? document.querySelector( selector ) : document.getElementById( selector );
     },
 
->>>>>>> dev
 
     decToRad: function( dec ) {
 
